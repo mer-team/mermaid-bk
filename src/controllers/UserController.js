@@ -1,7 +1,9 @@
+require('dotenv').config()
 const {User} = require('../models/index')
 const bcrypt = require("bcrypt")
-const { Op } = require('sequelize');
+const { Op, json } = require('sequelize');
 const { body } = require('express-validator');
+const jwt = require("jsonwebtoken")
 
 module.exports = {
 
@@ -48,7 +50,32 @@ module.exports = {
 
     //Login the user and return the jwt token
     async index(req, res){
+        try{
+            const {email, passw} = req.body
+            //verify if the email exists on our database 
+            const user = await User.findOne({
+                where: {
+                    email: email
+                }
+            })
+
+            if(!user){
+                return res.status(400).json("User Not Founded")
+            }
+
+
+            //verify if the password equals to the one on the database 
+            if(await bcrypt.compare(passw, user.hash_passwd)){
+                const token = jwt.sign({email: user.email}, process.env.ACESS_TOKEN_SECRET)
+                return res.status(200).json({token})
+            }else{
+                return res.status(400).json("Wrong Password")
+            }
+
+        }catch(e){
+            console.log(e)
+        }
+        
 
     }, 
-
 }
