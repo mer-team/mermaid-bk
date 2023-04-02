@@ -71,7 +71,7 @@ module.exports = {
 
             //verify if the password equals to the one on the database 
             if(await bcrypt.compare(passw, user.hash_passwd)){
-                const token = jwt.sign({email: user.email}, process.env.ACESS_TOKEN_SECRET)
+                const token = jwt.sign(user.dataValues, process.env.ACESS_TOKEN_SECRET)
                 return res.status(200).json({token})
             }else{
                 return res.status(400).json("Wrong Password")
@@ -80,7 +80,10 @@ module.exports = {
         }catch(e){
             console.log(e)
         }
-        
-
     }, 
+
+    //get user data by the token
+    async show(req, res){
+        return res.json(req.user)
+    }   
 }
