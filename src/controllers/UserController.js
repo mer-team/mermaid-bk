@@ -1,9 +1,13 @@
 require('dotenv').config()
 const {User} = require('../models/index')
 const bcrypt = require("bcrypt")
-const { Op, json } = require('sequelize');
-const { body } = require('express-validator');
+const { Op } = require('sequelize');
 const jwt = require("jsonwebtoken")
+
+function validatePassw(passwd){
+    const regex = /(?=^.{8,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/
+    return regex.test(passwd)
+}
 
 module.exports = {
 
@@ -14,8 +18,9 @@ module.exports = {
             const {name, email, passw} = req.body
                     
             //Check if it is a valid password the password
-            body("passw", 'This password is invalid try another one').matches(/(?=^.{8,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/)
-
+            if(!validatePassw(passw)){
+                return res.status(400).json("Error: The password you entered does not meet the password requirements. The password must be at least 8 characters long, including at least one uppercase letter, one lowercase letter, one digit or special character, and cannot contain a period or a newline. Please try again.")
+            }
             //Check if the current name and email exists on the database 
             const users = await User.findAll({
                 where: {
