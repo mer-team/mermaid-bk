@@ -22,7 +22,7 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     return queryInterface.bulkInsert('Songs', [
       {
-        external_id: "dQw4w9WgXcQ",
+        external_id: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=3s",
         title: "Rick Astley - Never Gonna Give You Up (Official Music Video)",
         artist: "Rick Astley",
         duration: duration1,
@@ -33,13 +33,14 @@ module.exports = {
         hits: 0,
         waveform: "dQw4w9WgXcQ.png",
         status: "processed",
-        added_by_ip: "1.1.1.1", 
+        added_by_ip: "1.1.1.1",
+        general_classification: "Happy",
         createdAt: new Date(),
         updatedAt: new Date()
     }, 
 
     {
-      external_id: "igFtut_1drQ",
+      external_id: "https://www.youtube.com/watch?v=igFtut_1drQ",
       title: "Lil Yachty - sAy sOMETHINg",
       artist: "lil boat",
       duration: duration2,
@@ -51,12 +52,13 @@ module.exports = {
       waveform: "dQw4w9WgXcQ.png",
       status: "processed",
       added_by_ip: "1.1.1.1", 
+      general_classification: "Calm",
       createdAt: new Date(),
       updatedAt: new Date()
     }, 
 
     {
-      external_id: "TGgcC5xg9YI",
+      external_id: "https://www.youtube.com/watch?v=TGgcC5xg9YI",
       title: "SEE YOU AGAIN featuring Kali Uchis",
       artist: "Tyler, The Creator",
       duration: duration3,
@@ -68,12 +70,13 @@ module.exports = {
       waveform: "dQw4w9WgXcQ.png",
       status: "processed",
       added_by_ip: "1.1.1.1", 
+      general_classification: "Happy",
       createdAt: new Date(),
       updatedAt: new Date()
     }, 
 
     {
-      external_id: "pRpeEdMmmQ0",
+      external_id: "https://www.youtube.com/watch?v=pRpeEdMmmQ0",
       title: "Shakira - Waka Waka (This Time for Africa) (The Official 2010 FIFA World Cup™ Song)",
       artist: "Shakira",
       duration: duration4,
@@ -85,6 +88,7 @@ module.exports = {
       waveform: "dQw4w9WgXcQ.png",
       status: "processed",
       added_by_ip: "1.1.1.1", 
+      general_classification: "Happy",
       createdAt: new Date(),
       updatedAt: new Date()
     }

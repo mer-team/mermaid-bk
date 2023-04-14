@@ -30,7 +30,8 @@ module.exports = (sequelize, DataTypes) => {
     hits: DataTypes.INTEGER,
     waveform: DataTypes.STRING,
     status: DataTypes.ENUM("queued", "processing", "processed", "error", "cancelled"),
-    added_by_ip: DataTypes.STRING
+    added_by_ip: DataTypes.STRING, 
+    general_classification: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'Song',
