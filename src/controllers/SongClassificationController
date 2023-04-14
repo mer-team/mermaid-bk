@@ -1,0 +1,22 @@
+require('dotenv').config()
+const {Song_Classification} = require('../models/index')
+
+module.exports = {
+
+    //Get the Song classifications given the song_id
+    async index(req, res){
+        try{
+            const { id } = req.headers
+            console.log(id)
+            const classifications = await Song_Classification.findAll({
+                where: {
+                    song_id: id
+                }
+            })
+           return res.status(200).json(classifications)
+        }catch(e){
+            console.log(e)
+        }
+    }, 
+
+}
