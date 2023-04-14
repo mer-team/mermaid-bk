@@ -18,9 +18,6 @@ module.exports = {
       artist: {
         type: Sequelize.STRING
       },
-      name: {
-        type: Sequelize.STRING
-      },
       duration: {
         type: Sequelize.DATE
       },
@@ -34,16 +31,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       description: {
-        type: Sequelize.STRING
-      },
-      likes: {
-        type: Sequelize.INTEGER
-      },
-      views: {
-        type: Sequelize.INTEGER
-      },
-      comments: {
-        type: Sequelize.STRING
+        type: Sequelize.TEXT
       },
       hits: {
         type: Sequelize.INTEGER
@@ -52,7 +40,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       status: {
-        type: Sequelize.STRING
+        type: Sequelize.ENUM("queued", "processing", "processed", "error", "cancelled")
       },
       added_by_ip: {
         type: Sequelize.STRING

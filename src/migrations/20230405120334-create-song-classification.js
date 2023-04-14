@@ -10,13 +10,22 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       song_id: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER, 
+        references: {model: "Songs", key: "id"}, 
+        onUpdate: "CASCADE", 
+        onDelete: "CASCADE"
       },
       segment_id: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER, 
+        references: {model: "Song_Segments", key: "id"}, 
+        onUpdate: "CASCADE", 
+        onDelete: "CASCADE"
       },
       source_id: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER, 
+        references: {model: "Sources", key: "id"}, 
+        onUpdate: "CASCADE", 
+        onDelete: "CASCADE"
       },
       emotion: {
         type: Sequelize.STRING

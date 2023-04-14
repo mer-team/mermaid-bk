@@ -10,7 +10,10 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       song_id: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER, 
+        references: {model: "Songs", key: "id"}, 
+        onUpdate: "CASCADE", 
+        onDelete: "CASCADE"
       },
       agree: {
         type: Sequelize.INTEGER
@@ -19,7 +22,10 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       user_id: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER, 
+        references: {model: "Users", key: "id"}, 
+        onUpdate: "CASCADE", 
+        onDelete: "CASCADE"
       },
       createdAt: {
         allowNull: false,
