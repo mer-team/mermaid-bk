@@ -5,19 +5,21 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     return queryInterface.bulkInsert('Sources', [
     {
-        name: "audio"
+        name: "audio", 
+        createdAt:new Date(),
+        updatedAt: new Date()
     }, 
 
     {
-      name: "audio"
+      name: "lyrics", 
+      createdAt:new Date(),
+      updatedAt: new Date()
     }, 
 
     {
-      name: "audio"
-    }, 
-
-    {
-      name: "audio"
+      name: "intrumental", 
+      createdAt:new Date(),
+      updatedAt: new Date()
     }
   ]);
   },
