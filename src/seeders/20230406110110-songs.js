@@ -22,7 +22,7 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     return queryInterface.bulkInsert('Songs', [
       {
-        external_id: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=3s",
+        external_id: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t",
         title: "Rick Astley - Never Gonna Give You Up (Official Music Video)",
         artist: "Rick Astley",
         duration: duration1,
