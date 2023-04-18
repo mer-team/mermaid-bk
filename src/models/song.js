@@ -27,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
     date: DataTypes.DATE,
     genre: DataTypes.STRING,
     description: DataTypes.TEXT,
+    thumbnail: DataTypes.STRING, 
     hits: DataTypes.INTEGER,
     waveform: DataTypes.STRING,
     status: DataTypes.ENUM("queued", "processing", "processed", "error", "cancelled"),

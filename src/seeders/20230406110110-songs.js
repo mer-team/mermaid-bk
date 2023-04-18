@@ -33,6 +33,7 @@ module.exports = {
         hits: 0,
         waveform: "dQw4w9WgXcQ.png",
         status: "processed",
+        thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg", 
         added_by_ip: "1.1.1.1",
         general_classification: "Happy",
         createdAt: new Date(),
@@ -52,6 +53,7 @@ module.exports = {
       waveform: "dQw4w9WgXcQ.png",
       status: "processed",
       added_by_ip: "1.1.1.1", 
+      thumbnail: "https://i.ytimg.com/vi/igFtut_1drQ/mqdefault.jpg", 
       general_classification: "Calm",
       createdAt: new Date(),
       updatedAt: new Date()
@@ -70,6 +72,7 @@ module.exports = {
       waveform: "dQw4w9WgXcQ.png",
       status: "processed",
       added_by_ip: "1.1.1.1", 
+      thumbnail: "https://i.ytimg.com/vi/TGgcC5xg9YI/mqdefault.jpg", 
       general_classification: "Happy",
       createdAt: new Date(),
       updatedAt: new Date()
@@ -88,6 +91,7 @@ module.exports = {
       waveform: "dQw4w9WgXcQ.png",
       status: "processed",
       added_by_ip: "1.1.1.1", 
+      thumbnail: "https://i.ytimg.com/vi/pRpeEdMmmQ0/mqdefault.jpg", 
       general_classification: "Happy",
       createdAt: new Date(),
       updatedAt: new Date()

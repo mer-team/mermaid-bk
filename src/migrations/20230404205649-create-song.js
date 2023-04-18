@@ -42,6 +42,9 @@ module.exports = {
       status: {
         type: Sequelize.ENUM("queued", "processing", "processed", "error", "cancelled")
       },
+      thumbnail: {
+        type: Sequelize.STRING
+      }, 
       added_by_ip: {
         type: Sequelize.STRING
       },
