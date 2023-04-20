@@ -15,12 +15,6 @@ module.exports = {
         onUpdate: "CASCADE", 
         onDelete: "CASCADE"
       },
-      segment_id: {
-        type: Sequelize.INTEGER, 
-        references: {model: "Song_Segments", key: "id"}, 
-        onUpdate: "CASCADE", 
-        onDelete: "CASCADE"
-      },
       source_id: {
         type: Sequelize.INTEGER, 
         references: {model: "Sources", key: "id"}, 

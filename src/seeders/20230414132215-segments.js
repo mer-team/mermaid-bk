@@ -36,6 +36,7 @@ module.exports = {
       //Music1 Segments
       {
         song_id: 1,
+        source_id: 1,
         start: start1_1,
         end: end1_1,
         createdAt: new Date(),
@@ -43,6 +44,7 @@ module.exports = {
       },
       {
         song_id: 1,
+        source_id: 1,
         start: start1_2,
         end: end1_2,
         createdAt: new Date(),
@@ -52,6 +54,7 @@ module.exports = {
       //Music 2 Segments
       {
         song_id: 2,
+        source_id: 1,
         start: start2_1,
         end: end2_1,
         createdAt: new Date(),
@@ -59,6 +62,7 @@ module.exports = {
       }, 
       {
         song_id: 2,
+        source_id: 1,
         start: start2_2,
         end: end2_2,
         createdAt: new Date(),
@@ -68,6 +72,7 @@ module.exports = {
       //Music 3 Segments
       {
         song_id: 3,
+        source_id: 1,
         start: start3_1,
         end: end3_1,
         createdAt: new Date(),
@@ -75,6 +80,7 @@ module.exports = {
       }, 
       {
         song_id: 3,
+        source_id: 1,
         start: start3_2,
         end: end3_2,
         createdAt: new Date(),
@@ -84,6 +90,7 @@ module.exports = {
       //Music 4 Segments
       {
         song_id: 4,
+        source_id: 1,
         start: start4_1,
         end: end4_1,
         createdAt: new Date(),
@@ -91,6 +98,7 @@ module.exports = {
       }, 
       {
         song_id: 4,
+        source_id: 1,
         start: start4_2,
         end: end4_2,
         createdAt: new Date(),

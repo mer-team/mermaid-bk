@@ -15,11 +15,20 @@ module.exports = {
         onUpdate: "CASCADE", 
         onDelete: "CASCADE"
       },
+      source_id: {
+        type: Sequelize.INTEGER, 
+        references: {model: "Sources", key: "id"}, 
+        onUpdate: "CASCADE", 
+        onDelete: "CASCADE"
+      },
       start: {
         type: Sequelize.DATE
       },
       end: {
         type: Sequelize.DATE
+      },
+      emotion: {
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,

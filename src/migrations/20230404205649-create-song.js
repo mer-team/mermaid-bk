@@ -12,6 +12,9 @@ module.exports = {
       external_id: {
         type: Sequelize.STRING
       },
+      link: {
+        type: Sequelize.STRING
+      },
       title: {
         type: Sequelize.STRING
       },
@@ -42,13 +45,16 @@ module.exports = {
       status: {
         type: Sequelize.ENUM("queued", "processing", "processed", "error", "cancelled")
       },
-      thumbnail: {
+      thumbnailHQ: {
+        type: Sequelize.STRING
+      }, 
+      thumbnailMQ: {
+        type: Sequelize.STRING
+      }, 
+      general_classification: {
         type: Sequelize.STRING
       }, 
       added_by_ip: {
-        type: Sequelize.STRING
-      },
-      general_classification: {
         type: Sequelize.STRING
       },
       createdAt: {

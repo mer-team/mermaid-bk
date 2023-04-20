@@ -22,7 +22,8 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     return queryInterface.bulkInsert('Songs', [
       {
-        external_id: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t",
+        external_id: "dQw4w9WgXcQ&t",
+        link: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t", 
         title: "Rick Astley - Never Gonna Give You Up (Official Music Video)",
         artist: "Rick Astley",
         duration: duration1,
@@ -33,15 +34,17 @@ module.exports = {
         hits: 0,
         waveform: "dQw4w9WgXcQ.png",
         status: "processed",
-        thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg", 
+        thumbnailHQ: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg", 
+        thumbnailMQ: "https://i.ytimg.com/vi/dQw4w9WgXcQ/mqdefault.jpg", 
+        general_classification: "Happy", 
         added_by_ip: "1.1.1.1",
-        general_classification: "Happy",
         createdAt: new Date(),
         updatedAt: new Date()
     }, 
 
     {
-      external_id: "https://www.youtube.com/watch?v=igFtut_1drQ",
+      external_id: "igFtut_1drQ",
+      link: "https://www.youtube.com/watch?v=igFtut_1drQ", 
       title: "Lil Yachty - sAy sOMETHINg",
       artist: "lil boat",
       duration: duration2,
@@ -53,14 +56,16 @@ module.exports = {
       waveform: "dQw4w9WgXcQ.png",
       status: "processed",
       added_by_ip: "1.1.1.1", 
-      thumbnail: "https://i.ytimg.com/vi/igFtut_1drQ/hqdefault.jpg", 
-      general_classification: "Calm",
+      thumbnailHQ: "https://i.ytimg.com/vi/igFtut_1drQ/hqdefault.jpg", 
+      thumbnailMQ: "https://i.ytimg.com/vi/igFtut_1drQ/mqdefault.jpg", 
+      general_classification: "Calm", 
       createdAt: new Date(),
       updatedAt: new Date()
     }, 
 
     {
-      external_id: "https://www.youtube.com/watch?v=TGgcC5xg9YI",
+      external_id: "TGgcC5xg9YI",
+      link: "https://www.youtube.com/watch?v=TGgcC5xg9YI", 
       title: "SEE YOU AGAIN featuring Kali Uchis",
       artist: "Tyler, The Creator",
       duration: duration3,
@@ -72,14 +77,16 @@ module.exports = {
       waveform: "dQw4w9WgXcQ.png",
       status: "processed",
       added_by_ip: "1.1.1.1", 
-      thumbnail: "https://i.ytimg.com/vi/TGgcC5xg9YI/hqdefault.jpg", 
-      general_classification: "Happy",
+      thumbnailHQ: "https://i.ytimg.com/vi/TGgcC5xg9YI/hqdefault.jpg", 
+      thumbnailMQ: "https://i.ytimg.com/vi/TGgcC5xg9YI/mqdefault.jpg", 
+      general_classification: "Happy", 
       createdAt: new Date(),
       updatedAt: new Date()
     }, 
 
     {
-      external_id: "https://www.youtube.com/watch?v=pRpeEdMmmQ0",
+      external_id: "pRpeEdMmmQ0",
+      link: "https://www.youtube.com/watch?v=pRpeEdMmmQ0", 
       title: "Shakira - Waka Waka (This Time for Africa) (The Official 2010 FIFA World Cup™ Song)",
       artist: "Shakira",
       duration: duration4,
@@ -91,8 +98,9 @@ module.exports = {
       waveform: "dQw4w9WgXcQ.png",
       status: "processed",
       added_by_ip: "1.1.1.1", 
-      thumbnail: "https://i.ytimg.com/vi/pRpeEdMmmQ0/hqdefault.jpg", 
-      general_classification: "Happy",
+      thumbnailHQ: "https://i.ytimg.com/vi/pRpeEdMmmQ0/hqdefault.jpg", 
+      thumbnailMQ: "https://i.ytimg.com/vi/pRpeEdMmmQ0/mqdefault.jpg", 
+      general_classification: "Happy", 
       createdAt: new Date(),
       updatedAt: new Date()
     }
