@@ -11,14 +11,14 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Feedback.belongsTo(models.Song, {foreignKey: 'song_id'})
       Feedback.belongsTo(models.User, {foreignKey: 'user_id'})
+      Feedback.belongsTo(models.Song_Classification, {foreignKey: 'user_id'})
     }
   }
   Feedback.init({
-    song_id: DataTypes.INTEGER,
+    song_classification_id: DataTypes.INTEGER,
     agree: DataTypes.INTEGER,
-    annotation: DataTypes.INTEGER,
+    disagree: DataTypes.INTEGER, 
     user_id: DataTypes.INTEGER
   }, {
     sequelize,

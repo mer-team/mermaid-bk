@@ -17,7 +17,8 @@ module.exports = (sequelize, DataTypes) => {
   Log.init({
     message: DataTypes.STRING,
     service: DataTypes.STRING,
-    song_id: DataTypes.INTEGER
+    song_id: DataTypes.INTEGER, 
+    type: DataTypes.ENUM("info", "warning", "error")
   }, {
     sequelize,
     modelName: 'Log',

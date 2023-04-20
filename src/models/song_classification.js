@@ -11,14 +11,14 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Song_Classification.belongsTo(models.Song_Segments, {foreignKey: 'segment_id'})
       Song_Classification.belongsTo(models.Song, {foreignKey: 'song_id'})
       Song_Classification.belongsTo(models.Source, {foreignKey: 'source_id'})
+
+      Song_Classification.hasMany(models.Feedback, {foreignKey: 'song_claassification_id'})
     }
   }
   Song_Classification.init({
     song_id: DataTypes.INTEGER,
-    segment_id: DataTypes.INTEGER,
     source_id: DataTypes.INTEGER,
     emotion: DataTypes.STRING
   }, {

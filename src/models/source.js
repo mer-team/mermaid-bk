@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       Source.hasMany(models.Song_Classification, {foreignKey: 'source_id'})
+      Source.hasMany(models.Song_Segments, {foreignKey: 'source_id'})
     }
   }
   Source.init({

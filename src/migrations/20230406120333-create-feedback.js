@@ -9,13 +9,16 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      song_id: {
+      song_classification_id: {
         type: Sequelize.INTEGER, 
-        references: {model: "Songs", key: "id"}, 
+        references: {model: "Song_Classifications", key: "id"}, 
         onUpdate: "CASCADE", 
         onDelete: "CASCADE"
       },
       agree: {
+        type: Sequelize.INTEGER
+      },
+      disagree: {
         type: Sequelize.INTEGER
       },
       annotation: {

@@ -12,14 +12,16 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       Song_Segments.belongsTo(models.Song, {foreignKey: 'song_id'})
-
-      Song_Segments.hasMany(models.Song_Classification, {foreignKey: 'segment_id'})
+      Song_Segments.belongsTo(models.Source, {foreignKey: 'source_id'})
+      
     }
   }
   Song_Segments.init({
     song_id: DataTypes.INTEGER,
+    source_id: DataTypes.INTEGER, 
     start: DataTypes.DATE,
-    end: DataTypes.DATE
+    end: DataTypes.DATE, 
+    emotion: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'Song_Segments',

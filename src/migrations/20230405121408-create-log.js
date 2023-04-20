@@ -15,6 +15,9 @@ module.exports = {
       service: {
         type: Sequelize.STRING
       },
+      type: {
+        type: Sequelize.ENUM("info", "warning", "error")
+      },
       song_id: {
         type: Sequelize.INTEGER, 
         references: {model: "Songs", key: "id"}, 
