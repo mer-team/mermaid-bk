@@ -13,9 +13,17 @@ module.exports = {
         }
     }, 
 
+    //Get a song by external_id 
     async show(req, res){
         try{
-           const songs = await Song.findAll()
+            const {id} = req.params
+
+           const songs = await Song.findOne({
+                where: {
+                    external_id: id
+                }
+           })
+
            return res.status(200).json(songs)
         }catch(e){
             console.log(e)
