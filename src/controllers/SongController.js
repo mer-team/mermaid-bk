@@ -34,7 +34,7 @@ module.exports = {
     //Get a song by name 
     async filter(req, res){
         try{
-            var {title} = req.body
+            var {title} = req.params
             title = title.toLowerCase()
 
            const songs = await Song.findAll({

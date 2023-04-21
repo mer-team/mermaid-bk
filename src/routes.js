@@ -16,7 +16,7 @@ route.get("/user", validateToken, UserController.show)
 //Get all the songs in the database
 route.get("/song", SongController.index)
 route.get("/song/:id", SongController.show)
-route.get("/song/name/filter", SongController.filter)
+route.get("/song/name/:title", SongController.filter)
 
 //Get the song classification given the id of the song 
 route.get("/classifications", SongClassificationController.index)
