@@ -11,7 +11,7 @@ route.post("/signup", UserController.store)
 //Login the user with JWT
 route.post("/login", UserController.index)
 //Get user data by the JWT
-route.get("/user", validateToken, UserController.show)
+route.get("/confirm/:token", UserController.validate)
 
 //Get all the songs in the database
 route.get("/song", SongController.index)
