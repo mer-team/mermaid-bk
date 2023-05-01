@@ -10,8 +10,10 @@ const { validateToken } = require('./JWT')
 route.post("/signup", UserController.store)
 //Login the user with JWT
 route.post("/login", UserController.index)
-//Get user data by the JWT
+//validate the user
 route.get("/confirm/:token", UserController.validate)
+//Get user data by the token
+route.get("/user", validateToken, UserController.show)
 
 //Get all the songs in the database
 route.get("/song", SongController.index)
