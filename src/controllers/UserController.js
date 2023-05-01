@@ -63,7 +63,7 @@ module.exports = {
                     from: 'noreply@something.com',
                     to: email,
                     subject: 'Confirm your email',
-                    text: `Please click on the following link to confirm your email address: http://localhost:8000/confirm/${token}`,
+                    text: `Please click on the following link to confirm your email address: http://localhost:3000/confirm/${token}`,
                 };
                 const info = await transporter.sendMail(sendEmail);
 
