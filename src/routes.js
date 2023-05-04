@@ -14,6 +14,8 @@ route.post("/login", UserController.index)
 route.get("/confirm/:token", UserController.validate)
 //Get user data by the token
 route.get("/user", validateToken, UserController.show)
+//resend the email 
+route.get("/user/newtoken", UserController.resendEmail)
 
 //Get all the songs in the database
 route.get("/song", SongController.index)

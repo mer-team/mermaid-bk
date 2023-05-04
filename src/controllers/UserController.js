@@ -60,7 +60,7 @@ module.exports = {
             }).then(async user => {
                 //Send the confirmation email
                 const sendEmail = {
-                    from: 'noreply@something.com',
+                    from: 'noreply@mermaid.com',
                     to: email,
                     subject: 'Confirm your email',
                     text: `Please click on the following link to confirm your email address: http://localhost:3000/confirm/${token}`,
@@ -131,5 +131,38 @@ module.exports = {
         }catch(e){
             console.log(e)
         }
-    }   
+    }, 
+
+    //If the token sended to the email has expired then the user needs to ask for another token by asking for another email
+    async resendEmail(req, res){
+        const authHeader = req.headers['authorization']
+        const accessToken = authHeader && authHeader.split(' ')[1]
+
+        try{
+            const decoded = jwt.decode(accessToken);
+            const email = decoded.email
+            // Generate a token secret key
+            const token = jwt.sign({ email }, process.env.ACESS_TOKEN_SECRET, { expiresIn: '1d' });
+
+            //Send the confirmation email
+            const sendEmail = {
+                from: 'noreply@mermaid.com',
+                to: email,
+                subject: 'Confirm your email',
+                text: `Please click on the following link to confirm your email address: http://localhost:3000/confirm/${token}`,
+            };
+
+            const info = await transporter.sendMail(sendEmail);
+
+            if (info && info.accepted.length > 0) {
+                return res.status(201).json({ message: 'Please check your email to confirm your account' });
+            } else {
+                // Handle error sending email
+                return res.status(500).json({ message: 'Failed to send confirmation email. Please try again.' });
+            }
+        }catch(e){
+            console.log(e)
+        }
+        
+    }
 }
