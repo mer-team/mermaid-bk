@@ -6,6 +6,7 @@ const SongController = require('./controllers/SongController')
 const SongClassificationController = require('./controllers/SongClassificationController')
 
 const { validateToken } = require('./JWT')
+const FeedbackController = require('./controllers/FeedbackController')
 //Register User on the database  
 route.post("/signup", UserController.store)
 //Login the user with JWT
@@ -28,4 +29,8 @@ route.get("/song/name/:title/emotion/:emotion", SongController.filterByAll)
 route.get("/classifications", SongClassificationController.index)
 
 
+//Agree or Disagree with a classification
+route.get("/feedback/agree/disagree", FeedbackController.index)
+route.get("/feedback/agrees", FeedbackController.getTotalAgrees)
+route.get("/feedback/disagrees", FeedbackController.getTotalDisagrees)
 module.exports = route

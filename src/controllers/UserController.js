@@ -115,19 +115,20 @@ module.exports = {
         return res.json(req.user)
     }, 
 
-    //get user data by the token
+    //Confirm the user
     async validate(req, res){
         const {token} = req.params
         try {
             // Verify the confirmation token
             const { email, exp} = jwt.verify(token, process.env.ACESS_TOKEN_SECRET);
+            console.log(exp)
             if (Date.now() >= exp * 1000) {
                 // The token has expired
                 return res.status(401).json("Token has expired");
             }
             //Update the confirmed in the database
             await User.update({ confirmed: true }, { where: { email: email } });
-            return res.status(400).json("Confirmed Email")
+            return res.status(200).json("Confirmed Email")
         }catch(e){
             console.log(e)
         }
