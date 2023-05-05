@@ -71,10 +71,12 @@ module.exports = {
 
     //Make an annotation
     async getTotalAgrees(req, res){
+        const {song_classification_id} = req.params
         try{
             const feedback = await Feedback.findAll({
                 where: {
-                    agree: 1
+                    agree: 1, 
+                    song_classification_id: song_classification_id
                 }
             }).then(async feedback =>{
                 return res.status(200).json(feedback.length)
@@ -88,10 +90,12 @@ module.exports = {
 
     //Make an annotation
     async getTotalDisagrees(req, res){
+        const {song_classification_id} = req.params
         try{
             const feedback = await Feedback.findAll({
                 where: {
-                    disagree: 1
+                    disagree: 1, 
+                    song_classification_id: song_classification_id
                 }
             }).then(async feedback =>{
                 return res.status(200).json(feedback.length)
