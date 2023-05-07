@@ -30,7 +30,7 @@ route.get("/classifications", SongClassificationController.index)
 
 
 //Agree or Disagree with a classification
-route.get("/feedback/agree/disagree/:agreeordisagree/user/:user_id/song/:song_id", FeedbackController.index)
+route.post("/feedback/agree/disagree/:agreeordisagree/user/:user_id/song/:song_id", FeedbackController.index)
 route.get("/feedback/agrees/:song_id", FeedbackController.getTotalAgrees)
 route.get("/feedback/disagrees/:song_id", FeedbackController.getTotalDisagrees)
 module.exports = route
