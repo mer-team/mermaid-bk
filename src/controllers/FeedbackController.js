@@ -7,13 +7,13 @@ module.exports = {
     //Note : The annotation or comentary can be null 
     async index(req, res){
         try{
-            const { userid, agreeordisagree, songid } = req.headers
+            const { user_id, agreeordisagree, song_id } = req.params
             
             //Before creating the feedback we have to see if the user has a feedback already in this song
             const feedback = await Feedback.findOne({
                 where: {
-                    user_id: userid, 
-                    song_id: songid
+                    user_id: user_id, 
+                    song_id: song_id
                 }
             }).then(async feedback =>{
                 //If the user has already a feedback made , we have to update and not create another 
@@ -38,10 +38,10 @@ module.exports = {
                     //If the user doenst have any feedbacks yet we just have to create
                     if(agreeordisagree == 1){
                         await Feedback.create({
-                            song_id: songid,
+                            song_id: song_id,
                             agree: 1,
                             disagree: 0, 
-                            user_id: userid
+                            user_id: user_id
                         }).then(feedback => {
                             return res.status(200).json("Feedback created")
                         }).catch(e => {
@@ -49,10 +49,10 @@ module.exports = {
                         })
                     }else{
                         await Feedback.create({
-                            song_id: songid,
+                            song_id: song_id,
                             agree: 0,
                             disagree: 1, 
-                            user_id: userid
+                            user_id: user_id
                         }).then(feedback => {
                             return res.status(200).json("Feedback created")
                         }).catch(e => {
