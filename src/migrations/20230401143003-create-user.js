@@ -27,6 +27,10 @@ module.exports = {
       reset_password_token_at: {
         type: Sequelize.STRING
       },
+      confirmed: {
+        type: Sequelize.BOOLEAN, 
+        defaultValue: false
+      }, 
       blocked_at: {
         type: Sequelize.DATE
       },

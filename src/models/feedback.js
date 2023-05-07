@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Feedback.init({
-    song_classification_id: DataTypes.INTEGER,
+    song_id: DataTypes.INTEGER,
     agree: DataTypes.INTEGER,
     disagree: DataTypes.INTEGER, 
     user_id: DataTypes.INTEGER

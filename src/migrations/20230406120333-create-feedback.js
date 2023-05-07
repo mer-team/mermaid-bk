@@ -9,9 +9,9 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      song_classification_id: {
+      song_id: {
         type: Sequelize.INTEGER, 
-        references: {model: "Song_Classifications", key: "id"}, 
+        references: {model: "Songs", key: "id"}, 
         onUpdate: "CASCADE", 
         onDelete: "CASCADE"
       },

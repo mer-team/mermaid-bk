@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     hash_passwd: DataTypes.STRING,
     name: DataTypes.STRING,
     admin: DataTypes.BOOLEAN,
+    confirmed: DataTypes.BOOLEAN, 
     reset_password_token: DataTypes.STRING,
     reset_password_token_at: DataTypes.STRING,
     blocked_at: DataTypes.DATE

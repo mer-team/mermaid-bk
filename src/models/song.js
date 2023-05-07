@@ -13,8 +13,10 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Song.hasMany(models.Song_Segments, {foreignKey: 'song_id'})
       Song.hasMany(models.Song_Classification, {foreignKey: 'song_id'})
+      Song.hasMany(models.Feedback, {foreignKey: 'song_id'})
 
       Song.hasOne(models.Log, {foreignKey: 'song_id'})
+
     }
   }
   Song.init({

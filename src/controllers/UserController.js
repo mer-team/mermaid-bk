@@ -1,5 +1,6 @@
 require('dotenv').config()
 const {User} = require('../models/index')
+const nodemailer = require('nodemailer')
 const bcrypt = require("bcrypt")
 const { Op } = require('sequelize');
 const jwt = require("jsonwebtoken")
@@ -8,6 +9,17 @@ function validatePassw(passwd){
     const regex = /(?=^.{8,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/
     return regex.test(passwd)
 }
+
+const transporter = nodemailer.createTransport({
+    service: "gmail", 
+    auth: {
+        user: process.env.USER_EMAIL, 
+        pass: process.env.USER_PASSWD
+    }, 
+    tls: {
+        rejectUnauthorized: false
+    }
+  });
 
 module.exports = {
 
@@ -38,12 +50,24 @@ module.exports = {
             //Create a hashed password 
             const hash_passw = await bcrypt.hash(passw, 10)
 
+            // Generate a token secret key
+            const token = jwt.sign({ email }, process.env.ACESS_TOKEN_SECRET, { expiresIn: '1d' });
+
             User.create({
                 email: email, 
                 hash_passwd: hash_passw, 
                 name: name
-            }).then(user => {
-                return res.status(200).json("User created")
+            }).then(async user => {
+                //Send the confirmation email
+                const sendEmail = {
+                    from: 'noreply@mermaid.com',
+                    to: email,
+                    subject: 'Confirm your email',
+                    text: `Please click on the following link to confirm your email address: http://localhost:3000/confirm/${token}`,
+                };
+                const info = await transporter.sendMail(sendEmail);
+
+                return res.status(201).json({ message: 'Please check your email to confirm your account' });
             }).catch(err => {
                 console.log(err)
             })
@@ -68,10 +92,14 @@ module.exports = {
                 return res.status(400).json("User Not Founded")
             }
 
+            if(!user.confirmed){
+                return res.status(400).json("Confirm your email")
+            }
+
 
             //verify if the password equals to the one on the database 
             if(await bcrypt.compare(passw, user.hash_passwd)){
-                const token = jwt.sign(user.dataValues, process.env.ACESS_TOKEN_SECRET)
+                const token = jwt.sign({ email }, process.env.ACESS_TOKEN_SECRET, { expiresIn: '1h' })
                 return res.status(200).json({token})
             }else{
                 return res.status(400).json("Wrong Password")
@@ -85,5 +113,57 @@ module.exports = {
     //get user data by the token
     async show(req, res){
         return res.json(req.user)
-    }   
+    }, 
+
+    //Confirm the user
+    async validate(req, res){
+        const {token} = req.params
+        try {
+            // Verify the confirmation token
+            const { email, exp} = jwt.verify(token, process.env.ACESS_TOKEN_SECRET);
+            console.log(exp)
+            if (Date.now() >= exp * 1000) {
+                // The token has expired
+                return res.status(401).json("Token has expired");
+            }
+            //Update the confirmed in the database
+            await User.update({ confirmed: true }, { where: { email: email } });
+            return res.status(200).json("Confirmed Email")
+        }catch(e){
+            console.log(e)
+        }
+    }, 
+
+    //If the token sended to the email has expired then the user needs to ask for another token by asking for another email
+    async resendEmail(req, res){
+        const authHeader = req.headers['authorization']
+        const accessToken = authHeader && authHeader.split(' ')[1]
+
+        try{
+            const decoded = jwt.decode(accessToken);
+            const email = decoded.email
+            // Generate a token secret key
+            const token = jwt.sign({ email }, process.env.ACESS_TOKEN_SECRET, { expiresIn: '1d' });
+
+            //Send the confirmation email
+            const sendEmail = {
+                from: 'noreply@mermaid.com',
+                to: email,
+                subject: 'Confirm your email',
+                text: `Please click on the following link to confirm your email address: http://localhost:3000/confirm/${token}`,
+            };
+
+            const info = await transporter.sendMail(sendEmail);
+
+            if (info && info.accepted.length > 0) {
+                return res.status(201).json({ message: 'Please check your email to confirm your account' });
+            } else {
+                // Handle error sending email
+                return res.status(500).json({ message: 'Failed to send confirmation email. Please try again.' });
+            }
+        }catch(e){
+            console.log(e)
+        }
+        
+    }
 }

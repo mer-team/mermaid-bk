@@ -14,7 +14,6 @@ module.exports = (sequelize, DataTypes) => {
       Song_Classification.belongsTo(models.Song, {foreignKey: 'song_id'})
       Song_Classification.belongsTo(models.Source, {foreignKey: 'source_id'})
 
-      Song_Classification.hasMany(models.Feedback, {foreignKey: 'song_claassification_id'})
     }
   }
   Song_Classification.init({
