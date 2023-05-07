@@ -93,6 +93,42 @@ module.exports = {
         }catch(e){
             console.log(e)
         }
+    }, 
+
+
+    async updateHits(req, res){
+        try{
+            const {song_id} = req.params
+
+            const song = await Song.findOne({
+                where: {
+                    id: song_id
+                }
+            })
+
+            song.hits = song.hits + 1
+
+            await Song.update({hits: song.hits}, { where: { id: song_id } });
+           return res.status(200).json("Hit updated")
+        }catch(e){
+            console.log(e)
+        }
+    }, 
+
+    async getHits(req, res){
+        try{
+            const {song_id} = req.params
+
+            const song = await Song.findOne({
+                where: {
+                    id: song_id
+                }
+            })
+
+           return res.status(200).json(song.hits)
+        }catch(e){
+            console.log(e)
+        }        
     }
 
 }

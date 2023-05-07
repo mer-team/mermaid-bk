@@ -25,6 +25,10 @@ route.get("/song/name/:title", SongController.filterByName)
 route.get("/song/emotion/:emotion", SongController.filterByEmotion)
 route.get("/song/name/:title/emotion/:emotion", SongController.filterByAll)
 
+route.post("/song/hits/:song_id", SongController.updateHits)
+route.get("/song/hits/:song_id", SongController.getHits)
+
+
 //Get the song classification given the id of the song 
 route.get("/classifications", SongClassificationController.index)
 
