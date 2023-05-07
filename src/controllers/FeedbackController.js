@@ -7,12 +7,13 @@ module.exports = {
     //Note : The annotation or comentary can be null 
     async index(req, res){
         try{
-            const { userid, agreeordisagree, songclassid } = req.headers
+            const { userid, agreeordisagree, songid } = req.headers
+            
             //Before creating the feedback we have to see if the user has a feedback already in this song
             const feedback = await Feedback.findOne({
                 where: {
                     user_id: userid, 
-                    song_classification_id: songclassid
+                    song_id: songid
                 }
             }).then(async feedback =>{
                 //If the user has already a feedback made , we have to update and not create another 
@@ -37,7 +38,7 @@ module.exports = {
                     //If the user doenst have any feedbacks yet we just have to create
                     if(agreeordisagree == 1){
                         await Feedback.create({
-                            song_classification_id: songclassid,
+                            song_id: songid,
                             agree: 1,
                             disagree: 0, 
                             user_id: userid
@@ -48,7 +49,7 @@ module.exports = {
                         })
                     }else{
                         await Feedback.create({
-                            song_classification_id: songclassid,
+                            song_id: songid,
                             agree: 0,
                             disagree: 1, 
                             user_id: userid
@@ -71,12 +72,12 @@ module.exports = {
 
     //Make an annotation
     async getTotalAgrees(req, res){
-        const {song_classification_id} = req.params
+        const {song_id} = req.params
         try{
             const feedback = await Feedback.findAll({
                 where: {
                     agree: 1, 
-                    song_classification_id: song_classification_id
+                    song_id: song_id,
                 }
             }).then(async feedback =>{
                 return res.status(200).json(feedback.length)
@@ -90,12 +91,12 @@ module.exports = {
 
     //Make an annotation
     async getTotalDisagrees(req, res){
-        const {song_classification_id} = req.params
+        const {song_id} = req.params
         try{
             const feedback = await Feedback.findAll({
                 where: {
                     disagree: 1, 
-                    song_classification_id: song_classification_id
+                    song_id: song_id,
                 }
             }).then(async feedback =>{
                 return res.status(200).json(feedback.length)
