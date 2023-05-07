@@ -33,4 +33,5 @@ route.get("/classifications", SongClassificationController.index)
 route.post("/feedback/agree/disagree/:agreeordisagree/user/:user_id/song/:song_id", FeedbackController.index)
 route.get("/feedback/agrees/:song_id", FeedbackController.getTotalAgrees)
 route.get("/feedback/disagrees/:song_id", FeedbackController.getTotalDisagrees)
+route.get("/feedback/opinion/:user_id/:song_id", FeedbackController.getUserOpinion)
 module.exports = route

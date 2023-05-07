@@ -106,5 +106,26 @@ module.exports = {
         }catch(e){
             console.log(e)
         }
-    }
+    }, 
+
+    //get if the agree or disagreed with a song classification
+    async getUserOpinion(req, res){
+        const {song_id, user_id} = req.params
+        try{
+            const feedback = await Feedback.findAll({
+                where: {
+                    user_id: user_id, 
+                    song_id: song_id,
+                }
+            }).then(feedback =>{
+                return res.status(200).json(feedback)
+            }).catch(e => {
+                console.log(e)
+            })
+        }catch(e){
+            console.log(e)
+        }
+    }, 
+
+
 }
