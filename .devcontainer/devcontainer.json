@@ -1,0 +1,20 @@
+{
+    "name": "MERmaid API Node.js Development",
+    "dockerComposeFile": [
+        "../docker-compose.yml"
+    ],
+    "service": "api",
+    "workspaceFolder": "/app",
+    "customizations": {
+		"vscode": {
+			"extensions": [
+				"mikestead.dotenv", //.ENV sintax highlighting
+				"dbaeumer.vscode-eslint"
+			],
+			"settings": {
+
+			}
+		}
+	},
+    "postCreateCommand": "npm install"
+}
