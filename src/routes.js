@@ -32,7 +32,6 @@ route.get("/song/hits/:song_id", SongController.getHits)
 //Get the song classification given the id of the song 
 route.get("/classifications", SongClassificationController.index)
 
-
 //Agree or Disagree with a classification
 route.post("/feedback/agree/disagree/:agreeordisagree/user/:user_id/song/:song_id", FeedbackController.index)
 route.get("/feedback/agrees/:song_id", FeedbackController.getTotalAgrees)

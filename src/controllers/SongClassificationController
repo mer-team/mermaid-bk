@@ -1,5 +1,7 @@
 require('dotenv').config()
 const {Song_Classification} = require('../models/index')
+const {Log} = require('../models/index')
+
 
 module.exports = {
 
@@ -17,6 +19,5 @@ module.exports = {
         }catch(e){
             console.log(e)
         }
-    }, 
-
+    }
 }

@@ -1,6 +1,12 @@
 require('dotenv').config()
 const { Op } = require('sequelize')
 const {Song, Sequelize} = require('../models/index')
+var search = require('youtube-search');
+
+var opts = {
+    maxResults: 1,
+    key: 'AIzaSyCVdyNQUbauI-DBDZ_a9GoRy3ukrIFiHMU'
+  };
 
 module.exports = {
 
@@ -129,6 +135,5 @@ module.exports = {
         }catch(e){
             console.log(e)
         }        
-    }
-
+    }, 
 }
