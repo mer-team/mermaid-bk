@@ -19,5 +19,22 @@ module.exports = {
         }catch(e){
             console.log(e)
         }
+    }, 
+
+    async classify(req, res){
+        try {
+            //Here we receive the external link of the song we want to classify (external id : means the id of the video on youtube)
+            const { external_id } = req.params
+
+            //////////////////////////////////////////////////////////////////////////
+            //Here we want to send the song we want to classify to the dummy service//
+            //////////////////////////////////////////////////////////////////////////
+
+            
+            sendMessage(external_id)
+            return res.status(200).json("A musica esta a classificar...")
+        } catch (error) {
+            console.log(error)
+        }
     }
 }

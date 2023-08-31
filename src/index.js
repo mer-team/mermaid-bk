@@ -16,8 +16,5 @@ const server = app.listen(8000, () => {
 
 const io = socketIO(server)
 
-//RABBIT MQ Connection
-startScript()
-
 module.exports = {server}
 
