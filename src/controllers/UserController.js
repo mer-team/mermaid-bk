@@ -164,6 +164,11 @@ module.exports = {
         }catch(e){
             console.log(e)
         }
-        
+    }, 
+
+    
+    async getUserIp(req, res){
+        return res.json(req.clientIp)
     }
+    
 }

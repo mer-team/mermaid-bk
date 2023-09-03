@@ -57,6 +57,9 @@ module.exports = {
       added_by_ip: {
         type: Sequelize.STRING
       },
+      added_by_user: {
+        type: Sequelize.STRING
+      }, 
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

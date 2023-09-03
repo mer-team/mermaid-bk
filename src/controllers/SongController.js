@@ -13,7 +13,11 @@ module.exports = {
     //Get the Songs in the database
     async index(req, res){
         try{
-           const songs = await Song.findAll()
+           const songs = await Song.findAll({
+            where: {
+                status: "processed"
+            }
+           })
            return res.status(200).json(songs)
         }catch(e){
             console.log(e)
@@ -27,7 +31,8 @@ module.exports = {
 
            const songs = await Song.findOne({
                 where: {
-                    external_id: id
+                    external_id: id, 
+                    status: "processed"
                 }
            })
 
@@ -47,7 +52,8 @@ module.exports = {
                 where: {
                     title: Sequelize.where(
                         Sequelize.fn('LOWER',Sequelize.col("title")), "LIKE", `%${title}%`
-                    )
+                    ), 
+                    status: "processed"
                 }
            })
     
@@ -68,7 +74,8 @@ module.exports = {
                 where: {
                     general_classification: Sequelize.where(
                         Sequelize.fn('LOWER',Sequelize.col("general_classification")), "LIKE", `%${emotion}%`
-                    )
+                    ), 
+                    status: "processed"
                 }
            })
     
@@ -91,7 +98,9 @@ module.exports = {
                     ), 
                     general_classification: Sequelize.where(
                         Sequelize.fn('LOWER',Sequelize.col("general_classification")), "LIKE", `%${emotion}%`
-                    )
+                    ), 
+                    status: "processed"
+
                 }
            })
     
@@ -135,5 +144,35 @@ module.exports = {
         }catch(e){
             console.log(e)
         }        
+    }, 
+
+    //Get the songs that user added to the queue 
+    //This is only used if the user is logged
+    async getQueueSongs(req, res){
+        const {user_id} = req.params
+        try{
+            const songs = await Song.findAll({
+             where: {
+                added_by_user : user_id
+             }
+            })
+            return res.status(200).json(songs)
+         }catch(e){
+             console.log(e)
+         }
+    }, 
+
+    //This is used if the user is not logged
+    async getQueueSongsByIp(req, res){
+        try{
+            const songs = await Song.findAll({
+             where: {
+                added_by_ip : req.clientIp
+             }
+            })
+            return res.status(200).json(songs)
+         }catch(e){
+             console.log(e)
+         }
     }, 
 }

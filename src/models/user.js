@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       User.hasMany(models.Feedback, {foreignKey: 'user_id'})
+      User.hasMany(models.Song, {foreignKey: 'added_by_user'})
     }
   }
   User.init({

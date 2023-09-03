@@ -1,7 +1,97 @@
 require('dotenv').config()
 const {Song_Classification} = require('../models/index')
-const {Log} = require('../models/index')
+const {Log, Song} = require('../models/index')
+const async = require('async')
+var search = require('youtube-search');
 
+//////////////////////////////////////////////////////////////
+//Functions in test///////////////////////////////////////////
+var ip, userId //Ip of the user 
+//Save the song to the database
+function saveTheSong(songId){
+    var opts = {
+        key: 'AIzaSyC-Du9-yLtOM0ZgbNPfuTsKvQviFqaGsV0'
+      };
+      
+      search(`https://www.youtube.com/watch?v=${songId}`, opts, async function(err, results) {
+        if(err) return console.log(err);
+
+            //Keep the song in the database
+            const song = await Song.create({
+                external_id: results[0].id,
+                link: results[0].link, 
+                title: results[0].title,
+                artist: results[0].channelTitle,
+                duration: new Date(0, 0, 0, 0, 2, 20),//Default the api dont give this data
+                year: new Date(results[0].publishedAt).getFullYear(),
+                date: new Date(results[0].publishedAt),
+                genre: "Salsa, Kuduro, Romance", //Default the api dont give this data
+                description: results[0].description,
+                thumbnailHQ: results[0].thumbnails.high.url, 
+                thumbnailMQ: results[0].thumbnails.medium.url, 
+                hits: 0,
+                waveform: "dQw4w9WgXcQ.png",
+                status: "processing",
+                added_by_ip: ip,
+                added_by_user: userId, 
+                general_classification: "" 
+            }).then(song => {
+                console.log("Song saved")
+            }).catch(e => {
+                console.log(e)
+            })
+      });
+}
+
+//Update the state of the song 
+async function updateStateSong(status, songId){
+    await Song.update({ 
+        status: status
+    }, { 
+        where: { external_id: songId} 
+    });
+}
+
+///////////////////////////////////////////////////7777777////
+//////////////////////////////////////////////////////////////
+
+
+//Here is the list of classification of the songs 
+const classificationQueue = async.queue(async (song, callback) => {
+    //Save the song in the processing state 
+    saveTheSong(song)
+    try {
+        //////////////////////////////////////////////////////////////////////////
+        //Here we want to send the song we want to classify to the dummy service//
+        //////////////////////////////////////////////////////////////////////////
+
+        const delay = Math.floor(Math.random() * 10000)
+        //Simulating the classification of the songs (temporary)
+        setTimeout(async () => {
+            console.log("Song Received")
+        }, delay);
+        
+
+
+        
+    } catch (error) {
+        updateStateSong("error", song)
+        console.error("Error")
+        callback(error)   
+    }
+}, 1) //This one means that we only accept one song at time and the others have to wait to be added to the classification queue 
+
+
+function startClassification(song){
+    //Push the song to the queue 
+    classificationQueue.push(song, (error) => {
+        if(error){  
+            console.error(error)
+        }else{
+            console.log("The song was classified")
+        }
+    })
+}
 
 module.exports = {
 
@@ -24,15 +114,13 @@ module.exports = {
     async classify(req, res){
         try {
             //Here we receive the external link of the song we want to classify (external id : means the id of the video on youtube)
-            const { external_id } = req.params
-
-            //////////////////////////////////////////////////////////////////////////
-            //Here we want to send the song we want to classify to the dummy service//
-            //////////////////////////////////////////////////////////////////////////
-
-            
-            sendMessage(external_id)
-            return res.status(200).json("A musica esta a classificar...")
+            const { external_id, user_id } = req.params
+            ip = req.clientIp
+            userId = user_id
+            console.log(ip)
+            startClassification(external_id)
+            //Simulating the classification and creating random logs to send to the frontend
+            return res.status(200).json("The song was added to the queue")
         } catch (error) {
             console.log(error)
         }

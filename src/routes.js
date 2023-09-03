@@ -17,6 +17,7 @@ route.get("/confirm/:token", UserController.validate)
 route.get("/user", validateToken, UserController.show)
 //resend the email 
 route.get("/user/newtoken", UserController.resendEmail)
+route.get("/user/ip", UserController.getUserIp)
 
 //Get all the songs in the database
 route.get("/song", SongController.index)
@@ -24,6 +25,8 @@ route.get("/song/:id", SongController.show)
 route.get("/song/name/:title", SongController.filterByName)
 route.get("/song/emotion/:emotion", SongController.filterByEmotion)
 route.get("/song/name/:title/emotion/:emotion", SongController.filterByAll)
+route.get("/song/getqueuesongs/:user_id", SongController.getQueueSongs)
+route.get("/song/getqueuesongsbyip/:ip", SongController.getQueueSongsByIp)
 
 route.post("/song/hits/:song_id", SongController.updateHits)
 route.get("/song/hits/:song_id", SongController.getHits)
