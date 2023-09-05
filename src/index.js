@@ -3,9 +3,27 @@ const cors = require('cors')
 const route  = require('./routes')
 const app = express()
 const http = require('http')
+const socketIo = require('socket.io')
 const server = http.createServer(app)
 const requestIp = require("request-ip")
 
+
+//setup the server to send realtime updates to the frontend
+const io = socketIo(server)
+const connectedSong = {};
+
+io.on('connection', socket => {
+    const {song_id} = socket.handshake.query; 
+    connectedSong[song_id] = socket.id; 
+ });
+
+ app.use( (req, res, next) => {
+    req.io = io; 
+    req.connectedSong = connectedSong;
+ 
+    return next();
+ });
+ 
 app.use(requestIp.mw())//middleware to get the ip of the user
 app.use(cors())
 app.use(express.json())
@@ -16,5 +34,5 @@ server.listen(8000, () => {
 })
 
 
-module.exports = {server}
+module.exports = {io}
 

@@ -2,11 +2,13 @@ require('dotenv').config()
 const {Song_Classification} = require('../models/index')
 const {Log, Song} = require('../models/index')
 const async = require('async')
+const {io} =  require("../index")
 var search = require('youtube-search');
+
 
 //////////////////////////////////////////////////////////////
 //Functions in test///////////////////////////////////////////
-var ip, userId //Ip of the user 
+var ip, userId, request //Ip of the user 
 //Save the song to the database
 function saveTheSong(songId){
     var opts = {
@@ -31,7 +33,7 @@ function saveTheSong(songId){
                 thumbnailMQ: results[0].thumbnails.medium.url, 
                 hits: 0,
                 waveform: "dQw4w9WgXcQ.png",
-                status: "processing",
+                status: "queued",
                 added_by_ip: ip,
                 added_by_user: userId, 
                 general_classification: "" 
@@ -58,22 +60,28 @@ async function updateStateSong(status, songId){
 
 //Here is the list of classification of the songs 
 const classificationQueue = async.queue(async (song, callback) => {
-    //Save the song in the processing state 
-    saveTheSong(song)
+    //To which id send the updates 
+    const songSocket = request.connectedSong[song];
+    console.log(song)
+    console.log(songSocket)
+
     try {
+        updateStateSong("processing", song)
         //////////////////////////////////////////////////////////////////////////
         //Here we want to send the song we want to classify to the dummy service//
         //////////////////////////////////////////////////////////////////////////
-
+        
         const delay = Math.floor(Math.random() * 10000)
         //Simulating the classification of the songs (temporary)
         setTimeout(async () => {
             console.log("Song Received")
+            if(songSocket){
+                console.log("sucess")
+                request.io.to(songSocket).emit('progress', 10);
+            }
+            
         }, delay);
-        
 
-
-        
     } catch (error) {
         updateStateSong("error", song)
         console.error("Error")
@@ -83,6 +91,7 @@ const classificationQueue = async.queue(async (song, callback) => {
 
 
 function startClassification(song){
+    saveTheSong(song)
     //Push the song to the queue 
     classificationQueue.push(song, (error) => {
         if(error){  
@@ -116,6 +125,7 @@ module.exports = {
             //Here we receive the external link of the song we want to classify (external id : means the id of the video on youtube)
             const { external_id, user_id } = req.params
             ip = req.clientIp
+            request = req
             userId = user_id
             console.log(ip)
             startClassification(external_id)
@@ -124,5 +134,6 @@ module.exports = {
         } catch (error) {
             console.log(error)
         }
-    }
+    }, 
+
 }
