@@ -15,21 +15,20 @@ const connectedSong = {};
 io.on('connection', socket => {
     const {song_id} = socket.handshake.query; 
     connectedSong[song_id] = socket.id; 
- });
+});
 
  app.use( (req, res, next) => {
     req.io = io; 
     req.connectedSong = connectedSong;
- 
-    return next();
+    return next(); 
  });
  
-app.use(requestIp.mw())//middleware to get the ip of the user
-app.use(cors())
-app.use(express.json())
-app.use(route)
+app.use(requestIp.mw()) //middleware to get the ip of the user
+app.use(cors())              
+app.use(express.json()) 
+app.use(route) 
 
-server.listen(8000, () => {
+server.listen(8000, () => { 
     console.log("Servidor a correr na porta 8000")
 })
 
