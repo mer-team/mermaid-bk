@@ -9,10 +9,23 @@ var search = require('youtube-search');
 //////////////////////////////////////////////////////////////
 //Functions in test///////////////////////////////////////////
 var ip, userId, request //Ip of the user 
+
+async function saveLog(msg, id){
+    await Log.create({
+        message: msg,
+        service: "song classification",
+        song_id: id, 
+        type: "info"
+    }).then(log => {
+        console.log("Log created")
+    }).catch(e => {
+        console.log(e)
+    })
+}
 //Save the song to the database
 function saveTheSong(songId){
     var opts = {
-        key: 'AIzaSyBFt5q-5AM9DQKOGuc-_2SQHmwSVgctvoQ'
+        key: 'AIzaSyDeZyEFcD3GYpQMF6Xgc8DyNvFmWnGdoLM'
       };
       
       search(`https://www.youtube.com/watch?v=${songId}`, opts, async function(err, results) {
@@ -56,6 +69,15 @@ async function updateStateSong(status, songId){
     });
 }
 
+//Update the classifitication of the song
+async function updateProcessed(emotion, songId){
+    await Song.update({ 
+        status: "processed", 
+        general_classification: emotion
+    }, { 
+        where: { external_id: songId} 
+    });
+}
 ///////////////////////////////////////////////////7777777////
 //////////////////////////////////////////////////////////////
 
@@ -74,18 +96,80 @@ const classificationQueue = async.queue(async (song, callback) => {
         const delay = Math.floor(Math.random() * 10000)
         //Simulating the classification of the songs (temporary)
         setTimeout(async () => {
-            console.log("Song Received")
             if(songSocket){
-                console.log("sucess")
                 request.io.emit('progress', {
                     progress: 10, 
                     song_id: `${song}`, 
-                    state: "Processing"
+                    state: "Song Received"
                 });
+
+                await saveLog("Song Received")
+            }
+        }, delay);
+
+        setTimeout(async () => {
+            if(songSocket){
+                request.io.emit('progress', {
+                    progress: 30, 
+                    song_id: `${song}`, 
+                    state: "Video Dowloaded"
+                });
+                await saveLog("Video Dowloaded")
             }
             
         }, delay);
 
+        setTimeout(async () => {
+            if(songSocket){
+                request.io.emit('progress', {
+                    progress: 50, 
+                    song_id: `${song}`, 
+                    state: "Audio Channel exctracted from audio"
+                });
+                await saveLog("Audio Channel exctracted from audio")
+            }
+            
+        }, delay);
+
+        setTimeout(async () => {
+            if(songSocket){
+                request.io.emit('progress', {
+                    progress: 60, 
+                    song_id: `${song}`, 
+                    state: "Features Extracted"
+                });
+                await saveLog("Features Extracted")
+            }
+            
+        }, delay);
+
+        setTimeout(async () => {
+            if(songSocket){
+                request.io.emit('progress', {
+                    progress: 80, 
+                    song_id: `${song}`, 
+                    state: "Classification in process"
+                });
+                await saveLog("Classification in process")
+            }
+            
+        }, delay);
+
+        setTimeout(async () => {
+            if(songSocket){
+                request.io.emit('progress', {
+                    progress: 100, 
+                    song_id: `${song}`, 
+                    state: "Classification finished"
+                });
+                await saveLog("Classification finished")
+            }
+            const emotions = ["Happy", "Sad", "Calm", "Tense"]
+            var  rnd = Math.floor(Math.random() * emotions.length)
+            const emotion = emotions[rnd]
+            updateProcessed(emotion, song)
+            
+        }, delay);
     } catch (error) {
         updateStateSong("error", song)
         console.error("Error")
