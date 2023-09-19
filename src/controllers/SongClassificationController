@@ -25,7 +25,7 @@ async function saveLog(msg, id){
 //Save the song to the database
 function saveTheSong(songId){
     var opts = {
-        key: 'AIzaSyDeZyEFcD3GYpQMF6Xgc8DyNvFmWnGdoLM'
+        key: 'AIzaSyBFt5q-5AM9DQKOGuc-_2SQHmwSVgctvoQ'
       };
       
       search(`https://www.youtube.com/watch?v=${songId}`, opts, async function(err, results) {
@@ -92,8 +92,6 @@ const classificationQueue = async.queue(async (song, callback) => {
         //////////////////////////////////////////////////////////////////////////
         //Here we want to send the song we want to classify to the dummy service//
         //////////////////////////////////////////////////////////////////////////
-        
-        const delay = Math.floor(Math.random() * 10000)
         //Simulating the classification of the songs (temporary)
         setTimeout(async () => {
             if(songSocket){
@@ -103,9 +101,9 @@ const classificationQueue = async.queue(async (song, callback) => {
                     state: "Song Received"
                 });
 
-                await saveLog("Song Received")
+                await saveLog("Song Received", song)
             }
-        }, delay);
+        }, 6000);
 
         setTimeout(async () => {
             if(songSocket){
@@ -114,10 +112,10 @@ const classificationQueue = async.queue(async (song, callback) => {
                     song_id: `${song}`, 
                     state: "Video Dowloaded"
                 });
-                await saveLog("Video Dowloaded")
+                await saveLog("Video Dowloaded", song)
             }
             
-        }, delay);
+        }, 8000);
 
         setTimeout(async () => {
             if(songSocket){
@@ -126,10 +124,10 @@ const classificationQueue = async.queue(async (song, callback) => {
                     song_id: `${song}`, 
                     state: "Audio Channel exctracted from audio"
                 });
-                await saveLog("Audio Channel exctracted from audio")
+                await saveLog("Audio Channel exctracted from audio", song)
             }
             
-        }, delay);
+        }, 10000);
 
         setTimeout(async () => {
             if(songSocket){
@@ -138,10 +136,10 @@ const classificationQueue = async.queue(async (song, callback) => {
                     song_id: `${song}`, 
                     state: "Features Extracted"
                 });
-                await saveLog("Features Extracted")
+                await saveLog("Features Extracted", song)
             }
             
-        }, delay);
+        }, 12000);
 
         setTimeout(async () => {
             if(songSocket){
@@ -150,10 +148,10 @@ const classificationQueue = async.queue(async (song, callback) => {
                     song_id: `${song}`, 
                     state: "Classification in process"
                 });
-                await saveLog("Classification in process")
+                await saveLog("Classification in process", song)
             }
             
-        }, delay);
+        }, 15000);
 
         setTimeout(async () => {
             if(songSocket){
@@ -162,14 +160,14 @@ const classificationQueue = async.queue(async (song, callback) => {
                     song_id: `${song}`, 
                     state: "Classification finished"
                 });
-                await saveLog("Classification finished")
+                await saveLog("Classification finished", song)
             }
             const emotions = ["Happy", "Sad", "Calm", "Tense"]
             var  rnd = Math.floor(Math.random() * emotions.length)
             const emotion = emotions[rnd]
-            updateProcessed(emotion, song)
+            await updateProcessed(emotion, song)
             
-        }, delay);
+        }, 16000);
     } catch (error) {
         updateStateSong("error", song)
         console.error("Error")
@@ -190,6 +188,36 @@ function startClassification(song){
     })
 }
 
+//see if the song is already on the database 
+async function isAlreadyOnTheDatabase(song_id){
+    const song = await Song.findOne({
+        where: {
+            external_id: song_id
+        }
+    })
+    return song
+}
+
+//see if the user based on his id has how many songs in the database
+async function howManySongsBasedOnUserId(id){
+    const song = await Song.findAll({
+        where: {
+            added_by_user: id
+        }
+    })
+    
+    return song.length
+}
+
+async function howManySongsBasedOnUserIp(){
+    const song = await Song.findAll({
+        where: {
+            added_by_ip: ip
+        }
+    })
+    
+    return song.length
+}
 module.exports = {
 
     //Get the Song classifications given the song_id
@@ -210,11 +238,30 @@ module.exports = {
 
     async classify(req, res){
         try {
+
             //Here we receive the external link of the song we want to classify (external id : means the id of the video on youtube)
             const { external_id, user_id } = req.params
             ip = req.clientIp
             request = req
             userId = user_id
+            //Before doing any classification we have to see if the song is already on the database 
+            if(await isAlreadyOnTheDatabase(external_id) != null){
+                return res.status(400).json("This song is already at the queue for classification.")
+            }
+            //Calculate the song limits the user has to have in tghe queue based on if his logged or not
+            if(user_id != "null"){
+                var lim = await howManySongsBasedOnUserId(user_id)
+                if(lim == 6){
+                    return res.status(400).json("You have already reached the limit for song classification")
+                }
+            }else{
+                var lim = await howManySongsBasedOnUserIp()
+                console.log(lim)
+                if(lim == 3){
+                    return res.status(400).json("You have already reached the limit for song classification")
+                }
+            }
+
             startClassification(external_id)
             //Simulating the classification and creating random logs to send to the frontend
             return res.status(200).json("The song was added to the queue")
