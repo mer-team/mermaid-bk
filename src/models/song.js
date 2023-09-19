@@ -16,7 +16,6 @@ module.exports = (sequelize, DataTypes) => {
       Song.hasMany(models.Feedback, {foreignKey: 'song_id'})
 
       Song.hasOne(models.Log, {foreignKey: 'song_id'})
-      Song.hasOne(models.User, {foreignKey: 'added_by_user'})
     }
   }
   Song.init({
