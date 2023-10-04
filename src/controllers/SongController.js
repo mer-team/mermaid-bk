@@ -175,4 +175,17 @@ module.exports = {
              console.log(e)
          }
     }, 
+
+    async deleteSong(req, res){
+        try{
+            const songs = await Song.destroy({
+             where: {
+                external_id : req.params.id
+             }
+            })
+            return res.status(200).json("User deleted with sucess")
+         }catch(e){
+             console.log(e)
+         }
+    }
 }

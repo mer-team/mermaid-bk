@@ -30,7 +30,7 @@ route.get("/song/getqueuesongsbyip/:ip", SongController.getQueueSongsByIp)
 
 route.post("/song/hits/:song_id", SongController.updateHits)
 route.get("/song/hits/:song_id", SongController.getHits)
-
+route.delete("/song/delete/:id", SongController.deleteSong)
 
 //Get the song classification given the id of the song 
 route.get("/classifications", SongClassificationController.index)

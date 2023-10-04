@@ -27,7 +27,7 @@ module.exports = {
     async store(req, res){
         try{
             //getting the name , email and password
-            const {name, email, passw} = req.body
+            const {name, email, passw, admin} = req.body
                     
             //Check if it is a valid password the password
             if(!validatePassw(passw)){
@@ -53,10 +53,12 @@ module.exports = {
             // Generate a token secret key
             const token = jwt.sign({ email }, process.env.ACESS_TOKEN_SECRET, { expiresIn: '1d' });
 
+
             User.create({
                 email: email, 
                 hash_passwd: hash_passw, 
-                name: name
+                name: name, 
+                admin: admin
             }).then(async user => {
                 //Send the confirmation email
                 const sendEmail = {
