@@ -1,5 +1,5 @@
 require('dotenv').config()
-const {User} = require('../models/index')
+const {User, Sequelize} = require('../models/index')
 const nodemailer = require('nodemailer')
 const bcrypt = require("bcrypt")
 const { Op } = require('sequelize');
@@ -171,6 +171,98 @@ module.exports = {
     
     async getUserIp(req, res){
         return res.json(req.clientIp)
-    }
+    }, 
+
+    async getUsers(req, res){
+        try{
+            const users = await User.findAll()
+
+            return res.status(200).json(users)
+        }catch(e){
+            console.log(e)
+        } 
+    }, 
+
+    async getUsersByEmailOrUsername(req, res){
+        const {name, email, blocked} = req.body
+        console.log(req.body)
+        try{
+            if(blocked){
+                const users = await User.findAll({
+                    where: {
+                        [Op.or]:[
+                            {email: Sequelize.where(
+                                Sequelize.fn('LOWER',Sequelize.col("email")), "LIKE", `%${email}%`
+                            )}, 
+                            {name: Sequelize.where(
+                                Sequelize.fn('LOWER',Sequelize.col("name")), "LIKE", `%${name}%`
+                            )}
+                        ], 
+                        blocked_at : {
+                            [Op.ne]: null
+                        }
+                        
+                    }
+                })
+
+                return res.status(200).json(users)
+            }else{
+                const users = await User.findAll({
+                    where: {
+                        [Op.or]:[
+                            {email:  Sequelize.where(
+                                Sequelize.fn('LOWER',Sequelize.col("email")), "LIKE", `%${email}%`
+                            )}, 
+                            {name:  Sequelize.where(
+                                Sequelize.fn('LOWER',Sequelize.col("name")), "LIKE", `%${name}%`
+                            )}
+                        ]
+                    }
+                })
+
+                return res.status(200).json(users)
+            }
+            
+        }catch(e){
+            console.log(e)
+        } 
+    }, 
+
+    async getOnlyBlockedUsers(req, res){
+        try{
+            const users = await User.findAll({
+                where: {
+                    blocked_at: {
+                        [Op.ne]: null
+                    }
+                }
+            })
+
+            return res.status(200).json(users)
+        }catch(e){
+            console.log(e)
+        } 
+    }, 
+
+    async blockUser(req, res){
+        const {email} = req.params
+        try{
+            await User.update({ blocked_at: new Date() }, { where: { email: email } });
+            return res.status(200).json("User Blocked with sucess")
+        }catch(e){
+            console.log(e)
+        }   
+    }, 
+
+    async unblockUser(req, res){
+        const {email} = req.params
+        try{
+            await User.update({ blocked_at: null }, { where: { email: email } });
+            return res.status(200).json("User Unblocked with sucess")
+        }catch(e){
+            console.log(e)
+        }   
+    }, 
+
     
 }

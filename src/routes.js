@@ -18,6 +18,11 @@ route.get("/user", validateToken, UserController.show)
 //resend the email 
 route.get("/user/newtoken", UserController.resendEmail)
 route.get("/user/ip", UserController.getUserIp)
+route.post("/user/bynameoremail", UserController.getUsersByEmailOrUsername)
+route.get("/user/blocked", UserController.getOnlyBlockedUsers)
+route.post("/user/blockuser/:email", UserController.blockUser)
+route.post("/user/unblockuser/:email", UserController.unblockUser)
+route.get("/user/getall", UserController.getUsers)
 
 //Get all the songs in the database
 route.get("/song", SongController.index)
