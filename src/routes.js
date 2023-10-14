@@ -23,7 +23,8 @@ route.get("/user/blocked", UserController.getOnlyBlockedUsers)
 route.post("/user/blockuser/:email", UserController.blockUser)
 route.post("/user/unblockuser/:email", UserController.unblockUser)
 route.get("/user/getall", UserController.getUsers)
-
+route.post("/user/change/password", UserController.changePassword)
+route.post("/user/change/username", UserController.changeUsername)
 //Get all the songs in the database
 route.get("/song", SongController.index)
 route.get("/song/:id", SongController.show)

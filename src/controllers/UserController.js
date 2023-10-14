@@ -264,5 +264,64 @@ module.exports = {
         }   
     }, 
 
+    async changePassword(req, res){
+        const {email, password, oldPassword} = req.body
+        //verify if the email exists on our database 
+        const user = await User.findOne({
+            where: {
+                email: email
+            }
+        })
+
+        //See if the old Password equal to the one in the database
+        if(await bcrypt.compare(oldPassword, user.hash_passwd)){
+            //verify if the password is valid
+             //Check if it is a valid password the password
+             if(!validatePassw(password)){
+                return res.status(400).json("Error: The password you entered does not meet the password requirements. The password must be at least 8 characters long, including at least one uppercase letter, one lowercase letter, one digit or special character, and cannot contain a period or a newline. Please try again.")
+            }else{
+                //Create a hashed password 
+                const hash_passw = await bcrypt.hash(password, 10)
+                //see if the hash pasword equals to the same in the database 
+                if(await bcrypt.compare(password, user.hash_passwd)){
+                    return res.status(400).json("The current password is equal to the one you are trying to change")
+                }
+                await User.update({ hash_passwd: hash_passw }, { where: { email: email } });
+                return res.status(200).json("Password Changed with sucess")
+            }
+        }else{
+            return res.status(400).json("The old password is wrong.")
+        }
+
+    }, 
+
+    async changeUsername(req, res){
+        const {username, email, password} = req.body
+
+        const user = await User.findOne({
+            where: {
+                email: email
+            }
+        })
+
+        //verify if the password equals to the one on the database 
+        if(await bcrypt.compare(password, user.hash_passwd)){
+            //Check if the current name and email exists on the database 
+            const users = await User.findAll({
+                where: {
+                    name: username
+                }
+            })
+
+            if(users.length > 0){
+                return res.status(400).json("This name is already in use")
+            }else{
+                await User.update({ name: username }, { where: { email: email } });
+                return res.status(200).json("Username Updated")
+            }
+        }else{
+            return res.status(400).json("Wrong Password")
+        }
+    }
     
 }
