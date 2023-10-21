@@ -7,6 +7,7 @@ const SongClassificationController = require('./controllers/SongClassificationCo
 
 const { validateToken } = require('./JWT')
 const FeedbackController = require('./controllers/FeedbackController')
+
 //Register User on the database  
 route.post("/signup", UserController.store)
 //Login the user with JWT
@@ -37,7 +38,9 @@ route.get("/song/getqueuesongsbyip/:ip", SongController.getQueueSongsByIp)
 route.post("/song/hits/:song_id", SongController.updateHits)
 route.get("/song/hits/:song_id", SongController.getHits)
 route.delete("/song/delete/:id", SongController.deleteSong)
-
+route.get("/song/get/streamedminutes", SongController.getStreamedMinutes)
+route.get("/song/get/analysed/videos", SongController.AnalysedVideos)
+route.get("/song/get/latest/classifications", SongController.getLatestClassifications)
 //Get the song classification given the id of the song 
 route.get("/classifications", SongClassificationController.index)
 route.post("/song/classification/song/:external_id/user/:user_id", SongClassificationController.classify)

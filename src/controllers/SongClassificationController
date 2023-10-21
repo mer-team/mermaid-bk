@@ -270,4 +270,14 @@ module.exports = {
         }
     }, 
 
+    async getLatestClassifications(req, res){
+        try{
+
+        }catch(e){
+            console.log(e)
+        }
+    }
+
+    
+
 }
