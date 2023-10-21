@@ -28,7 +28,7 @@ app.use(requestIp.mw()) //middleware to get the ip of the user
 app.use(cors())              
 app.use(express.json()) 
 app.use(route) 
-app.use("/", swaggerUI.serve, swaggerUI.setup(swaggerDocs))
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocs))
 
 server.listen(8000, () => { 
     console.log("Servidor a correr na porta 8000")
