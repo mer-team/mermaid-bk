@@ -269,18 +269,5 @@ module.exports = {
         }
     }, 
 
-<<<<<<< HEAD
-    async getLatestClassifications(req, res){
-        try{
-
-        }catch(e){
-            console.log(e)
-        }
-    }
-=======
-    
->>>>>>> 424ffa6b3ad0141f3cb0b89e3217add5f04b5447
-
-    
 
 }
