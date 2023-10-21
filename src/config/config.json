@@ -1,26 +1,44 @@
 {
   "development": {
-    "username": "postgres",
-    "password": "gordo1234",
-    "database": "Mermaid",
-    "host": "localhost",
+    "username": "merproject@merpostgresql",
+    "password": "Mermaid2023@",
+    "database": "postgres",
+    "host": "merpostgresql.postgres.database.azure.com",
     "dialect": "postgres", 
-    "port": 5432
+    "port": 5432, 
+    "ssl": true, 
+    "dialectOptions": {
+      "ssl": {
+         "require": true
+      }
+    }
   },
   "test": {
-    "username": "postgres",
-    "password": "gordo1234",
-    "database": "Mermaid",
-    "host": "127.0.0.1",
+    "username": "merproject@merpostgresql",
+    "password": "Mermaid2023@",
+    "database": "postgres",
+    "host": "merpostgresql.postgres.database.azure.com",
     "dialect": "postgres",
-    "port": 5432
+    "port": 5432, 
+    "ssl": true, 
+    "dialectOptions": {
+      "ssl": {
+         "require": true
+      }
+    }
   },
   "production": {
-    "username": "postgres",
-    "password": "gordo1234",
-    "database": "Mermaid",
-    "host": "127.0.0.1",
+    "username": "merproject@merpostgresql",
+    "password": "Mermaid2023@",
+    "database": "postgres",
+    "host": "merpostgresql.postgres.database.azure.com",
     "dialect": "postgres",
-    "port": 5432
+    "port": 5432, 
+    "ssl": true, 
+    "dialectOptions": {
+      "ssl": {
+         "require": true
+      }
+    }
   }
 }

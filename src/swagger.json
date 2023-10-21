@@ -1,0 +1,60 @@
+{
+    "openapi": "3.0.0", 
+    "info": {
+        "title": "Mermaid Web APP API"
+    }, 
+
+    "tags": [
+        {
+            "name": "Users",
+            "description": "Everythying about the users"
+        },
+        {
+            "name": "Music",
+            "description": "Everythying about the songs"
+        }
+    ],
+
+    "paths": {
+        "/signup": {
+            "post": {
+                "summary": "User sign up", 
+                "tags": [
+                    "Users"
+                ]
+            }
+        }, 
+        "/login": {
+            "post": {
+                "summary": "User Login", 
+                "tags": [
+                    "Users"
+                ]
+            }
+        }, 
+        "/confirm/{token}": {
+            "get": {
+                "summary": "Validate user account", 
+                "tags": [
+                    "Users"
+                ]
+            }
+        }, 
+        "/user/newtoken": {
+            "get": {
+                "summary": "Resend the email of verification to the user", 
+                "tags": [
+                    "Users"
+                ]
+            }
+        }, 
+        "/user/ip": {
+            "get": {
+                "summary": "Get the user ip", 
+                "tags": [
+                    "Users"
+                ]
+            }
+        }
+    }
+}

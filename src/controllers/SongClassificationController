@@ -238,7 +238,6 @@ module.exports = {
 
     async classify(req, res){
         try {
-
             //Here we receive the external link of the song we want to classify (external id : means the id of the video on youtube)
             const { external_id, user_id } = req.params
             ip = req.clientIp
@@ -248,7 +247,7 @@ module.exports = {
             if(await isAlreadyOnTheDatabase(external_id) != null){
                 return res.status(400).json("This song is already at the queue for classification.")
             }
-            //Calculate the song limits the user has to have in tghe queue based on if his logged or not
+            //Calculate the song limits the user has to have in the queue based on if his logged or not
             if(user_id != "null"){
                 var lim = await howManySongsBasedOnUserId(user_id)
                 if(lim == 6){
@@ -269,5 +268,9 @@ module.exports = {
             console.log(error)
         }
     }, 
+
+    
+
+    
 
 }

@@ -187,5 +187,51 @@ module.exports = {
          }catch(e){
              console.log(e)
          }
+    }, 
+
+    async getStreamedMinutes(req, res){
+        try{
+            var x = 0
+            var total = 0
+            const songs = await Song.findAll()
+            songs.map(song => {
+                x = new Date(song.duration).getMinutes()
+                total += x
+            })
+            return res.status(200).json(total)
+         }catch(e){
+             console.log(e)
+         }
+    }, 
+
+    async AnalysedVideos(req, res){
+        try{
+            var x = 0
+            var total = 0
+            const songs = await Song.findAll()
+            return res.status(200).json(songs.length)
+         }catch(e){
+             console.log(e)
+         }
+    }, 
+
+    async getLatestClassifications(req, res){
+        try{
+            const songs = await Song.findAll({
+                where: {
+                    status: "processed"
+                }
+            })
+
+            songs.sort((a, b) => a.updated_at - b.updated_at)
+
+            return res.status(200).json(songs.slice(0, 3))
+
+        }catch(e){
+            console.log(e)
+        }
     }
+
+
+
 }
