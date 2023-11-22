@@ -1,9 +1,9 @@
 {
   "development": {
-    "username": "merproject@merpostgresql",
-    "password": "Mermaid2023@",
-    "database": "postgres",
-    "host": "merpostgresql.postgres.database.azure.com",
+    "username": "mermaid_database_user",
+    "password": "dSkmR5Tsz5pq95oChR200t11etpmnMJI",
+    "database": "mermaid_database",
+    "host": "dpg-clees4fgsrdc739s8p5g-a.oregon-postgres.render.com",
     "dialect": "postgres", 
     "port": 5432, 
     "ssl": true, 
@@ -14,11 +14,11 @@
     }
   },
   "test": {
-    "username": "merproject@merpostgresql",
-    "password": "Mermaid2023@",
-    "database": "postgres",
-    "host": "merpostgresql.postgres.database.azure.com",
-    "dialect": "postgres",
+    "username": "mermaid_database_user",
+    "password": "dSkmR5Tsz5pq95oChR200t11etpmnMJI",
+    "database": "mermaid_database",
+    "host": "dpg-clees4fgsrdc739s8p5g-a.oregon-postgres.render.com",
+    "dialect": "postgres", 
     "port": 5432, 
     "ssl": true, 
     "dialectOptions": {
@@ -28,11 +28,11 @@
     }
   },
   "production": {
-    "username": "merproject@merpostgresql",
-    "password": "Mermaid2023@",
-    "database": "postgres",
-    "host": "merpostgresql.postgres.database.azure.com",
-    "dialect": "postgres",
+    "username": "mermaid_database_user",
+    "password": "dSkmR5Tsz5pq95oChR200t11etpmnMJI",
+    "database": "mermaid_database",
+    "host": "dpg-clees4fgsrdc739s8p5g-a.oregon-postgres.render.com",
+    "dialect": "postgres", 
     "port": 5432, 
     "ssl": true, 
     "dialectOptions": {

@@ -150,6 +150,7 @@ module.exports = {
     //This is only used if the user is logged
     async getQueueSongs(req, res){
         const {user_id} = req.params
+        console.log(req.params)
         try{
             const songs = await Song.findAll({
              where: {

@@ -12,10 +12,15 @@
         {
             "name": "Music",
             "description": "Everythying about the songs"
+        },
+        {
+            "name": "Feedback", 
+            "description": "Everythying about the feedback of the songs"
         }
     ],
 
     "paths": {
+
         "/signup": {
             "post": {
                 "summary": "User sign up", 
@@ -24,6 +29,7 @@
                 ]
             }
         }, 
+
         "/login": {
             "post": {
                 "summary": "User Login", 
@@ -32,6 +38,7 @@
                 ]
             }
         }, 
+        
         "/confirm/{token}": {
             "get": {
                 "summary": "Validate user account", 
@@ -40,6 +47,16 @@
                 ]
             }
         }, 
+
+        "/user": {
+            "get": {
+                "summary": "Get user data by the token", 
+                "tags": [
+                    "Users"
+                ]
+            }
+        }, 
+
         "/user/newtoken": {
             "get": {
                 "summary": "Resend the email of verification to the user", 
@@ -48,11 +65,258 @@
                 ]
             }
         }, 
+
+        "/user/bynameoremail": {
+            "get": {
+                "summary": "Get user by name or email", 
+                "tags": [
+                    "Users"
+                ]
+            }
+        }, 
+
         "/user/ip": {
             "get": {
                 "summary": "Get the user ip", 
                 "tags": [
                     "Users"
+                ]
+            }
+        }, 
+
+        "/user/blocked": {
+            "get": {
+                "summary": "Get only blocked users",
+                "tags": [
+                    "Users"
+                ]
+            }
+        },
+        "/user/blockuser/{email}": {
+            "post": {
+                "summary": "Block a user",
+                "tags": [
+                    "Users"
+                ]
+            }
+        },
+        "/user/unblockuser/{email}": {
+            "post": {
+                "summary": "Unblock a user",
+                "tags": [
+                    "Users"
+                ]
+            }
+        },
+        "/user/getall": {
+            "get": {
+                "summary": "Get all users",
+                "tags": [
+                    "Users"
+                ]
+            }
+        },
+        "/user/change/password": {
+            "post": {
+                "summary": "Change user password",
+                "tags": [
+                    "Users"
+                ]
+            }
+        },
+        "/user/change/username": {
+            "post": {
+                "summary": "Change username",
+                "tags": [
+                    "Users"
+                ]
+            }
+        },
+        "/user/reset/password": {
+            "post": {
+                "summary": "Reset user password by asking for the old one and updating by the new one",
+                "tags": [
+                    "Users"
+                ]
+            }
+        },
+        "/user/change/reset/password": {
+            "post": {
+                "summary": "Route used in case the user forgets his old password ",
+                "tags": [
+                    "Users"
+                ]
+            }
+        }, 
+
+        
+
+
+
+
+
+        "/song": {
+        "get": {
+            "summary": "Get all the songs in the database",
+            "tags": [
+                "Music"
+            ]
+            }
+        },
+        "/song/{id}": {
+            "get": {
+                "summary": "Get a song by id",
+                "tags": [
+                    "Music"
+                ]
+            }
+        },
+        "/song/name/{title}": {
+            "get": {
+                "summary": "Filter songs by title",
+                "tags": [
+                    "Music"
+                ]
+            }
+        },
+        "/song/emotion/{emotion}": {
+            "get": {
+                "summary": "Filter songs by emotion",
+                "tags": [
+                    "Music"
+                ]
+            }
+        },
+        "/song/name/{title}/emotion/{emotion}": {
+            "get": {
+                "summary": "Filter songs by title and emotion",
+                "tags": [
+                    "Music"
+                ]
+            }
+        },
+        "/song/getqueuesongs/{user_id}": {
+            "get": {
+                "summary": "Get queued songs for a user",
+                "tags": [
+                    "Music"
+                ]
+            }
+        },
+        "/song/hits/{song_id}": {
+            "post": {
+                "summary": "Update hits for a song",
+                "tags": [
+                    "Music"
+                ]
+            },
+            "get": {
+                "summary": "Get hits for a song",
+                "tags": [
+                    "Music"
+                ]
+            }
+        },
+        "/song/delete/{id}": {
+            "delete": {
+                "summary": "Delete a song",
+                "tags": [
+                    "Music"
+                ]
+            }
+        },
+        "/song/get/streamedminutes": {
+            "get": {
+                "summary": "Get streamed minutes",
+                "tags": [
+                    "Music"
+                ]
+            }
+        },
+        "/song/get/analysed/videos": {
+            "get": {
+                "summary": "Get analysed videos",
+                "tags": [
+                    "Music"
+                ]
+            }
+        },
+        "/song/get/latest/classifications": {
+            "get": {
+                "summary": "Get latest classifications",
+                "tags": [
+                    "Music"
+                ]
+            }
+        },
+        "/songbyip": {
+            "get": {
+                "summary": "Get queued songs by IP",
+                "tags": [
+                    "Music"
+                ]
+            }
+        },
+        "/classifications": {
+            "get": {
+                "summary": "Get the song classification",
+                "tags": [
+                    "Music"
+                ]
+            }
+        },
+        "/song/classification/song/{external_id}/user/{user_id}": {
+            "post": {
+                "summary": "Classify a song",
+                "tags": [
+                    "Music"
+                ]
+            }
+        }, 
+
+
+
+
+
+
+
+        "/feedback/agree/disagree/{agreeordisagree}/user/{user_id}/song/{song_id}": {
+            "post": {
+                "summary": "Post feedback",
+                "tags": [
+                    "Feedback"
+                ]
+            }
+        },
+        "/feedback/agrees/{song_id}": {
+            "get": {
+                "summary": "Get total agrees for a song",
+                "tags": [
+                    "Feedback"
+                ]
+            }
+        },
+        "/feedback/disagrees/{song_id}": {
+            "get": {
+                "summary": "Get total disagrees for a song",
+                "tags": [
+                    "Feedback"
+                ]
+            }
+        },
+        "/feedback/opinion/{user_id}/{song_id}": {
+            "get": {
+                "summary": "Get user opinion for a song",
+                "tags": [
+                    "Feedback"
+                ]
+            }
+        },
+        "/feedback/{user_id}/{song_id}": {
+            "delete": {
+                "summary": "Undo feedback for a song",
+                "tags": [
+                    "Feedback"
                 ]
             }
         }

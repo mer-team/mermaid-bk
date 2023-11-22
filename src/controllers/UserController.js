@@ -169,10 +169,6 @@ module.exports = {
     }, 
 
     
-    async getUserIp(req, res){
-        return res.json(req.clientIp)
-    }, 
-
     async getUsers(req, res){
         try{
             const users = await User.findAll()
@@ -322,6 +318,66 @@ module.exports = {
         }else{
             return res.status(400).json("Wrong Password")
         }
+    }, 
+
+
+    async resetPassw(req, res){
+        const {email} = req.body
+
+        const user = await User.findOne({
+            where: {
+                email: email
+            }
+        })
+
+        if(user){
+            if(user.confirmed){
+                try {
+            
+                    const token = jwt.sign({ email }, process.env.ACESS_TOKEN_SECRET, { expiresIn: '10m' });
+    
+                    //Send the confirmation email
+                    const sendEmail = {
+                        from: 'noreply@mermaid.com',
+                        to: email,
+                        subject: 'Reset Password',
+                        text: `Please click on the following link to reset your password address: http://localhost:3000/resetpassword/${token}`,
+                    };
+    
+                const info = await transporter.sendMail(sendEmail);
+                return res.status(201).json({ message: 'Please check your email to reset the password' });
+                } catch (error) {
+                    
+                }
+            }else
+            {
+                return res.status(400).json("Please confirm your email first")
+            }
+        }else{
+            return res.status(400).json("Invalid Email")
+        }
+
+    }, 
+
+    async passwordChange(req, res){
+        const {email, password} = req.body
+
+        //Check if it is a valid password the password
+        if(!validatePassw(password)){
+            return res.status(400).json("Error: The password you entered does not meet the password requirements. The password must be at least 8 characters long, including at least one uppercase letter, one lowercase letter, one digit or special character, and cannot contain a period or a newline. Please try again.")
+        }
+
+        //Create a hashed password 
+        const hash_passw = await bcrypt.hash(password, 10)
+
+        try{
+            await User.update({ hash_passw: hash_passw }, { where: { email: email } });
+
+            return res.status(200).json("Password changed")
+        }catch(e){
+
+        }
+
     }
     
 }

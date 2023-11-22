@@ -86,7 +86,6 @@ async function updateProcessed(emotion, songId){
 const classificationQueue = async.queue(async (song, callback) => {
     //To which id send the updates 
     const songSocket = request.connectedSong[song];
-    
     try {
         updateStateSong("processing", song)
         //////////////////////////////////////////////////////////////////////////
@@ -101,7 +100,7 @@ const classificationQueue = async.queue(async (song, callback) => {
                     state: "Song Received"
                 });
 
-                await saveLog("Song Received", song)
+                //await saveLog("Song Received", song)
             }
         }, 6000);
 
@@ -112,7 +111,7 @@ const classificationQueue = async.queue(async (song, callback) => {
                     song_id: `${song}`, 
                     state: "Video Dowloaded"
                 });
-                await saveLog("Video Dowloaded", song)
+                //await saveLog("Video Dowloaded", song)
             }
             
         }, 8000);
@@ -124,7 +123,7 @@ const classificationQueue = async.queue(async (song, callback) => {
                     song_id: `${song}`, 
                     state: "Audio Channel exctracted from audio"
                 });
-                await saveLog("Audio Channel exctracted from audio", song)
+                //await saveLog("Audio Channel exctracted from audio", song)
             }
             
         }, 10000);
@@ -136,7 +135,7 @@ const classificationQueue = async.queue(async (song, callback) => {
                     song_id: `${song}`, 
                     state: "Features Extracted"
                 });
-                await saveLog("Features Extracted", song)
+                //await saveLog("Features Extracted", song)
             }
             
         }, 12000);
@@ -148,7 +147,7 @@ const classificationQueue = async.queue(async (song, callback) => {
                     song_id: `${song}`, 
                     state: "Classification in process"
                 });
-                await saveLog("Classification in process", song)
+                //await saveLog("Classification in process", song)
             }
             
         }, 15000);
@@ -160,7 +159,7 @@ const classificationQueue = async.queue(async (song, callback) => {
                     song_id: `${song}`, 
                     state: "Classification finished"
                 });
-                await saveLog("Classification finished", song)
+                //await saveLog("Classification finished", song)
             }
             const emotions = ["Happy", "Sad", "Calm", "Tense"]
             var  rnd = Math.floor(Math.random() * emotions.length)
@@ -180,6 +179,7 @@ function startClassification(song){
     saveTheSong(song)
     //Push the song to the queue 
     classificationQueue.push(song, (error) => {
+        console.log("hey i passed")
         if(error){  
             console.error(error)
         }else{
@@ -249,25 +249,32 @@ module.exports = {
             }
             //Calculate the song limits the user has to have in the queue based on if his logged or not
             if(user_id != "null"){
+                ip = ""
                 var lim = await howManySongsBasedOnUserId(user_id)
-                if(lim == 6){
+                if(lim >= 6){
                     return res.status(400).json("You have already reached the limit for song classification")
                 }
             }else{
                 var lim = await howManySongsBasedOnUserIp()
                 console.log(lim)
-                if(lim == 3){
+                if(lim >= 3){
                     return res.status(400).json("You have already reached the limit for song classification")
                 }
             }
 
+            //We have to see if the classification is made by a logged user or not
+            //If not we have to know the user IP 
+
             startClassification(external_id)
+
             //Simulating the classification and creating random logs to send to the frontend
             return res.status(200).json("The song was added to the queue")
         } catch (error) {
             console.log(error)
         }
     }, 
+
+
 
 
 }
