@@ -8,4 +8,4 @@ COPY dummy-service.js .
 RUN npm install amqplib
 RUN npm install --verbose
 
-CMD ["node", "dummy-service.js"]
+CMD ["node", "dummy-worker.js"]

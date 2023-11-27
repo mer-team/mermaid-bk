@@ -21,8 +21,6 @@ services:
       - postgres-data:/var/lib/postgresql/data
   rabbitmq:
     image: rabbitmq:3-management
-    env_file:
-    - .env
     environment:
       - RABBITMQ_DEFAULT_USER=${MQ_USER}
       - RABBITMQ_DEFAULT_PASS=${MQ_PASS}
@@ -34,25 +32,41 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-  dummy-manager:
-    build:
-      context: ./dummy-manager
-      dockerfile: Dockerfile
+  wave2image:
+    image: merteam/wave2image:latest
     env_file:
     - .env
+    environment:
+      - HOST=rabbitmq 
+      - USER=${MQ_USER}
+      - PASS=${MQ_PASS}
+      - PORT=${MQ_PORT}
+      - MNG_PORT=${MQ_MNG_PORT}
+      - TIME=10
+    volumes:
+      - audios:/Audios
+      - soundwaves:/Soundwaves
     depends_on:
       rabbitmq:
         condition: service_healthy
-  dummy-worker:
-    build:
-      context: ./dummy-worker
-      dockerfile: Dockerfile
+  vidextractor:
+    image: merteam/vidextractor:latest
     env_file:
     - .env
+    environment:
+      - HOST=rabbitmq 
+      - USER=${MQ_USER}
+      - PASS=${MQ_PASS}
+      - PORT=${MQ_PORT}
+      - MNG_PORT=${MQ_MNG_PORT}
+      - TIME=10
+    volumes:
+      - audios:/Audios
     depends_on:
-      dummy-manager:
       rabbitmq:
         condition: service_healthy
-      
+
 volumes:
   postgres-data:
+  audios:
+  soundwaves:

@@ -30,6 +30,12 @@ startScript = async () => {
             console.log("Connected");
             var q = 'mer-management';
             ch.assertQueue(q, { durable: false });
+            ch.assertQueue("video-downloader", { durable: false });
+            ch.assertQueue("audio-extractor", { durable: false });
+            ch.assertQueue("lyrics-extractor", { durable: false });
+            ch.assertQueue("audio-feature-extractor", { durable: false });
+            ch.assertQueue("lyrics-feature-extractor", { durable: false });
+
             console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", q);
             ch.consume(q, async function (msg) {
                 // Simulate processing steps, the goal here as to call an api to report logs and pass info
