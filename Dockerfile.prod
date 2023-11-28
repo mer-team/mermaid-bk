@@ -8,8 +8,11 @@ WORKDIR /app
 COPY package*.json .
 COPY yarn.lock .
 
+# Install Yarn globally
+RUN npm install --global yarn
+
 # Install dependencies
-RUN npm install --production
+RUN yarn install --production
 
 # Copy the source code
 COPY . .
@@ -18,4 +21,4 @@ COPY . .
 EXPOSE 8000
 
 # Start your app
-CMD ["npm", "start"]
+CMD ["yarn", "start"]

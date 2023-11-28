@@ -127,5 +127,21 @@ module.exports = {
         }
     }, 
 
-
+    async undoFeedback(req, res){
+        const { user_id, song_id } = req.params
+        try{
+            const feedback = await Feedback.destroy({
+                where: {
+                    user_id: user_id, 
+                    song_id: song_id,
+                }
+            }).then(feedback =>{
+                return res.status(200).json("feedback deleted")
+            }).catch(e => {
+                console.log(e)
+            })
+        }catch(e){
+            console.log(e)
+        }
+    }
 }

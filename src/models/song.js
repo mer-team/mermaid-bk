@@ -16,7 +16,6 @@ module.exports = (sequelize, DataTypes) => {
       Song.hasMany(models.Feedback, {foreignKey: 'song_id'})
 
       Song.hasOne(models.Log, {foreignKey: 'song_id'})
-
     }
   }
   Song.init({
@@ -35,6 +34,7 @@ module.exports = (sequelize, DataTypes) => {
     waveform: DataTypes.STRING,
     status: DataTypes.ENUM("queued", "processing", "processed", "error", "cancelled"),
     added_by_ip: DataTypes.STRING,
+    added_by_user: DataTypes.STRING, 
     general_classification: DataTypes.STRING 
   }, {
     sequelize,

@@ -1,0 +1,33 @@
+# Use an official Node.js runtime as the base image
+FROM node:18
+
+ARG DB_USERNAME=root
+ARG DB_PASSWORD=teste
+ARG DB_DATABASE=mer
+ARG DB_HOST=localhost
+
+ARG MQ_HOST=localhost
+ARG MQ_USER=guest
+ARG MQ_PASS=guest
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy package.json and package-lock.json to the working directory
+COPY package*.json .
+COPY yarn.lock .
+
+# Install Yarn globally
+RUN npm install --global yarn
+
+# Install project dependencies
+RUN yarn install
+
+# Copy the rest of the application code
+# COPY . .
+
+# Expose the port the API is listening on
+EXPOSE 8000
+
+# Start the API server with nodemon for development
+CMD [ "yarn", "run", "dev" ]
