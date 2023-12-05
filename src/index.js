@@ -32,7 +32,7 @@ app.use(express.json())
 app.use(route) 
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocs))
 
-server.listen(8000, () => { 
+server.listen(8000, '0.0.0.0', () => { 
     console.log("Servidor a correr na porta 8000")
 })
 
