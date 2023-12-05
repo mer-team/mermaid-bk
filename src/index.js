@@ -2,7 +2,6 @@ const express = require('express')
 const cors = require('cors')
 const route  = require('./routes')
 const app = express()
-app.use(cors())
 const http = require('http')
 const socketIo = require('socket.io')
 const server = http.createServer(app)
@@ -15,8 +14,8 @@ const connectedSong = {};
 
 // load vars from .env (do I need to repeat this in other places? test!)
 require('dotenv').config();
-
-io.on('connection', socket => {
+app.use(cors())
+io.of('/ws').on('connection', socket => {
     const {song_id} = socket.handshake.query; 
     connectedSong[song_id] = socket.id; 
 });
