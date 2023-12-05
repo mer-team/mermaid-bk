@@ -1,7 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const route  = require('./routes')
-const app = express()
+var app = express()
 const http = require('http')
 const socketIo = require('socket.io')
 const server = http.createServer(app)
@@ -23,9 +23,6 @@ io.on('connection', socket => {
 });
 
  app.use( (req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     req.io = io; 
     req.connectedSong = connectedSong;
     return next(); 
