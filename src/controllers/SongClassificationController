@@ -3,6 +3,7 @@ const {Song_Classification} = require('../models/index')
 const {Log, Song} = require('../models/index')
 const async = require('async')
 const {io} =  require("../index")
+const { Op } = require("sequelize");
 var search = require('youtube-search');
 
 
@@ -25,7 +26,7 @@ async function saveLog(msg, id){
 //Save the song to the database
 function saveTheSong(songId){
     var opts = {
-        key: 'AIzaSyBFt5q-5AM9DQKOGuc-_2SQHmwSVgctvoQ'
+        key: 'AIzaSyBFt5q-5AM9DQKOGuc-_2SQHmwSVgctvoQ' //TODO: fix this with env vars
       };
       
       search(`https://www.youtube.com/watch?v=${songId}`, opts, async function(err, results) {
@@ -202,7 +203,10 @@ async function isAlreadyOnTheDatabase(song_id){
 async function howManySongsBasedOnUserId(id){
     const song = await Song.findAll({
         where: {
-            added_by_user: id
+            added_by_user: id,
+            status: {
+                [Op.ne]: 'processed'
+            }
         }
     })
     
@@ -212,7 +216,10 @@ async function howManySongsBasedOnUserId(id){
 async function howManySongsBasedOnUserIp(){
     const song = await Song.findAll({
         where: {
-            added_by_ip: ip
+            added_by_ip: ip,
+            status: {
+                [Op.ne]: 'processed'
+            }
         }
     })
     

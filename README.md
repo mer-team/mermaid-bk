@@ -16,12 +16,18 @@ This microservice is exposed on port `8000`
 | MQ_PASSWORD | teste | RabbitMQ password  |
 
 ### Seeding
+Inside the src folder:
 ```
 npx sequelize-cli db:migrate
 npx sequelize-cli db:seed:all
 ```
 
 ### Docker Build
+
+docker-compose build
+
+docker-compose run api bash
+
 Run Rabbit
 ```
 docker run -d -e RABBITMQ_DEFAULT_USER=merUser -e RABBITMQ_DEFAULT_PASS=passwordMER -p 15672:15672 -p 5672:5672 rabbitmq:3-management-alpine

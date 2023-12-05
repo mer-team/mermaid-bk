@@ -16,8 +16,10 @@ module.exports = {
            const songs = await Song.findAll({
             where: {
                 status: "processed"
-            }
-           })
+            },
+            order: [['updatedAt', 'DESC']]
+          });
+
            return res.status(200).json(songs)
         }catch(e){
             console.log(e)
@@ -154,7 +156,10 @@ module.exports = {
         try{
             const songs = await Song.findAll({
              where: {
-                added_by_user : user_id
+                added_by_user : user_id,
+                status: {
+                    [Op.ne]: 'processed'
+                }
              }
             })
             return res.status(200).json(songs)
@@ -166,9 +171,13 @@ module.exports = {
     //This is used if the user is not logged
     async getQueueSongsByIp(req, res){
         try{
+            //console.log("This is the user %s", req.clientIp)
             const songs = await Song.findAll({
              where: {
-                added_by_ip : req.clientIp
+                added_by_ip : req.clientIp,
+                status: {
+                    [Op.ne]: 'processed'
+                }
              }
             })
             return res.status(200).json(songs)
@@ -220,11 +229,13 @@ module.exports = {
         try{
             const songs = await Song.findAll({
                 where: {
-                    status: "processed"
-                }
-            })
+                  status: "processed",
+                },
+                order: [['updatedAt', 'DESC']], // Order by "updated_at" field in descending order
+                limit: 3, // Limit the result to 3 entries
+              });
 
-            songs.sort((a, b) => a.updated_at - b.updated_at)
+            //songs.sort((a, b) => a.updated_at - b.updated_at)
 
             return res.status(200).json(songs.slice(0, 3))
 

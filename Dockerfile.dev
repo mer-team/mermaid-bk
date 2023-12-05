@@ -10,8 +10,6 @@ ARG MQ_HOST=localhost
 ARG MQ_USER=guest
 ARG MQ_PASS=guest
 
-#COPY ./src /merApi
-
 # Set the working directory in the container
 WORKDIR /app
 
@@ -19,8 +17,11 @@ WORKDIR /app
 COPY package*.json .
 COPY yarn.lock .
 
-RUN npm install --global nodemon
-RUN npm install
+# Install Yarn globally - seems to be installed by default
+# RUN npm install --global yarn
+
+# Install project dependencies
+RUN yarn install
 
 # Copy the rest of the application code
 # COPY . .
@@ -29,4 +30,4 @@ RUN npm install
 EXPOSE 8000
 
 # Start the API server with nodemon for development
-CMD [ "npm", "run", "dev" ]
+CMD [ "yarn", "run", "dev" ]

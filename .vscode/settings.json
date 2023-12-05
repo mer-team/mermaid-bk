@@ -1,0 +1,14 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "MERmaid API DB",
+            "database": "Mermaid",
+            "username": "postgres",
+            "password": "gordo1234"
+        }
+    ]
+}

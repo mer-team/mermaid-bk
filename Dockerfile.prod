@@ -1,6 +1,15 @@
 # Use a smaller base image
 FROM node:18-alpine
 
+ARG DB_USERNAME=root
+ARG DB_PASSWORD=teste
+ARG DB_DATABASE=mer
+ARG DB_HOST=localhost
+
+ARG MQ_HOST=localhost
+ARG MQ_USER=guest
+ARG MQ_PASS=guest
+
 # Set the working directory in the container
 WORKDIR /app
 
@@ -9,7 +18,7 @@ COPY package*.json .
 COPY yarn.lock .
 
 # Install Yarn globally
-RUN npm install --global yarn
+# RUN npm install --global yarn
 
 # Install dependencies
 RUN yarn install --production
