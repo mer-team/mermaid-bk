@@ -15,19 +15,24 @@ const connectedSong = {};
 // load vars from .env (do I need to repeat this in other places? test!)
 require('dotenv').config();
 
+app.use(cors());   
+
 io.on('connection', socket => {
     const {song_id} = socket.handshake.query; 
     connectedSong[song_id] = socket.id; 
 });
 
  app.use( (req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     req.io = io; 
     req.connectedSong = connectedSong;
     return next(); 
  });
 
 app.use(requestIp.mw()) //middleware to get the ip of the user
-app.use(cors())              
+         
 app.use(express.json()) 
 app.use(route) 
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocs))
