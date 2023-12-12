@@ -4,6 +4,17 @@ This NodeJS microservice, developed with Express.JS, is responsible for the v2 o
 ### Port
 This microservice is exposed on port `8000`
 
+### Check outdated libraries
+If using docker, first launch a shell inside the container with `docker compose exec api sh`.
+
+```bash
+cd src
+yarn outdated
+```
+Check the packages listed. Note that some are patch updates (no problem updating) but others are minor (careful) and major (code changes needed, check migrating from X to Y). Next upgrade your code if needed and run `yarn upgrade <package name>`. After updating always run tests.
+
+Alternatively use `yarn upgrade-interactive`.
+
 ### Docker Params
 | Arg | Default | Description |
 | --- | --- | --- |

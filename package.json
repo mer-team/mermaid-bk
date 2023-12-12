@@ -1,7 +1,7 @@
 {
   "name": "mermaid-api",
   "version": "2.0.0",
-  "description": "",
+  "description": "The MERmaid API developed by MIR.dei.uc.pt",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/index.js",

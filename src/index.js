@@ -8,14 +8,22 @@ const server = http.createServer(app)
 const requestIp = require("request-ip")
 const swaggerUI = require('swagger-ui-express')
 const swaggerDocs = require('./swagger.json')
-//setup the server to send realtime updates to the frontend
-const io = socketIo(server)
-const connectedSong = {};
 
 // load vars from .env (do I need to repeat this in other places? test!)
 require('dotenv').config();
+
+//setup the server to send realtime updates to the frontend
+const io = socketIo(server, {
+    cors: {
+      origin: process.env.REACT_APP_SOCKET_URL || "https://mermaid.dei.uc.pt"
+    },
+    withCredentials: true
+  });
+
+const connectedSong = {};
+
 app.use(cors())
-io.of('/ws').on('connection', socket => {
+io.on('connection', socket => {
     const {song_id} = socket.handshake.query; 
     connectedSong[song_id] = socket.id; 
 });
