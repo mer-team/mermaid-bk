@@ -1,21 +1,25 @@
-services:
+version: '3.8'
 
+services:
   api:
+    container_name: mermaid-api # Assign a specific name to the container for easier identification
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     env_file:
-      - .env
+      - ../.env
     ports:
       - 8000:8000
     volumes:
-      - .:/mermaid-api:cached
+      - ..:/workspaces/mermaid-api:cached
+    command: sleep infinity # Overrides default command so things don't shut down after the process ends.
 
   db:
     image: postgres:15
+    container_name: db
     restart: on-failure:10 # Restart policy to automatically restart the container if it fails, up to 10 times
     env_file:
-      - .env.postgresql
+      - ../.env.postgresql
     ports:
       - '5432:5432'
     volumes:
@@ -23,9 +27,10 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management
+    container_name: rabbitmq
     restart: on-failure:10
     env_file:
-      - .env.rabbitmq
+      - ../.env.rabbitmq
     ports:
       - 5672:5672 # rabbitmq
       - 15672:15672 # web interface
@@ -37,12 +42,16 @@ services:
 
   mailcatcher:
     image: dockage/mailcatcher:latest
+    container_name: mailcatcher
     restart: on-failure:10
     env_file:
-      - .env.mailcatcher
+      - ../.env.mailcatcher
     ports:
       - '1080:1080' # web interface
       - '1025:1025' # SMTP server
 
 volumes:
   postgres-data:
+# fix restart, move all vars to specific .env.service, e.g., .env.postgresql and so on.
+# add adminer or use the sqltools
+# then maybe create a non dev composer and dockerfile that can be used to build the API and run it without devcontainers.

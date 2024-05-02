@@ -1,14 +1,21 @@
 {
-    "sqltools.connections": [
-        {
-            "previewLimit": 50,
-            "server": "localhost",
-            "port": 5432,
-            "driver": "PostgreSQL",
-            "name": "MERmaid API DB",
-            "database": "Mermaid",
-            "username": "postgres",
-            "password": "gordo1234"
-        }
-    ]
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "server": "db",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "MERmaid API DB",
+      "database": "Mermaid",
+      "username": "postgres",
+      "password": "gordo1234"
+    }
+  ],
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }

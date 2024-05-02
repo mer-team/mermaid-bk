@@ -1,15 +1,15 @@
 require('dotenv').config()
-const {User} = require('../src/models/index')
+const { User } = require('../src/models/index')
 const { verify } = require("jsonwebtoken");
 
 const validateToken = async (req, res, next) => {
   const authHeader = req.headers['authorization']
   const accessToken = authHeader && authHeader.split(' ')[1]
-  
-  if (!accessToken) return res.status(400).json("User not Authenticated!" );
-    
+
+  if (!accessToken) return res.status(400).json("User not Authenticated!");
+
   try {
-    const decoded = verify(accessToken, process.env.ACESS_TOKEN_SECRET);
+    const decoded = verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
     console.log(decoded)
     const userData = await User.findOne({
       where: {
@@ -32,4 +32,4 @@ const validateToken = async (req, res, next) => {
   }
 };
 
-module.exports = {validateToken};
+module.exports = { validateToken };

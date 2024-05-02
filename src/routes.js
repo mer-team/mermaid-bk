@@ -3,7 +3,7 @@ const route = express.Router()
 
 const UserController = require('./controllers/UserController')
 const SongController = require('./controllers/SongController')
-const SongClassificationController = require('./controllers/SongClassificationController')
+const SongClassificationController = require('./controllers/SongClassificationController.js')
 
 const { validateToken } = require('./JWT')
 const FeedbackController = require('./controllers/FeedbackController')
