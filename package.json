@@ -1,7 +1,25 @@
 {
-  "devDependencies": {
-    "nodemon": "^3.0.1",
-    "sequelize-cli": "^6.6.0"
+  "name": "mermaid-api",
+  "version": "2.0.0",
+  "description": "MERmaid API",
+  "homepage": "https://mermaid.dei.uc.pt",
+  "main": "src/index.js",
+  "license": "UNLICENSED",
+  "private": true,
+  "bugs": {
+    "url": "https://github.com/mer-team/mermaid-bk/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:mer-team/mermaid-bk.git"
+  },
+  "author": "MERmaid Team (https://github.com/orgs/mer-team/people)",
+  "scripts": {
+    "dev": "nodemon",
+    "start": "node src/index.js",
+    "lint": "eslint \"src/**/*.js\"",
+    "lint:fix": "eslint \"src/**/*.js\" --fix",
+    "format": "prettier --write ./**/*.{js,jsx,ts,tsx,css,md,json} --config ./.prettierrc.js"
   },
   "dependencies": {
     "amqplib": "^0.10.3",
@@ -28,7 +46,12 @@
     "swagger-ui-express": "^5.0.0",
     "youtube-search": "^1.1.6"
   },
-  "scripts": {
-    "dev": "nodemon src/index.js"
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "nodemon": "^3.1.0",
+    "prettier": "^3.2.5",
+    "sequelize-cli": "^6.6.0"
   }
 }

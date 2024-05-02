@@ -1,20 +1,55 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/javascript-node
 {
-    "name": "MERmaid API Node.js Development",
-    "dockerComposeFile": [
-        "../docker-compose.yml"
-    ],
-    "service": "api",
-    "workspaceFolder": "/app",
-    "customizations": {
-		"vscode": {
-			"extensions": [
-				"mikestead.dotenv", //.ENV sintax highlighting
-				"dbaeumer.vscode-eslint"
-			],
-			"settings": {
+  "name": "MERmaid API",
+  "dockerComposeFile": ["../docker-compose.yml", "docker-compose.extend.yml"],
+  "service": "api",
+  "workspaceFolder": "/workspaces/mermaid-api",
+  "shutdownAction": "stopCompose",
 
-			}
-		}
-	},
-    "postCreateCommand": "npm install"
+  // Features to add to the dev container. More info: https://containers.dev/features.
+  // "features": {},
+
+  //"runArgs": ["--env-file", ".env", "--name", "mermaid-api-devcontainer"],
+
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  "forwardPorts": [8000],
+
+  // Use 'postCreateCommand' to run commands after the container is created.
+  "postCreateCommand": "yarn install",
+
+  // Configure tool-specific properties.
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "prettier.requireConfig": true,
+        //"eslint.format.enable": false,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "[javascript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[typescript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "editor.formatOnSave": true,
+        "javascript.suggest.paths": false
+      },
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "mikestead.dotenv",
+        "christian-kohler.path-intellisense",
+        "mutantdino.resourcemonitor",
+        "waderyan.gitblame",
+        "mhutchie.git-graph",
+        "vincaslt.highlight-matching-tag",
+        "vscode-icons-team.vscode-icons",
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-pg"
+      ]
+    }
+  }
+
+  // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+  // "remoteUser": "root" node
 }
