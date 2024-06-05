@@ -154,19 +154,21 @@ const classificationQueue = async.queue(async (song, callback) => {
         }, 15000);
 
         setTimeout(async () => {
-            if (songSocket) {
-                request.io.emit('progress', {
-                    progress: 100,
-                    song_id: `${song}`,
-                    state: "Classification finished"
-                });
-                //await saveLog("Classification finished", song)
-            }
-            const emotions = ["Happy", "Sad", "Calm", "Tense"]
-            var rnd = Math.floor(Math.random() * emotions.length)
-            const emotion = emotions[rnd]
-            await updateProcessed(emotion, song)
-
+          if (songSocket) {
+            request.io.emit('progress', {
+              progress: 100,
+              song_id: `${song}`,
+              state: 'Classification finished'
+            });
+          }
+          const emotions = ['Happy', 'Sad', 'Calm', 'Tense'];
+          var rnd = Math.floor(Math.random() * emotions.length);
+          const emotion = emotions[rnd];
+          await updateProcessed(emotion, song);
+          
+          // Emit event when classification is finished
+          request.io.emit('song-classified', { songId: song, message: 'The song classification is finished' });
+          
         }, 16000);
     } catch (error) {
         updateStateSong("error", song)
