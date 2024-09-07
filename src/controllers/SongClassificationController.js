@@ -1,107 +1,94 @@
 require('dotenv').config();
-const { Song_Classification } = require('../models/index');
-const { Log, Song } = require('../models/index');
+const { Song_Classification, Log, Song } = require('../models/SongClassification');
 const async = require('async');
 const { io } = require('../index');
 const { Op } = require('sequelize');
-var search = require('youtube-search');
+const search = require('youtube-search');
 const { sendMessage } = require('../Services/rabbitmqService');
 
-//////////////////////////////////////////////////////////////
-//Functions in test///////////////////////////////////////////
-var ip, userId, request; //Ip of the user
+const API_KEY = process.env.YOUTUBE_API_KEY;
+
+let ip, userId, request; // IP of the user
 
 async function saveLog(msg, id) {
-  await Log.create({
-    message: msg,
-    service: 'song classification',
-    song_id: id,
-    type: 'info',
-  })
-    .then((log) => {
-      console.log('Log created');
-    })
-    .catch((e) => {
-      console.log(e);
+  try {
+    await Log.create({
+      message: msg,
+      service: 'song classification',
+      song_id: id,
+      type: 'info',
     });
+    console.log('Log created');
+  } catch (e) {
+    console.error(e);
+  }
 }
-//Save the song to the database
+
 function saveTheSong(songId) {
-  var opts = {
-    key: 'AIzaSyBFt5q-5AM9DQKOGuc-_2SQHmwSVgctvoQ', //TODO: fix this with env vars
+  const opts = {
+    key: API_KEY,
   };
 
-  search(`https://www.youtube.com/watch?v=${songId}`, opts, async function (err, results) {
-    if (err) return console.log(err);
+  search(`https://www.youtube.com/watch?v=${songId}`, opts, async (err, results) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
 
-    //Keep the song in the database
-    const song = await Song.create({
-      external_id: results[0].id,
-      link: results[0].link,
-      title: results[0].title,
-      artist: results[0].channelTitle,
-      duration: new Date(0, 0, 0, 0, 2, 20), //Default the api dont give this data
-      year: new Date(results[0].publishedAt).getFullYear(),
-      date: new Date(results[0].publishedAt),
-      genre: 'Salsa, Kuduro, Romance', //Default the api dont give this data
-      description: results[0].description,
-      thumbnailHQ: results[0].thumbnails.high.url,
-      thumbnailMQ: results[0].thumbnails.medium.url,
-      hits: 0,
-      waveform: 'dQw4w9WgXcQ.png',
-      status: 'queued',
-      added_by_ip: ip,
-      added_by_user: userId,
-      general_classification: '',
-    })
-      .then((song) => {
-        console.log('Song saved');
-      })
-      .catch((e) => {
-        console.log(e);
+    try {
+      await Song.create({
+        external_id: results[0].id,
+        link: results[0].link,
+        title: results[0].title,
+        artist: results[0].channelTitle,
+        duration: new Date(0, 0, 0, 0, 2, 20), // Default value
+        year: new Date(results[0].publishedAt).getFullYear(),
+        date: new Date(results[0].publishedAt),
+        genre: 'Salsa, Kuduro, Romance', // Default value
+        description: results[0].description,
+        thumbnailHQ: results[0].thumbnails.high.url,
+        thumbnailMQ: results[0].thumbnails.medium.url,
+        hits: 0,
+        waveform: 'dQw4w9WgXcQ.png',
+        status: 'queued',
+        added_by_ip: ip,
+        added_by_user: userId,
+        general_classification: '',
       });
+      console.log('Song saved');
+    } catch (e) {
+      console.error(e);
+    }
   });
 }
 
-//See if the user has
-
-//Update the state of the song
 async function updateStateSong(status, songId) {
-  await Song.update(
-    {
-      status: status,
-    },
-    {
-      where: { external_id: songId },
-    },
-  );
+  try {
+    await Song.update({ status }, { where: { external_id: songId } });
+  } catch (e) {
+    console.error(e);
+  }
 }
 
-//Update the classifitication of the song
 async function updateProcessed(emotion, songId) {
-  await Song.update(
-    {
-      status: 'processed',
-      general_classification: emotion,
-    },
-    {
-      where: { external_id: songId },
-    },
-  );
+  try {
+    await Song.update(
+      {
+        status: 'processed',
+        general_classification: emotion,
+      },
+      { where: { external_id: songId } }
+    );
+  } catch (e) {
+    console.error(e);
+  }
 }
-///////////////////////////////////////////////////7777777////
-//////////////////////////////////////////////////////////////
 
-//Here is the list of classification of the songs
 const classificationQueue = async.queue(async (song, callback) => {
-  //To which id send the updates
   const songSocket = request.connectedSong[song];
   try {
-    updateStateSong('processing', song);
-    //////////////////////////////////////////////////////////////////////////
-    //Here we want to send the song we want to classify to the dummy service//
-    //////////////////////////////////////////////////////////////////////////
-    //Simulating the classification of the songs (temporary)
+    await updateStateSong('processing', song);
+
     setTimeout(async () => {
       if (songSocket) {
         request.io.emit('progress', {
@@ -109,8 +96,6 @@ const classificationQueue = async.queue(async (song, callback) => {
           song_id: `${song}`,
           state: 'Song Received',
         });
-
-        //await saveLog("Song Received", song)
       }
     }, 6000);
 
@@ -119,12 +104,12 @@ const classificationQueue = async.queue(async (song, callback) => {
         request.io.emit('progress', {
           progress: 30,
           song_id: `${song}`,
-          state: 'Video Dowloaded',
+          state: 'Video Downloaded',
         });
         const songDetails = await Song.findOne({ where: { external_id: song } });
         await sendMessage(
           'videoDownloadQueue',
-          `Video downloaded for song ID: ${song}, Title: ${songDetails.title}`,
+          `Video downloaded for song ID: ${song}, Title: ${songDetails.title}`
         );
       }
     }, 8000);
@@ -134,9 +119,8 @@ const classificationQueue = async.queue(async (song, callback) => {
         request.io.emit('progress', {
           progress: 50,
           song_id: `${song}`,
-          state: 'Audio Channel exctracted from audio',
+          state: 'Audio Channel Extracted from Audio',
         });
-        //await saveLog("Audio Channel exctracted from audio", song)
       }
     }, 10000);
 
@@ -147,7 +131,6 @@ const classificationQueue = async.queue(async (song, callback) => {
           song_id: `${song}`,
           state: 'Features Extracted',
         });
-        //await saveLog("Features Extracted", song)
       }
     }, 12000);
 
@@ -156,9 +139,8 @@ const classificationQueue = async.queue(async (song, callback) => {
         request.io.emit('progress', {
           progress: 80,
           song_id: `${song}`,
-          state: 'Classification in process',
+          state: 'Classification in Process',
         });
-        //await saveLog("Classification in process", song)
       }
     }, 15000);
 
@@ -167,32 +149,29 @@ const classificationQueue = async.queue(async (song, callback) => {
         request.io.emit('progress', {
           progress: 100,
           song_id: `${song}`,
-          state: 'Classification finished',
+          state: 'Classification Finished',
         });
       }
+
       const emotions = ['Happy', 'Sad', 'Calm', 'Tense'];
-      var rnd = Math.floor(Math.random() * emotions.length);
-      const emotion = emotions[rnd];
+      const emotion = emotions[Math.floor(Math.random() * emotions.length)];
       await updateProcessed(emotion, song);
 
-      // Emit event when classification is finished
       request.io.emit('song-classified', {
         songId: song,
         message: 'The song classification is finished',
       });
     }, 16000);
   } catch (error) {
-    updateStateSong('error', song);
-    console.error('Error');
+    await updateStateSong('error', song);
+    console.error('Error:', error);
     callback(error);
   }
-}, 1); //This one means that we only accept one song at time and the others have to wait to be added to the classification queue
+}, 1);
 
 function startClassification(song) {
   saveTheSong(song);
-  //Push the song to the queue
   classificationQueue.push(song, (error) => {
-    console.log('hey i passed');
     if (error) {
       console.error(error);
     } else {
@@ -201,94 +180,72 @@ function startClassification(song) {
   });
 }
 
-//see if the song is already on the database
 async function isAlreadyOnTheDatabase(song_id) {
-  const song = await Song.findOne({
-    where: {
-      external_id: song_id,
-    },
-  });
-  return song;
+  return await Song.findOne({ where: { external_id: song_id } });
 }
 
-//see if the user based on his id has how many songs in the database
 async function howManySongsBasedOnUserId(id) {
-  const song = await Song.findAll({
+  const songs = await Song.findAll({
     where: {
       added_by_user: id,
-      status: {
-        [Op.ne]: 'processed',
-      },
+      status: { [Op.ne]: 'processed' },
     },
   });
-
-  return song.length;
+  return songs.length;
 }
 
 async function howManySongsBasedOnUserIp() {
-  const song = await Song.findAll({
+  const songs = await Song.findAll({
     where: {
       added_by_ip: ip,
-      status: {
-        [Op.ne]: 'processed',
-      },
+      status: { [Op.ne]: 'processed' },
     },
   });
-
-  return song.length;
+  return songs.length;
 }
+
 module.exports = {
-  //Get the Song classifications given the song_id
   async index(req, res) {
     try {
       const { id } = req.headers;
-      console.log(id);
-      const classifications = await Song_Classification.findAll({
-        where: {
-          song_id: id,
-        },
-      });
+      const classifications = await Song_Classification.findAll({ where: { song_id: id } });
       return res.status(200).json(classifications);
     } catch (e) {
-      console.log(e);
+      console.error(e);
+      return res.status(500).json({ message: 'Internal server error' });
     }
   },
 
   async classify(req, res) {
     try {
-      //Here we receive the external link of the song we want to classify (external id : means the id of the video on youtube)
       const { external_id, user_id } = req.params;
       ip = req.clientIp;
       request = req;
       userId = user_id;
-      //Before doing any classification we have to see if the song is already on the database
-      if ((await isAlreadyOnTheDatabase(external_id)) != null) {
-        return res.status(400).json('This song is already at the queue for classification.');
+
+      if (await isAlreadyOnTheDatabase(external_id)) {
+        return res.status(400).json('This song is already in the queue for classification.');
       }
-      //Calculate the song limits the user has to have in the queue based on if his logged or not
-      if (user_id != 'null') {
+
+      let lim;
+      if (user_id !== 'null') {
         ip = '';
-        var lim = await howManySongsBasedOnUserId(user_id);
+        lim = await howManySongsBasedOnUserId(user_id);
         if (lim >= 6) {
-          return res.status(400).json('You have already reached the limit for song classification');
+          return res.status(400).json('You have reached the limit for song classification.');
         }
       } else {
-        var lim = await howManySongsBasedOnUserIp();
-        console.log(lim);
+        lim = await howManySongsBasedOnUserIp();
         if (lim >= 3) {
-          return res.status(400).json('You have already reached the limit for song classification');
+          return res.status(400).json('You have reached the limit for song classification.');
         }
       }
 
-      //We have to see if the classification is made by a logged user or not
-      //If not we have to know the user IP
-
       startClassification(external_id);
-
-      //Simulating the classification and creating random logs to send to the frontend
-      return res.status(200).json('The song was added to the queue');
+      return res.status(200).json('The song was added to the queue.');
     } catch (error) {
-      console.log(error);
+      console.error(error);
+      return res.status(500).json({ message: 'Internal server error' });
     }
   },
 };
