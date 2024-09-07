@@ -1,16 +1,15 @@
 require('dotenv').config();
+
 const { Song_Classification, Log, Song } = require('../models/SongClassification');
 const async = require('async');
-const { io } = require('../index');
 const { Op } = require('sequelize');
 const search = require('youtube-search');
 const { sendMessage } = require('../Services/rabbitmqService');
-
 const API_KEY = process.env.YOUTUBE_API_KEY;
 
 let ip, userId, request; // IP of the user
 
-async function saveLog(msg, id) {
+const saveLog = async (msg, id) => {
   try {
     await Log.create({
       message: msg,
@@ -22,9 +21,9 @@ async function saveLog(msg, id) {
   } catch (e) {
     console.error(e);
   }
-}
+};
 
-function saveTheSong(songId) {
+const saveTheSong = songId => {
   const opts = {
     key: API_KEY,
   };
@@ -60,17 +59,17 @@ function saveTheSong(songId) {
       console.error(e);
     }
   });
-}
+};
 
-async function updateStateSong(status, songId) {
+const updateStateSong = async (status, songId) => {
   try {
     await Song.update({ status }, { where: { external_id: songId } });
   } catch (e) {
     console.error(e);
   }
-}
+};
 
-async function updateProcessed(emotion, songId) {
+const updateProcessed = async (emotion, songId) => {
   try {
     await Song.update(
       {
@@ -82,7 +81,7 @@ async function updateProcessed(emotion, songId) {
   } catch (e) {
     console.error(e);
   }
-}
+};
 
 const classificationQueue = async.queue(async (song, callback) => {
   const songSocket = request.connectedSong[song];
@@ -169,22 +168,22 @@ const classificationQueue = async.queue(async (song, callback) => {
   }
 }, 1);
 
-function startClassification(song) {
+const startClassification = song => {
   saveTheSong(song);
-  classificationQueue.push(song, (error) => {
+  classificationQueue.push(song, error => {
     if (error) {
       console.error(error);
     } else {
       console.log('The song was classified');
     }
   });
-}
+};
 
-async function isAlreadyOnTheDatabase(song_id) {
+const isAlreadyOnTheDatabase = async song_id => {
   return await Song.findOne({ where: { external_id: song_id } });
-}
+};
 
-async function howManySongsBasedOnUserId(id) {
+const howManySongsBasedOnUserId = async id => {
   const songs = await Song.findAll({
     where: {
       added_by_user: id,
@@ -192,9 +191,9 @@ async function howManySongsBasedOnUserId(id) {
     },
   });
   return songs.length;
-}
+};
 
-async function howManySongsBasedOnUserIp() {
+const howManySongsBasedOnUserIp = async () => {
   const songs = await Song.findAll({
     where: {
       added_by_ip: ip,
@@ -202,50 +201,53 @@ async function howManySongsBasedOnUserIp() {
     },
   });
   return songs.length;
-}
+};
+
+const index = async (req, res) => {
+  try {
+    const { id } = req.headers;
+    const classifications = await Song_Classification.findAll({ where: { song_id: id } });
+    return res.status(200).json(classifications);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+const classify = async (req, res) => {
+  try {
+    const { external_id, user_id } = req.params;
+    ip = req.clientIp;
+    request = req;
+    userId = user_id;
+
+    if (await isAlreadyOnTheDatabase(external_id)) {
+      return res.status(400).json('This song is already in the queue for classification.');
+    }
+
+    let lim;
+    if (user_id !== 'null') {
+      ip = '';
+      lim = await howManySongsBasedOnUserId(user_id);
+      if (lim >= 6) {
+        return res.status(400).json('You have reached the limit for song classification.');
+      }
+    } else {
+      lim = await howManySongsBasedOnUserIp();
+      if (lim >= 3) {
+        return res.status(400).json('You have reached the limit for song classification.');
+      }
+    }
+
+    startClassification(external_id);
+    return res.status(200).json('The song was added to the queue.');
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
 
 module.exports = {
-  async index(req, res) {
-    try {
-      const { id } = req.headers;
-      const classifications = await Song_Classification.findAll({ where: { song_id: id } });
-      return res.status(200).json(classifications);
-    } catch (e) {
-      console.error(e);
-      return res.status(500).json({ message: 'Internal server error' });
-    }
-  },
-
-  async classify(req, res) {
-    try {
-      const { external_id, user_id } = req.params;
-      ip = req.clientIp;
-      request = req;
-      userId = user_id;
-
-      if (await isAlreadyOnTheDatabase(external_id)) {
-        return res.status(400).json('This song is already in the queue for classification.');
-      }
-
-      let lim;
-      if (user_id !== 'null') {
-        ip = '';
-        lim = await howManySongsBasedOnUserId(user_id);
-        if (lim >= 6) {
-          return res.status(400).json('You have reached the limit for song classification.');
-        }
-      } else {
-        lim = await howManySongsBasedOnUserIp();
-        if (lim >= 3) {
-          return res.status(400).json('You have reached the limit for song classification.');
-        }
-      }
-
-      startClassification(external_id);
-      return res.status(200).json('The song was added to the queue.');
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Internal server error' });
-    }
-  },
+  index,
+  classify,
 };

@@ -1,10 +1,11 @@
 require('dotenv').config();
+
 const { Op, Sequelize } = require('sequelize');
 const { Song } = require('../models/Index');
 
 const API_KEY = process.env.YOUTUBE_API_KEY;
 
-async function index(req, res) {
+const index = async (req, res) => {
   try {
     const songs = await Song.findAll({
       where: { status: 'processed' },
@@ -15,9 +16,9 @@ async function index(req, res) {
     console.error(error);
     return res.status(500).json({ message: 'Internal server error' });
   }
-}
+};
 
-async function show(req, res) {
+const show = async (req, res) => {
   try {
     const { id } = req.params;
     const song = await Song.findOne({
@@ -29,9 +30,9 @@ async function show(req, res) {
     console.error(error);
     return res.status(500).json({ message: 'Internal server error' });
   }
-}
+};
 
-async function filterByName(req, res) {
+const filterByName = async (req, res) => {
   try {
     const { title } = req.params;
     const songs = await Song.findAll({
@@ -49,9 +50,9 @@ async function filterByName(req, res) {
     console.error(error);
     return res.status(500).json({ message: 'Internal server error' });
   }
-}
+};
 
-async function filterByEmotion(req, res) {
+const filterByEmotion = async (req, res) => {
   try {
     const { emotion } = req.params;
     const songs = await Song.findAll({
@@ -69,9 +70,9 @@ async function filterByEmotion(req, res) {
     console.error(error);
     return res.status(500).json({ message: 'Internal server error' });
   }
-}
+};
 
-async function filterByAll(req, res) {
+const filterByAll = async (req, res) => {
   try {
     const { title, emotion } = req.params;
     const songs = await Song.findAll({
@@ -94,9 +95,9 @@ async function filterByAll(req, res) {
     console.error(error);
     return res.status(500).json({ message: 'Internal server error' });
   }
-}
+};
 
-async function updateHits(req, res) {
+const updateHits = async (req, res) => {
   try {
     const { song_id } = req.params;
     const song = await Song.findOne({
@@ -112,9 +113,9 @@ async function updateHits(req, res) {
     console.error(error);
     return res.status(500).json({ message: 'Internal server error' });
   }
-}
+};
 
-async function getHits(req, res) {
+const getHits = async (req, res) => {
   try {
     const { song_id } = req.params;
     const song = await Song.findOne({
@@ -127,9 +128,9 @@ async function getHits(req, res) {
     console.error(error);
     return res.status(500).json({ message: 'Internal server error' });
   }
-}
+};
 
-async function getQueueSongs(req, res) {
+const getQueueSongs = async (req, res) => {
   try {
     const { user_id } = req.params;
     const songs = await Song.findAll({
@@ -143,9 +144,9 @@ async function getQueueSongs(req, res) {
     console.error(error);
     return res.status(500).json({ message: 'Internal server error' });
   }
-}
+};
 
-async function getQueueSongsByIp(req, res) {
+const getQueueSongsByIp = async (req, res) => {
   try {
     const songs = await Song.findAll({
       where: {
@@ -158,9 +159,9 @@ async function getQueueSongsByIp(req, res) {
     console.error(error);
     return res.status(500).json({ message: 'Internal server error' });
   }
-}
+};
 
-async function deleteSong(req, res) {
+const deleteSong = async (req, res) => {
   try {
     const { id } = req.params;
     const result = await Song.destroy({
@@ -172,9 +173,9 @@ async function deleteSong(req, res) {
     console.error(error);
     return res.status(500).json({ message: 'Internal server error' });
   }
-}
+};
 
-async function getStreamedMinutes(req, res) {
+const getStreamedMinutes = async (req, res) => {
   try {
     let total = 0;
     const songs = await Song.findAll();
@@ -186,9 +187,9 @@ async function getStreamedMinutes(req, res) {
     console.error(error);
     return res.status(500).json({ message: 'Internal server error' });
   }
-}
+};
 
-async function analysedVideos(req, res) {
+const analysedVideos = async (req, res) => {
   try {
     const songs = await Song.findAll();
     return res.status(200).json(songs.length);
@@ -196,9 +197,9 @@ async function analysedVideos(req, res) {
     console.error(error);
     return res.status(500).json({ message: 'Internal server error' });
   }
-}
+};
 
-async function getLatestClassifications(req, res) {
+const getLatestClassifications = async (req, res) => {
   try {
     const songs = await Song.findAll({
       where: { status: 'processed' },
@@ -210,7 +211,7 @@ async function getLatestClassifications(req, res) {
     console.error(error);
     return res.status(500).json({ message: 'Internal server error' });
   }
-}
+};
 
 module.exports = {
   index,

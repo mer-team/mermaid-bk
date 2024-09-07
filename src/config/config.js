@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: '../.env' });
 
 const commonConfig = {
   username: process.env.DB_USERNAME,
