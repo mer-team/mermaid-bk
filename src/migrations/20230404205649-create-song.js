@@ -22,7 +22,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       duration: {
-        type: Sequelize.DATE
+        type: Sequelize.STRING
       },
       year: {
         type: Sequelize.INTEGER

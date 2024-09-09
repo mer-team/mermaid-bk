@@ -100,13 +100,12 @@ const filterByAll = async (req, res) => {
 const updateHits = async (req, res) => {
   try {
     const { song_id } = req.params;
-    const song = await Song.findOne({
-      where: { id: song_id },
-    });
-    if (!song) return res.status(404).json({ message: 'Song not found' });
+    const [affectedRows] = await Song.update(
+      { hits: Sequelize.literal('hits + 1') },
+      { where: { id: song_id } }
+    );
 
-    song.hits += 1;
-    await Song.update({ hits: song.hits }, { where: { id: song_id } });
+    if (affectedRows === 0) return res.status(404).json({ message: 'Song not found' });
 
     return res.status(200).json('Hit updated');
   } catch (error) {

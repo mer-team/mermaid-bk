@@ -1,4 +1,6 @@
-const { body, validationResult } = require('express-validator');
+'use strict';
+
+const { body, validationResult, param } = require('express-validator');
 
 // User creation validation
 const userCreateValidation = () => {
@@ -78,7 +80,17 @@ const usernameChangeValidation = () => {
   ];
 };
 
-// Middleware to check validation results
+// ID validation
+const validateId = () => {
+  return [
+    param('id')
+      .isInt({ min: 1 })
+      .withMessage('Invalid user ID. It must be a positive integer.'),
+  ];
+};
+
+
+// Check validation results
 const validateRequest = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -92,5 +104,6 @@ module.exports = {
   loginValidation,
   passwordChangeValidation,
   usernameChangeValidation,
+  validateId,
   validateRequest,
 };

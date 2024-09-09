@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const { Song_Classification, Log, Song } = require('../models/SongClassification');
+const { Song_Classification, Log, Song } = require('../models/Index');
 const async = require('async');
 const { Op } = require('sequelize');
 const search = require('youtube-search');

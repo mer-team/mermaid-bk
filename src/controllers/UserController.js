@@ -1,4 +1,4 @@
-const { User } = require('../models/User');
+const { User } = require('../models/Index');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -7,7 +7,7 @@ const { Op } = require('sequelize');
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: process.env.SMTP_PORT,
-  secure: process.env.SMTP_SECURE === 'true',
+  secure: process.env.SMTP_SECURE,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -17,7 +17,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Register user
 const register = async (req, res) => {
   try {
     const { name, email, password, admin } = req.body;
@@ -31,7 +30,7 @@ const register = async (req, res) => {
     const salt = await bcrypt.genSalt();
     const passwordHash = await bcrypt.hash(password, salt);
 
-    const newUser = await User.create({ email, password: passwordHash, name, admin });
+    const newUser = await User.create({ email, hash_passwd: passwordHash, name, admin });
 
     const sendEmail = {
       from: 'noreply@mermaid.com',
@@ -40,7 +39,13 @@ const register = async (req, res) => {
       text: `Please click on the following link to confirm your email address: http://localhost:3000/confirm/${generateToken(newUser.email)}`,
     };
 
-    await transporter.sendMail(sendEmail);
+    await transporter.sendMail(sendEmail, (error, info) => {
+      if (error) {
+        console.error('Error sending email:', error);
+        return res.status(500).json({ errors: ['Failed to send confirmation email.'] });
+      }
+      console.log('Email sent:', info.response);
+    });
 
     return res.status(201).json({ message: 'Please check your email to confirm your account' });
 
@@ -88,7 +93,7 @@ const login = async (req, res) => {
       return res.status(400).json({ error: 'Please confirm your email address' });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.hash_passwd);
 
     if (isPasswordValid) {
       const token = jwt.sign({ id: user.id, email: user.email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
@@ -102,9 +107,23 @@ const login = async (req, res) => {
   }
 };
 
-// Get user data
+// Get user by ID
 const show = async (req, res) => {
-  return res.json(req.user);
+  try {
+    const { id } = req.params;  // Get user ID from request parameters
+    const user = await User.findOne({
+      where: { id },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });  // Return 404 if user is not found
+    }
+
+    return res.status(200).json(user);  // Return user data with status 200
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal server error' });  // Return 500 for any server errors
+  }
 };
 
 // Resend confirmation email
@@ -253,7 +272,7 @@ const changePassword = async (req, res) => {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    const isOldPasswordValid = await bcrypt.compare(oldPassword, user.hash_passwd);
 
     if (!isOldPasswordValid) {
       return res.status(400).json({ message: 'The old password is incorrect.' });
@@ -262,7 +281,7 @@ const changePassword = async (req, res) => {
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    await User.update({ password: hashedPassword }, { where: { email } });
+    await User.update({ hash_passwd: hashedPassword }, { where: { email } });
 
     return res.status(200).json({ message: 'Password changed successfully.' });
 
@@ -283,7 +302,7 @@ const changeUsername = async (req, res) => {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.hash_passwd);
 
     if (!isPasswordValid) {
       return res.status(400).json({ message: 'Incorrect password.' });
@@ -369,5 +388,5 @@ module.exports = {
   changePassword,
   changeUsername,
   resetPassword,
-  validate,  // Include validate function in exports
+  validate,
 };

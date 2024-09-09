@@ -11,7 +11,7 @@ class User extends Model {
 const defineUserModel = (sequelize) => {
   User.init({
     email: DataTypes.STRING,
-    password: DataTypes.STRING,
+    hash_passwd: DataTypes.STRING,
     name: DataTypes.STRING,
     admin: DataTypes.BOOLEAN,
     confirmed: DataTypes.BOOLEAN,

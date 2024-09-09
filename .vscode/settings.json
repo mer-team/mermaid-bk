@@ -2,7 +2,7 @@
   "sqltools.connections": [
     {
       "previewLimit": 50,
-      "server": "db",
+      "server": "localhost",
       "port": 5432,
       "driver": "PostgreSQL",
       "name": "MERmaid API DB",
@@ -17,5 +17,8 @@
   },
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
   }
 }

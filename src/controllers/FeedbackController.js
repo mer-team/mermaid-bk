@@ -1,10 +1,10 @@
 require('dotenv').config();
 
-const { Feedback } = require('../models/Feedback');
+const { Feedback } = require('../models/Index');
 const { validationResult } = require('express-validator');
-const { validateToken } = require('../middlewares/jwt'); // Import JWT validation middleware
 
 // Agree or Disagree with a song classification
+//Note : The annotation or comentary can be null 
 const index = async (req, res) => {
     // Validate feedback data
     const feedbackValidationErrors = validationResult(req);

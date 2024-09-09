@@ -37,7 +37,7 @@ app.use((req, res, next) => {
 });
 
 app.use(requestIp.mw()); // Middleware to get the IP of the user
-app.use('/api', route); // Use routes with /api prefix
+app.use('/', route); // Use routes with /api prefix
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 server.listen(8000, () => {

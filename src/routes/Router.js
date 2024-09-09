@@ -8,9 +8,9 @@ const feedbackRoutes = require('./FeedbackRoutes');
 const { sendMessage } = require('../Services/rabbitmqService');
 
 // Aggregate routes
-router.use('/users', userRoutes);
-router.use('/songs', songRoutes);
-router.use('/classifications', songClassificationRoutes);
+router.use('/user', userRoutes);
+router.use('/song', songRoutes);
+router.use('/classification', songClassificationRoutes);
 router.use('/feedback', feedbackRoutes);
 
 // RabbitMQ route

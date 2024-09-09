@@ -17,7 +17,7 @@ const defineSongModel = (sequelize) => {
     link: DataTypes.STRING,
     title: DataTypes.STRING,
     artist: DataTypes.STRING,
-    duration: DataTypes.DATE,
+    duration: DataTypes.STRING,
     year: DataTypes.INTEGER,
     date: DataTypes.DATE,
     genre: DataTypes.STRING,
