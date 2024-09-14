@@ -1,24 +1,27 @@
-const { User } = require('../models/User');
-const { verify } = require('jsonwebtoken');
+require('dotenv').config();
+
+const { User } = require('../models/Index');
+const jwt = require('jsonwebtoken');
 
 const validateToken = async (req, res, next) => {
   // Extract the token from the Authorization header
-  const accessToken = req.headers.authorization?.split(' ')[1];
+  const authHeader = req.headers['authorization'];
+  const accessToken = authHeader && authHeader.split(' ')[1];
 
-  if (!accessToken) {
+  if (accessToken == null) {
     return res.status(401).json({ error: 'Authentication token is missing!' });
   }
 
   try {
     // Verify and decode the JWT token
-    const decoded = verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+    const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
 
     // Find the user in the database using the decoded email
     const userData = await User.findOne({ where: { email: decoded.email } });
 
     // Check if the user exists
     if (!userData) {
-      return res.status(403).json({ error: 'User does not exist!' });
+      return res.status(404).json({ error: 'User does not exist!' });
     }
 
     // Attach user data to the request object

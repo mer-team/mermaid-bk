@@ -16,7 +16,7 @@ const { validateToken } = require('../middlewares/jwt');
 router.get('/', validateToken, UserController.show);
 router.post('/signup', userCreateValidation(), UserController.register);
 router.post('/login', loginValidation(), UserController.login);
-router.get('/confirm/:token', UserController.validate);
+router.get('/confirm/:token', UserController.confirmUser);
 router.get('/newtoken', UserController.resendEmail);
 router.post('/bynameoremail', UserController.getUsersByEmailOrUsername);
 router.get('/blocked', UserController.getOnlyBlockedUsers);
