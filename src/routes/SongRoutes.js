@@ -4,7 +4,7 @@ const SongController = require('../controllers/SongController');
 
 // Song routes
 router.get('/', SongController.index);
-router.get('/:id', SongController.show);
+router.get('/:external_id', SongController.show);
 router.get('/name/:title', SongController.filterByName);
 router.get('/emotion/:emotion', SongController.filterByEmotion);
 router.get('/name/:title/emotion/:emotion', SongController.filterByAll);

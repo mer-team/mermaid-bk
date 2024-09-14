@@ -5,12 +5,12 @@ const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT,
-  secure: process.env.SMTP_SECURE,
+  host: process.env.SMTP_HOST || 'localhost',
+  port: process.env.SMTP_PORT || 1025,  // Default port for MailCatcher is 1025
+  secure: false, // MailCatcher does not use SSL/TLS by default
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    user: process.env.SMTP_USER || 'docker',  // MailCatcher does not require authentication
+    pass: process.env.SMTP_PASS || 'docker',
   },
   tls: {
     rejectUnauthorized: process.env.SMTP_TLS_REJECT_UNAUTHORIZED === 'true',
@@ -20,40 +20,45 @@ const transporter = nodemailer.createTransport({
 const register = async (req, res) => {
   try {
     const { name, email, password, admin } = req.body;
+    console.log(req.body); // For debugging purposes, logging the request body
 
+    // Check if user already exists with the given email
     const user = await User.findOne({ where: { email } });
 
     if (user) {
-      return res.status(422).json({ errors: ['Mail already in use!'] });
+      return res.status(422).json({ errors: ['Email already in use!'] });
     }
 
+    // Generate JWT token for email confirmation
+    const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+
+    // Hash the password with bcrypt
     const salt = await bcrypt.genSalt();
     const passwordHash = await bcrypt.hash(password, salt);
 
-    const newUser = await User.create({ email, hash_passwd: passwordHash, name, admin });
+    // Create the new user
+    await User.create({ email, hash_passwd: passwordHash, name, admin });
 
+    // Prepare the email for sending
     const sendEmail = {
       from: 'noreply@mermaid.com',
       to: email,
       subject: 'Confirm your email',
-      text: `Please click on the following link to confirm your email address: http://localhost:3000/confirm/${generateToken(newUser.email)}`,
+      text: `Please click on the following link to confirm your email address: http://localhost:3000/confirm/${token}`,
     };
 
-    await transporter.sendMail(sendEmail, (error, info) => {
-      if (error) {
-        console.error('Error sending email:', error);
-        return res.status(500).json({ errors: ['Failed to send confirmation email.'] });
-      }
-      console.log('Email sent:', info.response);
-    });
+    // Send the confirmation email
+    await transporter.sendMail(sendEmail);
 
+    // Respond with success message
     return res.status(201).json({ message: 'Please check your email to confirm your account' });
 
   } catch (err) {
-    console.error(err);
+    console.error('Error during user registration:', err);
     return res.status(500).json({ errors: ['Internal server error'] });
   }
 };
+
 
 // Confirm user email
 const confirmUser = async (req, res) => {
@@ -107,24 +112,19 @@ const login = async (req, res) => {
   }
 };
 
-// Get user by ID
+// Get User
 const show = async (req, res) => {
   try {
-    const { id } = req.params;  // Get user ID from request parameters
-    const user = await User.findOne({
-      where: { id },
-    });
-
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });  // Return 404 if user is not found
+    if (!req.user) {
+      return res.status(404).json({ message: 'User not found' });
     }
-
-    return res.status(200).json(user);  // Return user data with status 200
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Internal server error' });  // Return 500 for any server errors
+    return res.status(200).json(userData);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 
 // Resend confirmation email
 const resendEmail = async (req, res) => {
@@ -356,21 +356,24 @@ const resetPassword = async (req, res) => {
   }
 };
 
-// Validate password reset token
+// Validate user
 const validate = async (req, res) => {
   const { token } = req.params;
 
   try {
-    const { email, exp } = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    // Verify and decode the token
+    const { email } = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
-    if (Date.now() >= exp * 1000) {
-      return res.status(401).json({ error: 'Token has expired' });
+    // Token is valid; respond with email
+    return res.status(200).json({ message: 'Token is valid', email });
+  } catch (err) {
+    // Handle expired token specifically
+    if (err.name === 'TokenExpiredError') {
+      return res.status(403).json({ error: 'Token has expired' });
     }
 
-    return res.status(200).json({ message: 'Token is valid', email });
-  } catch (e) {
-    console.error(e);
-    return res.status(400).json({ error: 'Invalid or expired token' });
+    // Handle other verification errors (e.g., invalid token)
+    return res.status(400).json({ error: 'Invalid token' });
   }
 };
 

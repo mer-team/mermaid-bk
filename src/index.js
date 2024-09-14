@@ -13,11 +13,19 @@ const swaggerDocs = require('./swagger.json');
 require('dotenv').config();
 
 // Setup Socket.io
-const io = socketIo(server, {
+/*const io = socketIo(server, {
   cors: {
     origin: process.env.REACT_APP_SOCKET_URL || 'https://mermaid.dei.uc.pt',
   },
   withCredentials: true,
+});*/
+
+const io = socketIo(server, {
+  cors: {
+    origin: process.env.REACT_APP_SOCKET_URL || 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
 });
 
 const connectedSong = {};

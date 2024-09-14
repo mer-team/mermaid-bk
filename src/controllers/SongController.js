@@ -20,9 +20,9 @@ const index = async (req, res) => {
 
 const show = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { external_id } = req.params;
     const song = await Song.findOne({
-      where: { external_id: id, status: 'processed' },
+      where: { external_id, status: 'processed' },
     });
     if (!song) return res.status(404).json({ message: 'Song not found' });
     return res.status(200).json(song);
