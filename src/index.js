@@ -8,6 +8,11 @@ const server = http.createServer(app);
 const requestIp = require('request-ip');
 const swaggerUI = require('swagger-ui-express');
 const swaggerDocs = require('./swagger.json');
+const { sendMessage } = require('./Services/rabbitmqService');
+const { startConsumer } = require('./Services/rabbitmqConsumer');
+const songProcessingRoutes = require('./routes/SongProcessingRoutes');  
+
+
 
 // Load environment variables
 require('dotenv').config();
@@ -47,6 +52,22 @@ app.use((req, res, next) => {
 app.use(requestIp.mw()); // Middleware to get the IP of the user
 app.use('/', route); // Use routes with /api prefix
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
+app.use('/', songProcessingRoutes);
+
+
+// Send a test message to RabbitMQ when the app starts
+const queue = 'song_processing_queue';
+const message = JSON.stringify({
+  type: 'song_processing_complete',
+  data: {
+    songId: 1, // Test song ID
+    result: 'teste123',
+  },
+});
+
+sendMessage(queue, message);
+
+startConsumer(queue);
 
 server.listen(8000, () => {
   console.log('[mermaid-api] server running on port 8000');
