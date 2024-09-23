@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
+// Controller
 const SongProcessingController = require('../controllers/SongProcessingController');
 
 // Endpoint to receive information when a song finishes processing

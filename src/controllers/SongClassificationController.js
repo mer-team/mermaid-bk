@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const { Song_Classification, Log, Song } = require('../models/Index');
+const axios = require('axios');
 const async = require('async');
 const { Op } = require('sequelize');
 const search = require('youtube-search');
@@ -23,7 +24,18 @@ const saveLog = async (msg, id) => {
   }
 };
 
-const saveTheSong = songId => {
+const convertIso8601DurationToSeconds = (duration) => {
+  const regex = /PT(\d+H)?(\d+M)?(\d+S)?/; // Matches the ISO 8601 duration format
+  const matches = duration.match(regex);
+
+  const hours = matches[1] ? parseInt(matches[1]) : 0;
+  const minutes = matches[2] ? parseInt(matches[2]) : 0;
+  const seconds = matches[3] ? parseInt(matches[3]) : 0;
+
+  return hours * 3600 + minutes * 60 + seconds;
+};
+
+const saveTheSong = async (songId) => {
   const opts = {
     key: API_KEY,
   };
@@ -35,12 +47,28 @@ const saveTheSong = songId => {
     }
 
     try {
+      const videoId = results[0].id;
+
+      // Fetch video details to get duration
+      const videoDetailsResponse = await axios.get(`https://www.googleapis.com/youtube/v3/videos`, {
+        params: {
+          part: 'contentDetails',
+          id: videoId,
+          key: API_KEY,
+        },
+      });
+
+      const duration = videoDetailsResponse.data.items[0].contentDetails.duration; // ISO 8601 format
+
+      // Convert ISO 8601 duration to seconds
+      const durationInSeconds = convertIso8601DurationToSeconds(duration);
+
       await Song.create({
-        external_id: results[0].id,
+        external_id: videoId,
         link: results[0].link,
         title: results[0].title,
         artist: results[0].channelTitle,
-        duration: new Date(0, 0, 0, 0, 2, 20), // Default value
+        duration: durationInSeconds,
         year: new Date(results[0].publishedAt).getFullYear(),
         date: new Date(results[0].publishedAt),
         genre: 'Salsa, Kuduro, Romance', // Default value
@@ -54,9 +82,10 @@ const saveTheSong = songId => {
         added_by_user: userId,
         general_classification: '',
       });
-      console.log('Song saved');
+
+      console.log('Song saved with duration:', durationInSeconds);
     } catch (e) {
-      console.error(e);
+      console.error('Error saving song:', e);
     }
   });
 };
@@ -83,6 +112,7 @@ const updateProcessed = async (emotion, songId) => {
   }
 };
 
+// List of classification of the songs
 const classificationQueue = async.queue(async (song, callback) => {
   const songSocket = request.connectedSong[song];
   try {

@@ -42,7 +42,7 @@ async function saveSong(id, ip, classification) {
             link: results[0].link,
             title: results[0].title,
             artist: results[0].channelTitle,
-            duration: new Date(0, 0, 0, 0, 2, 20),//Default the api dont give this data
+            duration: 555,//Default the api dont give this data
             year: new Date(results[0].publishedAt).getFullYear(),
             date: new Date(results[0].publishedAt),
             genre: "Salsa, Kuduro, Romance", //Default the api dont give this data

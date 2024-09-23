@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const route = require('./routes/Router');
+const router = require('./routes/Router');
 const app = express();
 const http = require('http');
 const socketIo = require('socket.io');
@@ -10,27 +10,16 @@ const swaggerUI = require('swagger-ui-express');
 const swaggerDocs = require('./swagger.json');
 const { sendMessage } = require('./Services/rabbitmqService');
 const { startConsumer } = require('./Services/rabbitmqConsumer');
-const songProcessingRoutes = require('./routes/SongProcessingRoutes');  
-
-
 
 // Load environment variables
 require('dotenv').config();
 
 // Setup Socket.io
-/*const io = socketIo(server, {
+const io = socketIo(server, {
   cors: {
     origin: process.env.REACT_APP_SOCKET_URL || 'https://mermaid.dei.uc.pt',
   },
   withCredentials: true,
-});*/
-
-const io = socketIo(server, {
-  cors: {
-    origin: process.env.REACT_APP_SOCKET_URL || 'http://localhost:3000',
-    methods: ['GET', 'POST'],
-    credentials: true,
-  },
 });
 
 const connectedSong = {};
@@ -50,10 +39,8 @@ app.use((req, res, next) => {
 });
 
 app.use(requestIp.mw()); // Middleware to get the IP of the user
-app.use('/', route); // Use routes with /api prefix
+app.use(router);
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
-app.use('/', songProcessingRoutes);
-
 
 // Send a test message to RabbitMQ when the app starts
 const queue = 'song_processing_queue';
