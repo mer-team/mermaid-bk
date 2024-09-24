@@ -32,10 +32,12 @@ const show = async (req, res) => {
   }
 };
 
-const filterByName = async (req, res) => {
+const filterByTitleAndArtist = async (req, res) => {
   try {
     const { title } = req.params;
-    const songs = await Song.findAll({
+
+    // Step 1: Search for songs by title
+    const titleMatches = await Song.findAll({
       where: {
         title: Sequelize.where(
           Sequelize.fn('LOWER', Sequelize.col('title')),
@@ -45,7 +47,27 @@ const filterByName = async (req, res) => {
         status: 'processed',
       },
     });
-    return res.status(200).json(songs);
+
+    // Step 2: Search for songs by artist
+    const artistMatches = await Song.findAll({
+      where: {
+        artist: Sequelize.where(
+          Sequelize.fn('LOWER', Sequelize.col('artist')),
+          'LIKE',
+          `%${title.toLowerCase()}%`
+        ),
+        status: 'processed',
+      },
+    });
+
+    // Step 3: Combine results and remove duplicates
+    const allMatches = [...titleMatches, ...artistMatches].filter(
+      (song, index, self) =>
+        index === self.findIndex((s) => s.id === song.id) // Remove duplicates based on the song ID
+    );
+
+    // Return the combined list of songs
+    return res.status(200).json(allMatches);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Internal server error' });
@@ -215,7 +237,7 @@ const getLatestClassifications = async (req, res) => {
 module.exports = {
   index,
   show,
-  filterByName,
+  filterByTitleAndArtist,
   filterByEmotion,
   filterByAll,
   updateHits,

@@ -42,6 +42,7 @@ app.use(requestIp.mw()); // Middleware to get the IP of the user
 app.use(router);
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
+/*
 // Send a test message to RabbitMQ when the app starts
 const queue = 'song_processing_queue';
 const message = JSON.stringify({
@@ -55,6 +56,7 @@ const message = JSON.stringify({
 sendMessage(queue, message);
 
 startConsumer(queue);
+*/
 
 server.listen(8000, () => {
   console.log('[mermaid-api] server running on port 8000');
