@@ -21,6 +21,8 @@ router.post('/login', UserController.login);
 router.get('/confirm/:token', UserController.confirmUser);
 router.get('/newtoken', UserController.resendEmail);
 router.get('/getall', UserController.getUsers);
+router.get('/getProfilePicture/:email', UserController.getProfilePicture);
+router.post('/setProfilePicture', UserController.upload, UserController.setProfilePicture);
 router.post('/bynameoremail', UserController.getUsersByEmailOrUsername);
 router.post('/blockedUser', UserController.getBlockedUser);
 router.get('/blockedUsers', UserController.getOnlyBlockedUsers);

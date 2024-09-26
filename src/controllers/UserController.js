@@ -1,6 +1,9 @@
 const { User } = require('../models/Index');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
+const multer = require('multer');
+const sharp = require('sharp');
+const path = require('path');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
 
@@ -19,7 +22,7 @@ const transporter = nodemailer.createTransport({
 
 const register = async (req, res) => {
   try {
-    const { name, email, password, admin } = req.body;
+    const { name, email, password, admin, profilePicture } = req.body;
     console.log(req.body); // For debugging purposes, logging the request body
 
     // Check if user already exists with the given email
@@ -37,7 +40,7 @@ const register = async (req, res) => {
     const passwordHash = await bcrypt.hash(password, salt);
 
     // Create the new user
-    await User.create({ email, hash_passwd: passwordHash, name, admin });
+    await User.create({ email, hash_passwd: passwordHash, name, admin, profilePicture });
 
     // Prepare the email for sending
     const sendEmail = {
@@ -171,6 +174,70 @@ const getUsers = async (req, res) => {
     return res.status(500).json({ message: 'An error occurred while fetching users.' });
   }
 };
+
+// Set up multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadPath = path.join(__dirname, '../Uploads/ProfilePictures');
+    console.log(uploadPath)
+
+    cb(null, uploadPath);
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage }).single('profilePicture');
+
+const getProfilePicture = async (req, res) => {
+  const { email } = req.params; // Extract email from request parameters
+  try {
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Build the URL for the profile picture
+    const profilePictureUrl = `${req.protocol}://${req.get('host')}/profilePictures/${path.basename(user.profilePicture)}`;
+
+    return res.status(200).json({ ...user, profilePicture: profilePictureUrl });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: 'An error occurred while fetching the profile picture.' });
+  }
+};
+
+const setProfilePicture = async (req, res) => {
+  const { email } = req.body
+
+  try {
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const profilePicturePath = req.file.path;
+
+    // Create a new file name for the resized image
+    const resizedImagePath = path.join(path.dirname(profilePicturePath), `resized_${path.basename(profilePicturePath)}`);
+
+
+    // Resize the image
+    await sharp(profilePicturePath)
+      .resize(200, 200) // Specify width and height
+      .toFile(resizedImagePath); // Overwrite the existing file
+
+    await User.update({ profilePicture: resizedImagePath }, { where: { email } });
+
+    return res.status(200).json(user);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: 'An error occurred while fetching users.' });
+  }
+}
 
 // Get users by email or username
 const getUsersByEmailOrUsername = async (req, res) => {
@@ -412,6 +479,9 @@ module.exports = {
   resendEmail,
   getUsers,
   getUsersByEmailOrUsername,
+  getProfilePicture,
+  upload,
+  setProfilePicture,
   blockUser,
   getBlockedUser,
   getOnlyBlockedUsers,

@@ -21,6 +21,9 @@ module.exports = {
       admin: {
         type: Sequelize.BOOLEAN
       },
+      profilePicture: {
+        type: Sequelize.STRING
+      }, 
       reset_password_token: {
         type: Sequelize.STRING
       },

@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const router = require('./routes/Router');
+const path = require('path');
 const app = express();
 const http = require('http');
 const socketIo = require('socket.io');
@@ -41,6 +42,7 @@ app.use((req, res, next) => {
 });
 
 app.use(requestIp.mw()); // Middleware to get the IP of the user
+app.use('/profilePictures', express.static(path.join(__dirname, '/Uploads/ProfilePictures')));
 app.use(router);
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
