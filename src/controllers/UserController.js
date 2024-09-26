@@ -229,6 +229,33 @@ const blockUser = async (req, res) => {
   }
 };
 
+//Get blocked user by email
+const getBlockedUser = async (req, res) => {
+  const { email } = req.body; // Assuming you're sending the email in the body
+
+  try {
+    const user = await User.findOne({
+      where: {
+        email,
+        blocked_at: {
+          [Op.ne]: null
+        },
+      },
+    });
+
+    // Check if user is found and blocked
+    if (user) {
+      return res.status(200).json({ blocked: true });
+    } else {
+      return res.status(200).json({ blocked: false });
+    }
+  } catch (error) {
+    console.error('Error fetching blocked users:', error);
+    return res.status(500).json({ message: 'An error occurred while fetching blocked users.' });
+  }
+};
+
+
 // Get only blocked users
 const getOnlyBlockedUsers = async (req, res) => {
   try {
@@ -386,6 +413,7 @@ module.exports = {
   getUsers,
   getUsersByEmailOrUsername,
   blockUser,
+  getBlockedUser,
   getOnlyBlockedUsers,
   unblockUser,
   changePassword,

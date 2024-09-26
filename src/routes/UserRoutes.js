@@ -20,10 +20,12 @@ router.post('/signup', userCreateValidation(), validate, UserController.register
 router.post('/login', UserController.login);
 router.get('/confirm/:token', UserController.confirmUser);
 router.get('/newtoken', UserController.resendEmail);
+router.get('/getall', UserController.getUsers);
 router.post('/bynameoremail', UserController.getUsersByEmailOrUsername);
-router.get('/blocked', UserController.getOnlyBlockedUsers);
-router.post('/blockuser/:email', UserController.blockUser);
-router.post('/unblockuser/:email', UserController.unblockUser);
+router.post('/blockedUser', UserController.getBlockedUser);
+router.get('/blockedUsers', UserController.getOnlyBlockedUsers);
+router.post('/blockUser/:email', UserController.blockUser);
+router.post('/unblockUser/:email', UserController.unblockUser);
 router.post('/change/password', passwordChangeValidation(), validate, UserController.changePassword);
 router.post('/change/username', usernameChangeValidation(), validate, UserController.changeUsername);
 router.post('/reset/password', UserController.resetPassword);

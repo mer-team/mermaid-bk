@@ -58,9 +58,6 @@ const saveTheSong = async (songId) => {
         },
       });
 
-      console.log("AHHHHHHHHHHHHHHHHHHHHHHHHH")
-      console.log(videoDetailsResponse.data.items[0].contentDetails)
-
       const duration = videoDetailsResponse.data.items[0].contentDetails.duration; // ISO 8601 format
 
       // Convert ISO 8601 duration to seconds
