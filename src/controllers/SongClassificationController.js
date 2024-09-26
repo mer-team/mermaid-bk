@@ -8,21 +8,7 @@ const search = require('youtube-search');
 const { sendMessage } = require('../Services/rabbitmqService');
 const API_KEY = process.env.YOUTUBE_API_KEY;
 
-let ip, userId, request; // IP of the user
-
-const saveLog = async (msg, id) => {
-  try {
-    await Log.create({
-      message: msg,
-      service: 'song classification',
-      song_id: id,
-      type: 'info',
-    });
-    console.log('Log created');
-  } catch (e) {
-    console.error(e);
-  }
-};
+var request;
 
 const convertIso8601DurationToSeconds = (duration) => {
   const regex = /PT(\d+H)?(\d+M)?(\d+S)?/; // Matches the ISO 8601 duration format
@@ -35,7 +21,7 @@ const convertIso8601DurationToSeconds = (duration) => {
   return hours * 3600 + minutes * 60 + seconds;
 };
 
-const saveTheSong = async (songId) => {
+const saveTheSong = async (songId, userId, ip) => {
   const opts = {
     key: API_KEY,
   };
@@ -80,9 +66,9 @@ const saveTheSong = async (songId) => {
         status: 'queued',
         added_by_ip: ip,
         added_by_user: userId,
+        createdAt: new Date(),
         general_classification: '',
       });
-
       console.log('Song saved with duration:', durationInSeconds);
     } catch (e) {
       console.error('Error saving song:', e);
@@ -198,8 +184,8 @@ const classificationQueue = async.queue(async (song, callback) => {
   }
 }, 1);
 
-const startClassification = song => {
-  saveTheSong(song);
+const startClassification = (song, user, ip) => {
+  saveTheSong(song, user, ip);
   classificationQueue.push(song, error => {
     if (error) {
       console.error(error);
@@ -223,7 +209,7 @@ const howManySongsBasedOnUserId = async id => {
   return songs.length;
 };
 
-const howManySongsBasedOnUserIp = async () => {
+const howManySongsBasedOnUserIp = async (ip) => {
   const songs = await Song.findAll({
     where: {
       added_by_ip: ip,
@@ -244,33 +230,73 @@ const index = async (req, res) => {
   }
 };
 
+const canClassify = async (userId, ip) => {
+  // Retrieve the last classification time based on user or IP
+  let song;
+
+  if (userId == null) {
+    song = await Song.findOne({
+      where: {
+        added_by_ip: ip
+      },
+      order: [['createdAt', 'DESC']],
+    });
+  } else if (ip == null) {
+    song = await Song.findOne({
+      where: {
+        added_by_user: userId
+      },
+      order: [['createdAt', 'DESC']],
+    });
+  }
+
+  if (song && song.createdAt) {
+    const now = new Date();
+    const hoursSinceClassification = (now - new Date(song.createdAt)) / (1000 * 60 * 60); // Convert milliseconds to hours
+    return hoursSinceClassification >= 24; // Return true if 24 hours have passed
+  }
+  return true; // Allow classification if no previous song found
+};
+
 const classify = async (req, res) => {
   try {
     const { external_id, user_id } = req.params;
-    ip = req.clientIp;
+    let ip = req.clientIp; // IP for guests
     request = req;
-    userId = user_id;
 
+    // Check if the song is already in the queue
     if (await isAlreadyOnTheDatabase(external_id)) {
       return res.status(400).json('This song is already in the queue for classification.');
     }
 
-    let lim;
+    let limit;
+
+    // If user is logged in (user_id is not 'null'), use user ID for classification limit
     if (user_id !== 'null') {
-      ip = '';
-      lim = await howManySongsBasedOnUserId(user_id);
-      if (lim >= 6) {
-        return res.status(400).json('You have reached the limit for song classification.');
+
+      limit = await howManySongsBasedOnUserId(user_id);  // Get classification count by user ID
+
+      if (limit % 5 === 0 && limit > 0) {
+        if (!await canClassify(user_id, null)) {
+          return res.status(400).json('You have reached the limit for song classification.');
+        }
       }
-    } else {
-      lim = await howManySongsBasedOnUserIp();
-      if (lim >= 3) {
-        return res.status(400).json('You have reached the limit for song classification.');
+    }
+    // If user is a guest (user_id is 'null'), use IP address for classification limit
+    else {
+      limit = await howManySongsBasedOnUserIp(ip);  // Get classification count by IP
+
+      if (limit >= 1) {
+        if (!await canClassify(null, ip)) {
+          return res.status(400).json('You have reached the limit for song classification.');
+        }
       }
     }
 
-    startClassification(external_id);
+    // Start the classification process
+    startClassification(external_id, user_id, ip);
     return res.status(200).json('The song was added to the queue.');
+
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Internal server error' });

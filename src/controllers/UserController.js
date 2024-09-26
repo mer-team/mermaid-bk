@@ -396,7 +396,7 @@ const validate = async (req, res) => {
   } catch (err) {
     // Handle expired token specifically
     if (err.name === 'TokenExpiredError') {
-      return res.status(403).json({ error: 'Token has expired' });
+      return res.status(403).json({ error: 'Token has expired!' });
     }
 
     // Handle other verification errors (e.g., invalid token)

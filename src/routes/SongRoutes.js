@@ -18,6 +18,5 @@ router.delete('/delete/:id', SongController.deleteSong);
 router.get('/get/streamedminutes', SongController.getStreamedMinutes);
 router.get('/get/analysed/videos', SongController.analysedVideos);
 router.get('/get/latest/classifications', SongController.getLatestClassifications);
-router.get('/songbyip', SongController.getQueueSongsByIp);
 
 module.exports = router;

@@ -152,8 +152,9 @@ const getHits = async (req, res) => {
 };
 
 const getQueueSongs = async (req, res) => {
+  const { user_id } = req.params
+
   try {
-    const { user_id } = req.params;
     const songs = await Song.findAll({
       where: {
         added_by_user: user_id,
