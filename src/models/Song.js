@@ -5,9 +5,10 @@ const { Model, DataTypes } = require('sequelize');
 class Song extends Model {
   static associate(models) {
     Song.hasMany(models.Song_Segments, { foreignKey: 'song_id' });
-    Song.hasMany(models.Song_Classification, { foreignKey: 'song_id' });
+    Song.hasOne(models.Song_Classification, { foreignKey: 'song_id' });
+    Song.hasOne(models.Source, { foreignKey: 'song_id' });
     Song.hasMany(models.Feedback, { foreignKey: 'song_id' });
-    Song.hasOne(models.Log, { foreignKey: 'song_id' });
+    Song.hasMany(models.Log, { foreignKey: 'song_id' });
   }
 }
 

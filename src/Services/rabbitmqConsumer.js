@@ -30,27 +30,37 @@ function startConsumer(queue) {
           const parsedMessage = JSON.parse(message);
 
           // Route the message to the correct API endpoint
-          handleMessage(parsedMessage);
+          handleMessage(parsedMessage, connection);
 
           channel.ack(msg);
+
         }
       });
     });
   });
 }
 
-async function handleMessage(message) {
+async function handleMessage(message, connection) {
   try {
-    if (message.type === 'song_processing_complete') {
-      await axios.post(`${API_BASE_URL}/processing/completed`, message.data);
-    } else if (message.type === 'processing_log') {
-      await axios.post(`${API_BASE_URL}/processing/log`, message.data);
-    } else if (message.type === 'song_segments') {
-      await axios.post(`${API_BASE_URL}/processing/segments`, message.data);
+    switch (message.type) {
+      case 'song_processing_complete':
+        await axios.post(`${API_BASE_URL}/processing/completed`, message.data);
+        // Close the connection after a music is processed. With more users using the service this strategy needs to be rethink
+        connection.close();
+        break;
+      case 'song_processing_log':
+        await axios.post(`${API_BASE_URL}/processing/log`, message.data);
+        break;
+      case 'song_segments':
+        await axios.post(`${API_BASE_URL}/processing/segments`, message.data);
+        break;
+      default:
+        console.warn('Unhandled message type:', message.type);
     }
   } catch (error) {
-    console.error('Error handling message:', error);
+    console.error(`Error handling message of type ${message.type}:`, error);
   }
 }
+
 
 module.exports = { startConsumer }; // Export startConsumer

@@ -1,11 +1,16 @@
 require('dotenv').config();
 
-const { Song_Classification, Log, Song } = require('../models/Index');
+const { Song_Classification, Log, Song, Song_Segments } = require('../models/Index');
 const axios = require('axios');
 const async = require('async');
 const { Op } = require('sequelize');
 const search = require('youtube-search');
+const { Sequelize } = require('sequelize');
+
+// RabbitMQ
 const { sendMessage } = require('../Services/rabbitmqService');
+const { startConsumer } = require('../Services/rabbitmqConsumer');
+
 const API_KEY = process.env.YOUTUBE_API_KEY;
 
 var request;
@@ -22,57 +27,62 @@ const convertIso8601DurationToSeconds = (duration) => {
 };
 
 const saveTheSong = async (songId, userId, ip) => {
-  const opts = {
-    key: API_KEY,
-  };
+  return new Promise((resolve, reject) => {
+    const opts = {
+      key: API_KEY,
+    };
 
-  search(`https://www.youtube.com/watch?v=${songId}`, opts, async (err, results) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
+    // YouTube search function (still callback-based)
+    search(`https://www.youtube.com/watch?v=${songId}`, opts, async (err, results) => {
+      if (err) {
+        console.error(err);
+        return reject(err); // Reject the promise on error
+      }
 
-    try {
-      const videoId = results[0].id;
+      try {
+        const videoId = results[0].id;
 
-      // Fetch video details to get duration
-      const videoDetailsResponse = await axios.get(`https://www.googleapis.com/youtube/v3/videos`, {
-        params: {
-          part: 'contentDetails',
-          id: videoId,
-          key: API_KEY,
-        },
-      });
+        // Fetch video details to get duration
+        const videoDetailsResponse = await axios.get(`https://www.googleapis.com/youtube/v3/videos`, {
+          params: {
+            part: 'contentDetails',
+            id: videoId,
+            key: API_KEY,
+          },
+        });
 
-      const duration = videoDetailsResponse.data.items[0].contentDetails.duration; // ISO 8601 format
+        const duration = videoDetailsResponse.data.items[0].contentDetails.duration; // ISO 8601 format
+        const durationInSeconds = convertIso8601DurationToSeconds(duration);
 
-      // Convert ISO 8601 duration to seconds
-      const durationInSeconds = convertIso8601DurationToSeconds(duration);
+        // Save the song to the database
+        await Song.create({
+          external_id: videoId,
+          link: results[0].link,
+          title: results[0].title,
+          artist: results[0].channelTitle,
+          duration: durationInSeconds,
+          year: new Date(results[0].publishedAt).getFullYear(),
+          date: new Date(results[0].publishedAt),
+          genre: 'Salsa, Kuduro, Romance', // Default value
+          description: results[0].description,
+          thumbnailHQ: results[0].thumbnails.high.url,
+          thumbnailMQ: results[0].thumbnails.medium.url,
+          hits: 0,
+          waveform: 'dQw4w9WgXcQ.png',
+          status: 'queued',
+          added_by_ip: ip,
+          added_by_user: userId,
+          createdAt: new Date(),
+          general_classification: '',
+        });
 
-      await Song.create({
-        external_id: videoId,
-        link: results[0].link,
-        title: results[0].title,
-        artist: results[0].channelTitle,
-        duration: durationInSeconds,
-        year: new Date(results[0].publishedAt).getFullYear(),
-        date: new Date(results[0].publishedAt),
-        genre: 'Salsa, Kuduro, Romance', // Default value
-        description: results[0].description,
-        thumbnailHQ: results[0].thumbnails.high.url,
-        thumbnailMQ: results[0].thumbnails.medium.url,
-        hits: 0,
-        waveform: 'dQw4w9WgXcQ.png',
-        status: 'queued',
-        added_by_ip: ip,
-        added_by_user: userId,
-        createdAt: new Date(),
-        general_classification: '',
-      });
-      console.log('Song saved with duration:', durationInSeconds);
-    } catch (e) {
-      console.error('Error saving song:', e);
-    }
+        console.log('Song saved with duration:', durationInSeconds);
+        resolve(); // Resolve the promise when the song is successfully saved
+      } catch (e) {
+        console.error('Error saving song:', e);
+        reject(e); // Reject the promise if something goes wrong
+      }
+    });
   });
 };
 
@@ -84,108 +94,283 @@ const updateStateSong = async (status, songId) => {
   }
 };
 
-const updateProcessed = async (emotion, songId) => {
+// Custom delay function (Promise-based timeout)
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Polling function to check for the log entry
+const pollForLog = async (songId, maxAttempts, interval) => {
+  let attempts = 0;
+  let log = null;
+
+  while (attempts < maxAttempts) {
+    log = await Log.findOne({
+      where: { song_id: songId },
+      order: [['createdAt', 'DESC']],
+    });
+
+    if (log) {
+      return log.message; // Log found, return it
+    }
+
+    await delay(interval); // Wait for the interval before checking again
+    attempts++;
+  }
+  return null; // Log not found after maxAttempts
+};
+
+// Helper function to fetch log and emit progress
+const emitProgress = async (songSocket, song_externalID, progress, songId) => {
   try {
-    await Song.update(
-      {
-        status: 'processed',
-        general_classification: emotion,
-      },
-      { where: { external_id: songId } }
-    );
-  } catch (e) {
-    console.error(e);
+
+    const logMessage = await pollForLog(songId, 10, 1000); // Check up to 10 times, 1-second intervals
+
+    // Emit progress with the log message
+    if (songSocket) {
+      request.io.emit('progress', {
+        progress: progress,
+        song_id: `${song_externalID}`,
+        state: logMessage,
+      });
+    }
+  } catch (err) {
+    console.error('Error fetching log:', err);
   }
 };
 
 // List of classification of the songs
-const classificationQueue = async.queue(async (song, callback) => {
-  const songSocket = request.connectedSong[song];
+const classificationQueue = async.queue(async (song_externalID, callback) => {
+  const songSocket = request.connectedSong[song_externalID];
+  let rabbitQueue;
+  let queueMessage;
+  let songId;
+
+  // search for the id of the song we just started to classify
+  songId = await Song.findOne({
+    where: { external_id: song_externalID }
+  });
+
   try {
-    await updateStateSong('processing', song);
+    await updateStateSong('processing', song_externalID);
 
-    setTimeout(async () => {
-      if (songSocket) {
-        request.io.emit('progress', {
-          progress: 10,
-          song_id: `${song}`,
-          state: 'Song Received',
-        });
+    // Start reading RabbitMQ messages
+    // Open a queue for song info
+    rabbitQueue = 'song_processing_queue';
+
+    // Message sent to the RabbitMQ with info about the song
+    queueMessage = JSON.stringify({
+      type: 'song_processing_start',
+      data: {
+        link: songId.link, // Send the song url link
+        title: songId.title,
+        song_id: songId.id // Send the PK id from our song databse
+      },
+    });
+
+    // Sends a message with the songId and title
+    sendMessage(rabbitQueue, queueMessage);
+
+    // Open a new queue just for logs
+    rabbitQueue = 'song_processing_log';
+
+    // This new message should be sent by the microsservices
+    queueMessage = JSON.stringify({
+      type: 'song_processing_log',
+      data: {
+        songId: songId.id,
+        logMessage: "Song Received"
       }
-    }, 6000);
+    });
 
-    setTimeout(async () => {
-      if (songSocket) {
-        request.io.emit('progress', {
-          progress: 30,
-          song_id: `${song}`,
-          state: 'Video Downloaded',
-        });
-        const songDetails = await Song.findOne({ where: { external_id: song } });
-        await sendMessage(
-          'videoDownloadQueue',
-          `Video downloaded for song ID: ${song}, Title: ${songDetails.title}`
-        );
+    sendMessage(rabbitQueue, queueMessage);
+
+    // Reads the message coming from the queue and stores it in the logs database field
+    startConsumer(rabbitQueue);
+
+    await emitProgress(songSocket, song_externalID, 10, songId.id);
+    await delay(3000);
+
+    // This new message should be sent by the microsservices
+    queueMessage = JSON.stringify({
+      type: 'song_processing_log',
+      data: {
+        songId: songId.id,
+        logMessage: "Video Downloaded"
       }
-    }, 8000);
+    });
 
-    setTimeout(async () => {
-      if (songSocket) {
-        request.io.emit('progress', {
-          progress: 50,
-          song_id: `${song}`,
-          state: 'Audio Channel Extracted from Audio',
-        });
+    sendMessage(rabbitQueue, queueMessage);
+
+    await emitProgress(songSocket, song_externalID, 30, songId.id);
+    await delay(3000);
+
+    // This new message should be sent by the microsservices
+    queueMessage = JSON.stringify({
+      type: 'song_processing_log',
+      data: {
+        songId: songId.id,
+        logMessage: "Audio Channel Extracted from Audio"
       }
-    }, 10000);
+    });
 
-    setTimeout(async () => {
-      if (songSocket) {
-        request.io.emit('progress', {
-          progress: 60,
-          song_id: `${song}`,
-          state: 'Features Extracted',
-        });
+    sendMessage(rabbitQueue, queueMessage);
+
+    await emitProgress(songSocket, song_externalID, 50, songId.id);
+    await delay(3000);
+
+    // This new message should be sent by the microsservices
+    queueMessage = JSON.stringify({
+      type: 'song_processing_log',
+      data: {
+        songId: songId.id,
+        logMessage: "Features Extracted"
       }
-    }, 12000);
+    });
 
-    setTimeout(async () => {
-      if (songSocket) {
-        request.io.emit('progress', {
-          progress: 80,
-          song_id: `${song}`,
-          state: 'Classification in Process',
-        });
+    sendMessage(rabbitQueue, queueMessage);
+
+    await emitProgress(songSocket, song_externalID, 60, songId.id);
+    await delay(3000);
+    // This new message should be sent by the microsservices
+    queueMessage = JSON.stringify({
+      type: 'song_processing_log',
+      data: {
+        songId: songId.id,
+        logMessage: "Classification in Process"
       }
-    }, 15000);
+    });
 
-    setTimeout(async () => {
-      if (songSocket) {
-        request.io.emit('progress', {
-          progress: 100,
-          song_id: `${song}`,
-          state: 'Classification Finished',
-        });
+    sendMessage(rabbitQueue, queueMessage);
+
+    await emitProgress(songSocket, song_externalID, 80, songId.id);
+    await delay(3000);
+
+    // This new message should be sent by the microsservices
+    queueMessage = JSON.stringify({
+      type: 'song_processing_log',
+      data: {
+        songId: songId.id,
+        logMessage: "Classification Finished"
       }
+    });
 
-      const emotions = ['Happy', 'Sad', 'Calm', 'Tense'];
-      const emotion = emotions[Math.floor(Math.random() * emotions.length)];
-      await updateProcessed(emotion, song);
+    sendMessage(rabbitQueue, queueMessage);
 
-      request.io.emit('song-classified', {
-        songId: song,
-        message: 'The song classification is finished',
-      });
-    }, 16000);
+    // Random emotion for testing purposes
+    const emotions = ['Happy', 'Sad', 'Calm', 'Tense'];
+    let emotion = emotions[Math.floor(Math.random() * emotions.length)];
+
+    // New queue for processed segments
+    rabbitQueue = 'song_processing_segments';
+
+    queueMessage = JSON.stringify({
+      type: 'song_segments',
+      data: {
+        songId: songId.id,
+        segmentStart: 0,
+        segmentEnd: 60,
+        emotion: emotion,
+      },
+    });
+
+    sendMessage(rabbitQueue, queueMessage);
+
+    startConsumer(rabbitQueue);
+
+    // Different emotion
+    emotion = emotions[Math.floor(Math.random() * emotions.length)];
+
+    // Another song segment
+    queueMessage = JSON.stringify({
+      type: 'song_segments',
+      data: {
+        songId: songId.id,
+        segmentStart: 60,
+        segmentEnd: 120,
+        emotion: emotion,
+      },
+    });
+
+    sendMessage(rabbitQueue, queueMessage);
+
+    // Different emotion
+    emotion = emotions[Math.floor(Math.random() * emotions.length)];
+
+    // Another song segment with the longest feeling
+    queueMessage = JSON.stringify({
+      type: 'song_segments',
+      data: {
+        songId: songId.id,
+        segmentStart: 120,
+        segmentEnd: 190,
+        emotion: emotion,
+      },
+    });
+
+    sendMessage(rabbitQueue, queueMessage);
+
+    await delay(5000);
+
+    // Receives the complete song analisis back from the microsservices
+    rabbitQueue = 'song_processing_completed';
+
+    const largestSegments = await Song_Segments.findAll({
+      where: {
+        song_id: songId.id,
+      },
+    })
+
+    console.log(largestSegments)
+
+    // Get the segment with the largest duration (end - start)
+    const largestSegment = await Song_Segments.findOne({
+      where: {
+        song_id: songId.id,
+      },
+      attributes: [
+        'id',
+        'start',
+        'end',
+        [Sequelize.literal(`"end" - "start"`), 'duration'],
+      ],
+      order: [[Sequelize.literal(`"end" - "start"`), 'DESC']], // Order by the calculated duration directly
+    });
+
+    // Final song classification
+    // This new message should be sent by the microsservices
+    queueMessage = JSON.stringify({
+      type: 'song_processing_complete',
+      data: {
+        songId: song_externalID,
+        emotion: largestSegment.emotion,
+        lyrics: 'path to lyrics txt file',
+        voice: 'path to voice in server',
+        instrumental: 'path to intrumental in server'
+      },
+    });
+
+    sendMessage(rabbitQueue, queueMessage);
+
+    startConsumer(rabbitQueue);
+
+    await emitProgress(songSocket, song_externalID, 99, songId.id);
+    await delay(3000);
+
+    request.io.emit('song-classified', {
+      songId: song_externalID,
+      message: 'The song classification is finished',
+    });
+
+    await emitProgress(songSocket, song_externalID, 100, songId.id);
+
   } catch (error) {
-    await updateStateSong('error', song);
+    await updateStateSong('error', song_externalID);
     console.error('Error:', error);
-    callback(error);
   }
 }, 1);
 
-const startClassification = (song, user, ip) => {
-  saveTheSong(song, user, ip);
+const startClassification = async (song, user, ip) => {
+  await saveTheSong(song, user, ip);
+
   classificationQueue.push(song, error => {
     if (error) {
       console.error(error);
@@ -224,6 +409,20 @@ const index = async (req, res) => {
     const { id } = req.headers;
     const classifications = await Song_Classification.findAll({ where: { song_id: id } });
     return res.status(200).json(classifications);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+const getSegments = async (req, res) => {
+  try {
+    const { song_id } = req.params;
+
+    const segments = await Song_Segments.findAll({ where: { song_id } });
+
+    return res.status(200).json(segments);
+
   } catch (e) {
     console.error(e);
     return res.status(500).json({ message: 'Internal server error' });
@@ -306,4 +505,5 @@ const classify = async (req, res) => {
 module.exports = {
   index,
   classify,
+  getSegments
 };

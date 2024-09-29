@@ -1,8 +1,10 @@
 const { User } = require('../models/Index');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto')
 const multer = require('multer');
 const sharp = require('sharp');
+const fs = require('fs');
 const path = require('path');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
@@ -175,23 +177,10 @@ const getUsers = async (req, res) => {
   }
 };
 
-// Set up multer for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadPath = path.join(__dirname, '../Uploads/ProfilePictures');
-    console.log(uploadPath)
-
-    cb(null, uploadPath);
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
-});
-
-const upload = multer({ storage }).single('profilePicture');
-
 const getProfilePicture = async (req, res) => {
+
   const { email } = req.params; // Extract email from request parameters
+
   try {
     const user = await User.findOne({ where: { email } });
 
@@ -209,6 +198,10 @@ const getProfilePicture = async (req, res) => {
   }
 };
 
+// Set up multer for file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage }).single('profilePicture');
+
 const setProfilePicture = async (req, res) => {
   const { email } = req.body
 
@@ -219,24 +212,45 @@ const setProfilePicture = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const profilePicturePath = req.file.path;
+    // Get the buffer of the uploaded file
+    const fileBuffer = req.file.buffer;
+    const fileExtension = path.extname(req.file.originalname);
+
+    // Generate a hash for the file name
+    const hash = crypto.createHash('md5').update(email).digest('hex');
 
     // Create a new file name for the resized image
-    const resizedImagePath = path.join(path.dirname(profilePicturePath), `resized_${path.basename(profilePicturePath)}`);
-
+    const resizedImagePath = path.join(__dirname, `../Uploads/ProfilePictures/${hash}_${Date.now()}${fileExtension}`);
 
     // Resize the image
-    await sharp(profilePicturePath)
+    await sharp(fileBuffer)
       .resize(200, 200) // Specify width and height
       .toFile(resizedImagePath); // Overwrite the existing file
 
     await User.update({ profilePicture: resizedImagePath }, { where: { email } });
 
-    return res.status(200).json(user);
+    // If the hash is the same until the _ it means the user alredy has a photo, so replace it instead of adding a new one to the server
+    if (getHashPart(user.profilePicture) === getHashPart(resizedImagePath)) {
+      fs.unlink(user.profilePicture, (err) => {
+        if (err) {
+          console.error(`Error deleting old profile picture: ${err}`);
+        } else {
+          console.log('Old profile picture deleted successfully.');
+        }
+      });
+    }
+
+
+    return res.status(200).json({ message: 'Success' });
   } catch (e) {
     console.error(e);
     return res.status(500).json({ message: 'An error occurred while fetching users.' });
   }
+}
+
+const getHashPart = (path) => {
+  const underscoreIndex = path.indexOf('_');
+  return storedPath = underscoreIndex !== -1 ? path.substring(0, underscoreIndex) : path;
 }
 
 // Get users by email or username

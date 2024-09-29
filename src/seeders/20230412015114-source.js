@@ -5,7 +5,7 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     return queryInterface.bulkInsert('Sources', [
     {
-        name: "audio", 
+        name: "voice", 
         createdAt:new Date(),
         updatedAt: new Date()
     }, 

@@ -21,9 +21,6 @@ function sendMessage(queue, msg) {
       channel.sendToQueue(queue, Buffer.from(msg));
       console.log(' [x] Sent %s', msg);
 
-      setTimeout(function () {
-        connection.close();
-      }, 500);
     });
   });
 }

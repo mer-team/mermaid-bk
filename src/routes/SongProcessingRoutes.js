@@ -13,5 +13,4 @@ router.post('/log', SongProcessingController.handleProcessingLog);
 // Endpoint to receive detailed song segments
 router.post('/segments', SongProcessingController.handleSongSegments);
 
-
 module.exports = router;

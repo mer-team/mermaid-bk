@@ -13,8 +13,8 @@ const defineSongSegmentsModel = (sequelize) => {
   Song_Segments.init({
     song_id: DataTypes.INTEGER,
     source_id: DataTypes.INTEGER,
-    start: DataTypes.DATE,
-    end: DataTypes.DATE,
+    start: DataTypes.INTEGER,
+    end: DataTypes.INTEGER,
     emotion: DataTypes.STRING,
   }, {
     sequelize,

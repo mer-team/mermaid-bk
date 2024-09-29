@@ -1,25 +1,32 @@
-const { Song, Log: SongLog, Song_Segments: SongSegment } = require('../models/Index');
+const { Song, Log: SongLog, Song_Segments: SongSegment, Source } = require('../models/Index');
 
 const handleProcessingComplete = async (req, res) => {
-  const { songId, result } = req.body;
+  const { songId, emotion, lyrics, voice, instrumental} = req.body;
 
   try {
     await Song.update(
-      { status: 'processed', general_classification: result }, 
-      { where: { id: songId } }
+      { status: 'processed', general_classification: emotion },
+      { where: { external_id: songId } }
     );
+
+    await Source.update(
+      { lyrics, voice, instrumental },
+      { where: { song_id: songId } }
+    );
+
     res.status(200).json({ message: 'Song processing completed' });
   } catch (error) {
     console.error('Error processing song completion:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
+
 };
 
 const handleProcessingLog = async (req, res) => {
   const { songId, logMessage } = req.body;
 
   try {
-    await SongLog.create({ song_id: songId, message: logMessage });
+    await SongLog.create({ song_id: songId, message: logMessage, type: "info" });
     res.status(200).json({ message: 'Log received' });
   } catch (error) {
     console.error('Error saving log:', error);
@@ -28,15 +35,12 @@ const handleProcessingLog = async (req, res) => {
 };
 
 const handleSongSegments = async (req, res) => {
-  const { songId, segments } = req.body;
+  const { songId, segmentStart, segmentEnd, emotion } = req.body;
 
   try {
     // Save the segments to the database
-    await SongSegment.bulkCreate(
-      segments.map(segment => ({
-        song_id: songId, // Make sure song_id is used here and it matches your DB column
-        ...segment,      // Spread other properties if they match DB columns
-      }))
+    await SongSegment.create(
+      { song_id: songId, start: segmentStart, end: segmentEnd, emotion }
     );
 
     res.status(200).json({ message: 'Song segments received' });

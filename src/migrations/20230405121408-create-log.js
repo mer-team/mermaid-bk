@@ -19,9 +19,9 @@ module.exports = {
         type: Sequelize.ENUM("info", "warning", "error")
       },
       song_id: {
-        type: Sequelize.INTEGER, 
-        references: {model: "Songs", key: "id"}, 
-        onUpdate: "CASCADE", 
+        type: Sequelize.INTEGER,
+        references: { model: "Songs", key: "id" },
+        onUpdate: "CASCADE",
         onDelete: "CASCADE"
       },
       createdAt: {
