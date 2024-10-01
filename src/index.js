@@ -39,12 +39,19 @@ app.use((req, res, next) => {
 });
 
 app.use(requestIp.mw()); // Middleware to get the IP of the user
+app.use(cors()); // CORS middleware
+app.use(express.json()); // Body parsing middleware
+
+// Static file serving
 app.use('/profilePictures', express.static(path.join(__dirname, '/Uploads/ProfilePictures')));
 app.use('/songLyrics', express.static(path.join(__dirname, '/Uploads/SongLyrics')));
 app.use('/songIntrumentals', express.static(path.join(__dirname, '/Uploads/SongInstrumentals')));
 app.use('/songVocals', express.static(path.join(__dirname, '/Uploads/SongVocals')));
+
 app.use(router);
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
+
+// Start server
 server.listen(8000, () => {
   console.log('[mermaid-api] server running on port 8000');
 });

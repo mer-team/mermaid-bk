@@ -141,6 +141,7 @@ const emitProgress = async (songSocket, song_externalID, progress, songId) => {
 // List of classification of the songs
 const classificationQueue = async.queue(async (song_externalID, callback) => {
   const songSocket = request.connectedSong[song_externalID];
+
   let rabbitQueue;
   let queueMessage;
   let songId;
@@ -412,21 +413,21 @@ const howManySongsBasedOnUserId = async (id) => {
   const songs = await Song.findAll({
     where: {
       added_by_user: id,
-      status: { [Op.ne]: 'processed' },
+      status: 'processed',
     },
   });
   return songs.length;
 };
 
 const howManySongsBasedOnUserIp = async (ip) => {
-  console.log(ip)
-
+  
   const songs = await Song.findAll({
     where: {
       added_by_ip: ip,
-      status: { [Op.ne]: 'processed' },
+      status: 'processed',
     },
   });
+
   return songs.length;
 };
 
@@ -537,6 +538,7 @@ const classify = async (req, res) => {
   try {
     const { external_id, user_id } = req.params;
     let ip = req.clientIp; // IP for guests
+
     request = req;
 
     // Check if the song is already in the queue
@@ -559,7 +561,8 @@ const classify = async (req, res) => {
     }
     // If user is a guest (user_id is 'null'), use IP address for classification limit
     else {
-      limit = await howManySongsBasedOnUserIp();  // Get classification count by IP
+
+      limit = await howManySongsBasedOnUserIp(ip);  // Get classification count by IP
 
       if (limit >= 1) {
         if (!await canClassify(null, ip)) {
