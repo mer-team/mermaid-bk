@@ -12,8 +12,10 @@ class Source extends Model {
 
 const defineSourceModel = (sequelize) => {
   Source.init({
-    name: DataTypes.STRING,
     song_id: DataTypes.INTEGER,
+    lyrics: DataTypes.STRING,
+    instrumental: DataTypes.STRING,
+    voice: DataTypes.STRING,
   }, {
     sequelize,
     modelName: 'Source',

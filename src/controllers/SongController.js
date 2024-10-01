@@ -200,16 +200,21 @@ const deleteSong = async (req, res) => {
 const getStreamedMinutes = async (req, res) => {
   try {
     let total = 0;
+
     const songs = await Song.findAll();
+
+    // Convert duration from seconds to minutes and sum it
     songs.forEach(song => {
-      total += new Date(song.duration).getMinutes();
+      total += Math.floor(song.duration / 60); // Convert seconds to minutes and round down
     });
-    return res.status(200).json(total);
+
+    return res.status(200).json(total); // Return total minutes as an integer
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 
 const analysedVideos = async (req, res) => {
   try {

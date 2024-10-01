@@ -6,12 +6,11 @@ const handleProcessingComplete = async (req, res) => {
   try {
     await Song.update(
       { status: 'processed', general_classification: emotion },
-      { where: { external_id: songId } }
+      { where: { external_id: songId.external_id } }
     );
 
-    await Source.update(
-      { lyrics, voice, instrumental },
-      { where: { song_id: songId } }
+    await Source.create(
+      { song_id: songId.id, lyrics, voice, instrumental, createdAt: new Date() }
     );
 
     res.status(200).json({ message: 'Song processing completed' });

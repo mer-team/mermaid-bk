@@ -177,9 +177,13 @@ const getUsers = async (req, res) => {
   }
 };
 
+// Set up multer for file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage }).single('profilePicture');
+
 const getProfilePicture = async (req, res) => {
 
-  const { email } = req.params; // Extract email from request parameters
+  const { email } = req.params;
 
   try {
     const user = await User.findOne({ where: { email } });
@@ -197,10 +201,6 @@ const getProfilePicture = async (req, res) => {
     return res.status(500).json({ message: 'An error occurred while fetching the profile picture.' });
   }
 };
-
-// Set up multer for file uploads
-const storage = multer.memoryStorage();
-const upload = multer({ storage }).single('profilePicture');
 
 const setProfilePicture = async (req, res) => {
   const { email } = req.body
@@ -227,21 +227,25 @@ const setProfilePicture = async (req, res) => {
       .resize(200, 200) // Specify width and height
       .toFile(resizedImagePath); // Overwrite the existing file
 
-    await User.update({ profilePicture: resizedImagePath }, { where: { email } });
-
-    // If the hash is the same until the _ it means the user alredy has a photo, so replace it instead of adding a new one to the server
-    if (getHashPart(user.profilePicture) === getHashPart(resizedImagePath)) {
-      fs.unlink(user.profilePicture, (err) => {
-        if (err) {
-          console.error(`Error deleting old profile picture: ${err}`);
-        } else {
-          console.log('Old profile picture deleted successfully.');
-        }
-      });
+    // Check if the user already has a profile picture
+    if (user.profilePicture) {
+      // Check if the hash is the same until the _
+      if (getHashPart(user.profilePicture) === getHashPart(resizedImagePath)) {
+        // If the hashes are the same, delete the old file
+        fs.unlink(user.profilePicture, (err) => {
+          if (err) {
+            console.error(`Error deleting old profile picture: ${err}`);
+          } else {
+            console.log('Old profile picture deleted successfully.');
+          }
+        });
+      }
     }
 
-
-    return res.status(200).json({ message: 'Success' });
+    await User.update({ profilePicture: resizedImagePath }, { where: { email } });
+    
+    return res.status(200).json({ message: 'Profile picture updated successfully.' });
+    
   } catch (e) {
     console.error(e);
     return res.status(500).json({ message: 'An error occurred while fetching users.' });

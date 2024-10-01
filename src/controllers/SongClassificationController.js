@@ -1,11 +1,12 @@
 require('dotenv').config();
 
-const { Song_Classification, Log, Song, Song_Segments } = require('../models/Index');
+const { Song_Classification, Log, Song, Song_Segments, Source } = require('../models/Index');
 const axios = require('axios');
 const async = require('async');
 const { Op } = require('sequelize');
 const search = require('youtube-search');
-const { Sequelize } = require('sequelize');
+const multer = require('multer');
+const path = require('path');
 
 // RabbitMQ
 const { sendMessage } = require('../Services/rabbitmqService');
@@ -255,96 +256,59 @@ const classificationQueue = async.queue(async (song_externalID, callback) => {
 
     sendMessage(rabbitQueue, queueMessage);
 
-    // Random emotion for testing purposes
-    const emotions = ['Happy', 'Sad', 'Calm', 'Tense'];
-    let emotion = emotions[Math.floor(Math.random() * emotions.length)];
+    // Random number between 1 and 4
+    const segmentCount = Math.floor(Math.random() * 4) + 1;
 
-    // New queue for processed segments
-    rabbitQueue = 'song_processing_segments';
-
-    queueMessage = JSON.stringify({
-      type: 'song_segments',
-      data: {
-        songId: songId.id,
-        segmentStart: 0,
-        segmentEnd: 60,
-        emotion: emotion,
-      },
-    });
-
-    sendMessage(rabbitQueue, queueMessage);
-
-    startConsumer(rabbitQueue);
-
-    // Different emotion
-    emotion = emotions[Math.floor(Math.random() * emotions.length)];
-
-    // Another song segment
-    queueMessage = JSON.stringify({
-      type: 'song_segments',
-      data: {
-        songId: songId.id,
-        segmentStart: 60,
-        segmentEnd: 120,
-        emotion: emotion,
-      },
-    });
-
-    sendMessage(rabbitQueue, queueMessage);
-
-    // Different emotion
-    emotion = emotions[Math.floor(Math.random() * emotions.length)];
-
-    // Another song segment with the longest feeling
-    queueMessage = JSON.stringify({
-      type: 'song_segments',
-      data: {
-        songId: songId.id,
-        segmentStart: 120,
-        segmentEnd: 190,
-        emotion: emotion,
-      },
-    });
-
-    sendMessage(rabbitQueue, queueMessage);
-
-    await delay(5000);
+    // Generate random segments with random emotions
+    await generateRandomSegments(songId.id, songId.duration, segmentCount);
+    await delay(3000);
 
     // Receives the complete song analisis back from the microsservices
     rabbitQueue = 'song_processing_completed';
 
-    const largestSegments = await Song_Segments.findAll({
-      where: {
-        song_id: songId.id,
-      },
-    })
+    let segments = await Song_Segments.findAll({ where: { song_id: songId.id } });
 
-    console.log(largestSegments)
+    let finalEmotion;
 
-    // Get the segment with the largest duration (end - start)
-    const largestSegment = await Song_Segments.findOne({
-      where: {
-        song_id: songId.id,
-      },
-      attributes: [
-        'id',
-        'start',
-        'end',
-        [Sequelize.literal(`"end" - "start"`), 'duration'],
-      ],
-      order: [[Sequelize.literal(`"end" - "start"`), 'DESC']], // Order by the calculated duration directly
-    });
+    if (segments && segments.length > 0) {
+
+      const calculatedData = segments.map(segment => ({
+        duration: segment.end - segment.start, // Calculate duration
+        emotion: segment.emotion,               // Get emotion
+      }));
+
+      // Find the longest segment duration
+      const longestDuration = Math.max(...calculatedData.map(segment => segment.duration));
+
+      // Find all segments that have the longest duration
+      const longestSegments = calculatedData.filter(segment => segment.duration === longestDuration);
+
+      // If there is more than one segment with the longest duration, return 'Mixed'
+      finalEmotion = longestSegments.length > 1 ? 'Mixed' : longestSegments[0].emotion;
+
+    }
+
+    /* Use this when you can get the files stored in the server by the microsservices
+    const lyricsPath = path.join(__dirname, `../Uploads/SongLyrics/${songId.external_id}_lyrics.txt`);
+    const voicePath = path.join(__dirname, `../Uploads/SongVoice/${songId.external_id}_voice.mp3`);
+    const instrumentalPath = path.join(__dirname, `../Uploads/SongInstrumental/${songId.external_id}_instrumental.mp3`);
+    */
+
+    // Path for the sources (for test purposes only)
+    const lyricsPath = path.join(__dirname, `../Uploads/SongLyrics/lyrics.txt`);
+    const voicePath = path.join(__dirname, `../Uploads/SongVoice/A203.mp3`);
+    const instrumentalPath = path.join(__dirname, `../Uploads/SongInstrumental/A203.mp3`);
 
     // Final song classification
     // This new message should be sent by the microsservices
     queueMessage = JSON.stringify({
       type: 'song_processing_complete',
       data: {
-        songId: song_externalID,
-        emotion: largestSegment.emotion,
-        lyrics: 'path to lyrics txt file',
-        voice: 'path to voice in server',
-        instrumental: 'path to intrumental in server'
+        songId,
+        emotion: finalEmotion,
+        lyrics: lyricsPath,
+        voice: voicePath,
+        instrumental: instrumentalPath
       },
     });
 
@@ -368,6 +332,66 @@ const classificationQueue = async.queue(async (song_externalID, callback) => {
   }
 }, 1);
 
+const generateRandomSegments = async (songId, duration, segmentCount) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const emotions = ['Happy', 'Sad', 'Calm', 'Tense'];
+      const rabbitQueue = 'song_processing_segments';
+      startConsumer(rabbitQueue);
+
+      let start = 0;
+      let segments = [];
+
+      // Divide the song duration into the given number of segments
+      for (let i = 0; i < segmentCount; i++) {
+        // Generate a random end time for the segment between start and remaining song duration
+        let remainingDuration = duration - start;
+        let end;
+
+        if (i === segmentCount - 1) {
+          // Make sure the last segment ends exactly at the song's duration
+          end = duration;
+        } else {
+          // Ensure each segment's length is within the remaining duration
+          const maxSegmentLength = remainingDuration / (segmentCount - i); // Evenly divide remaining time
+          end = start + Math.floor(Math.random() * maxSegmentLength);
+        }
+
+        // Pick a random emotion for the segment
+        let emotion = emotions[Math.floor(Math.random() * emotions.length)];
+
+        // Create the segment message
+        const queueMessage = JSON.stringify({
+          type: 'song_segments',
+          data: {
+            songId: songId,
+            segmentStart: start,
+            segmentEnd: end,
+            emotion: emotion,
+          },
+        });
+
+        // Push the segment message to an array
+        segments.push(queueMessage);
+
+        // Simulate sending the message to the queue
+        sendMessage(rabbitQueue, queueMessage);
+
+        // Update start for the next segment
+        start = end;
+
+      }
+
+      // Resolve the promise with the generated segments
+      resolve(segments);
+
+    } catch (error) {
+      reject(error); // In case of an error, reject the promise
+    }
+  });
+};
+
+
 const startClassification = async (song, user, ip) => {
   await saveTheSong(song, user, ip);
 
@@ -380,11 +404,11 @@ const startClassification = async (song, user, ip) => {
   });
 };
 
-const isAlreadyOnTheDatabase = async song_id => {
+const isAlreadyOnTheDatabase = async (song_id) => {
   return await Song.findOne({ where: { external_id: song_id } });
 };
 
-const howManySongsBasedOnUserId = async id => {
+const howManySongsBasedOnUserId = async (id) => {
   const songs = await Song.findAll({
     where: {
       added_by_user: id,
@@ -395,6 +419,8 @@ const howManySongsBasedOnUserId = async id => {
 };
 
 const howManySongsBasedOnUserIp = async (ip) => {
+  console.log(ip)
+
   const songs = await Song.findAll({
     where: {
       added_by_ip: ip,
@@ -428,6 +454,56 @@ const getSegments = async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+const getVoice = async (req, res) => {
+
+  const { song_id } = req.params; // Extract email from request parameters
+
+  try {
+    const source = await Source.findOne({ where: { song_id } });
+
+    const songVocalsUrl = `${req.protocol}://${req.get('host')}/songVocals/${path.basename(source.voice)}`;
+
+    return res.status(200).json({ songVocalsUrl });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: 'An error occurred while fetching the voice.' });
+  }
+};
+
+const getLyrics = async (req, res) => {
+
+  const { song_id } = req.params; // Extract email from request parameters
+
+  try {
+    const source = await Source.findOne({ where: { song_id } });
+
+    // Build the URL for the profile picture
+    const songLyricsUrl = `${req.protocol}://${req.get('host')}/songLyrics/${path.basename(source.lyrics)}`;
+
+    return res.status(200).json({ songLyricsUrl });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: 'An error occurred while fetching the lyrics.' });
+  }
+}
+
+const getInstrumental = async (req, res) => {
+
+  const { song_id } = req.params; // Extract email from request parameters
+
+  try {
+    const source = await Source.findOne({ where: { song_id } });
+
+    // Build the URL for the profile picture
+    const songInstrumentalUrl = `${req.protocol}://${req.get('host')}/songIntrumentals/${path.basename(source.instrumental)}`;
+
+    return res.status(200).json({ songInstrumentalUrl });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: 'An error occurred while fetching the instrumental.' });
+  }
+}
 
 const canClassify = async (userId, ip) => {
   // Retrieve the last classification time based on user or IP
@@ -483,7 +559,7 @@ const classify = async (req, res) => {
     }
     // If user is a guest (user_id is 'null'), use IP address for classification limit
     else {
-      limit = await howManySongsBasedOnUserIp(ip);  // Get classification count by IP
+      limit = await howManySongsBasedOnUserIp();  // Get classification count by IP
 
       if (limit >= 1) {
         if (!await canClassify(null, ip)) {
@@ -498,12 +574,15 @@ const classify = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json('Internal server error');
   }
 };
 
 module.exports = {
   index,
   classify,
-  getSegments
+  getSegments,
+  getVoice,
+  getLyrics,
+  getInstrumental,
 };

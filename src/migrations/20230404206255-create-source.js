@@ -18,7 +18,7 @@ module.exports = {
       lyrics: {
         type: Sequelize.STRING
       },
-      intrumental: {
+      instrumental: {
         type: Sequelize.STRING
       },
       voice: {
