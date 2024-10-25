@@ -119,6 +119,22 @@ const pollForLog = async (songId, maxAttempts, interval) => {
   return null; // Log not found after maxAttempts
 };
 
+// Polling function to check for the log entry
+const getLogs = async (req, res) => {
+  const { song_id } = req.params;
+
+  try {
+    const logs = await Log.findAll({
+      where: { song_id },
+    });
+
+    return res.status(200).json(logs);
+
+  } catch {
+    return res.status(400).json('No logs found!');
+  }
+};
+
 // Helper function to fetch log and emit progress
 const emitProgress = async (songSocket, song_externalID, progress, songId) => {
   try {
@@ -140,6 +156,7 @@ const emitProgress = async (songSocket, song_externalID, progress, songId) => {
 
 // List of classification of the songs
 const classificationQueue = async.queue(async (song_externalID, callback) => {
+  
   const songSocket = request.connectedSong[song_externalID];
 
   let rabbitQueue;
@@ -420,7 +437,7 @@ const howManySongsBasedOnUserId = async (id) => {
 };
 
 const howManySongsBasedOnUserIp = async (ip) => {
-  
+
   const songs = await Song.findAll({
     where: {
       added_by_ip: ip,
@@ -465,10 +482,10 @@ const getVoice = async (req, res) => {
 
     const songVocalsUrl = `${req.protocol}://${req.get('host')}/songVocals/${path.basename(source.voice)}`;
 
-    return res.status(200).json({ songVocalsUrl });
+    return res.status(200).json(songVocalsUrl);
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ message: 'An error occurred while fetching the voice.' });
+    return res.status(500).json('An error occurred while fetching the voice.');
   }
 };
 
@@ -482,10 +499,10 @@ const getLyrics = async (req, res) => {
     // Build the URL for the profile picture
     const songLyricsUrl = `${req.protocol}://${req.get('host')}/songLyrics/${path.basename(source.lyrics)}`;
 
-    return res.status(200).json({ songLyricsUrl });
+    return res.status(200).json(songLyricsUrl);
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ message: 'An error occurred while fetching the lyrics.' });
+    return res.status(500).json('An error occurred while fetching the lyrics.');
   }
 }
 
@@ -499,10 +516,10 @@ const getInstrumental = async (req, res) => {
     // Build the URL for the profile picture
     const songInstrumentalUrl = `${req.protocol}://${req.get('host')}/songIntrumentals/${path.basename(source.instrumental)}`;
 
-    return res.status(200).json({ songInstrumentalUrl });
+    return res.status(200).json(songInstrumentalUrl);
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ message: 'An error occurred while fetching the instrumental.' });
+    return res.status(500).json('An error occurred while fetching the instrumental.');
   }
 }
 
@@ -588,4 +605,5 @@ module.exports = {
   getVoice,
   getLyrics,
   getInstrumental,
+  getLogs
 };

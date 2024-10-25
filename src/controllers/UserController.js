@@ -42,7 +42,7 @@ const register = async (req, res) => {
     const passwordHash = await bcrypt.hash(password, salt);
 
     // Create the new user
-    await User.create({ email, hash_passwd: passwordHash, name, admin, profilePicture });
+    await User.create({ email, hash_passwd: passwordHash, name, profilePicture });
 
     // Prepare the email for sending
     const sendEmail = {

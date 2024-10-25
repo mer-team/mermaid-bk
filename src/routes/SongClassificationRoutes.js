@@ -11,6 +11,6 @@ router.post('/:external_id/user/:user_id', SongClassificationController.classify
 router.get('/getVoice/:song_id', SongClassificationController.getVoice);
 router.get('/getLyrics/:song_id', SongClassificationController.getLyrics);
 router.get('/getInstrumental/:song_id', SongClassificationController.getInstrumental);
-
+router.get('/getLogs/:song_id', SongClassificationController.getLogs);
 
 module.exports = router;
