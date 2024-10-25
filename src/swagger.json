@@ -467,44 +467,95 @@
         }
       }
     },
+    "/song/classify": {
+      "post": {
+        "summary": "Classify a song",
+        "tags": [
+          "Music"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "external_id": {
+                    "type": "string"
+                  },
+                  "emotion": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "external_id",
+                  "emotion"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Song classified successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Song classified successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Song not found"
+          }
+        }
+      }
+    },
     "/feedback": {
       "post": {
-        "summary": "Submit feedback on a song",
+        "summary": "Submit feedback for a song",
         "tags": [
           "Feedback"
         ],
-        "parameters": [
-          {
-            "name": "agreeordisagree",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "agree",
-                "disagree"
-              ]
-            }
-          },
-          {
-            "name": "user_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "song_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "external_id": {
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "type": "string"
+                  },
+                  "comment": {
+                    "type": "string"
+                  },
+                  "rating": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "external_id",
+                  "user_id",
+                  "comment",
+                  "rating"
+                ]
+              }
             }
           }
-        ],
+        },
         "responses": {
-          "200": {
+          "201": {
             "description": "Feedback submitted successfully",
             "content": {
               "application/json": {
@@ -519,35 +570,19 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Invalid input",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string",
-                      "example": "Invalid feedback data"
-                    }
-                  }
-                }
-              }
-            }
           }
         }
       }
     },
-    "/feedback/agrees/{song_id}": {
+    "/feedback/song/{external_id}": {
       "get": {
-        "summary": "Get feedback agrees for a song",
+        "summary": "Get feedback for a song",
         "tags": [
           "Feedback"
         ],
         "parameters": [
           {
-            "name": "song_id",
+            "name": "external_id",
             "in": "path",
             "required": true,
             "schema": {
@@ -557,7 +592,7 @@
         ],
         "responses": {
           "200": {
-            "description": "List of feedback agrees",
+            "description": "Feedback retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -568,107 +603,20 @@
                       "user_id": {
                         "type": "string"
                       },
-                      "song_id": {
+                      "comment": {
                         "type": "string"
                       },
-                      "feedback": {
-                        "type": "string"
+                      "rating": {
+                        "type": "number"
                       }
                     }
                   }
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/feedback/disagrees/{song_id}": {
-      "get": {
-        "summary": "Get feedback disagrees for a song",
-        "tags": [
-          "Feedback"
-        ],
-        "parameters": [
-          {
-            "name": "song_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of feedback disagrees",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "user_id": {
-                        "type": "string"
-                      },
-                      "song_id": {
-                        "type": "string"
-                      },
-                      "feedback": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "User": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
           },
-          "name": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          }
-        }
-      },
-      "Song": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "artist": {
-            "type": "string"
-          }
-        }
-      },
-      "Feedback": {
-        "type": "object",
-        "properties": {
-          "user_id": {
-            "type": "string"
-          },
-          "song_id": {
-            "type": "string"
-          },
-          "feedback": {
-            "type": "string"
+          "404": {
+            "description": "No feedback found for this song"
           }
         }
       }

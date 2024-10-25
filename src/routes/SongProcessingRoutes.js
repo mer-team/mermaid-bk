@@ -4,13 +4,9 @@ const router = express.Router();
 // Controller
 const SongProcessingController = require('../controllers/SongProcessingController');
 
-// Endpoint to receive information when a song finishes processing
+// Song Processing Routes
 router.post('/completed', SongProcessingController.handleProcessingComplete);
-
-// Endpoint to receive log information about song processing
 router.post('/log', SongProcessingController.handleProcessingLog);
-
-// Endpoint to receive detailed song segments
 router.post('/segments', SongProcessingController.handleSongSegments);
 
 module.exports = router;
