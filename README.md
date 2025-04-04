@@ -15,6 +15,8 @@ In brief:
 
 ## Running the Project
 
+**Please check the dev-orchestrator repo first, this now requires the external docker network `mermaid-dev-network`.**
+
 The API is containerized, check all the docker-compose* and Dockerfile* under the project root and .devcontainer/.
 
 To run / dev the project install:

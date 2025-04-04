@@ -1,5 +1,4 @@
 services:
-
   api:
     build:
       context: .
@@ -10,6 +9,8 @@ services:
       - 8000:8000
     volumes:
       - .:/mermaid-api:cached
+    networks:
+      - mermaid-dev-network
 
   db:
     image: postgres:15
@@ -20,20 +21,8 @@ services:
       - '5432:5432'
     volumes:
       - postgres-data:/var/lib/postgresql/data
-
-  rabbitmq:
-    image: rabbitmq:3-management
-    restart: on-failure:10
-    env_file:
-      - .env.rabbitmq
-    ports:
-      - 5672:5672 # rabbitmq
-      - 15672:15672 # web interface
-    healthcheck:
-      test: rabbitmq-diagnostics check_port_connectivity
-      interval: 10s
-      timeout: 5s
-      retries: 10
+    networks:
+      - mermaid-dev-network
 
   mailcatcher:
     image: dockage/mailcatcher:latest
@@ -43,6 +32,12 @@ services:
     ports:
       - '1080:1080' # web interface
       - '1025:1025' # SMTP server
+    networks:
+      - mermaid-dev-network
 
 volumes:
   postgres-data:
+
+networks:
+  mermaid-dev-network:
+    external: true
