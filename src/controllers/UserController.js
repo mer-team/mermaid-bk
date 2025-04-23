@@ -4,6 +4,7 @@ const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 const { Op } = require('sequelize');
 const jwt = require('jsonwebtoken');
+const formatter = require('../utils/responseFormatter');
 
 function validatePassw(passwd) {
   const regex = /(?=^.{8,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/;
@@ -32,11 +33,10 @@ module.exports = {
 
       //Check if it is a valid password the password
       if (!validatePassw(passw)) {
-        return res
-          .status(400)
-          .json(
-            'Error: The password you entered does not meet the password requirements. The password must be at least 8 characters long, including at least one uppercase letter, one lowercase letter, one digit or special character, and cannot contain a period or a newline. Please try again.',
-          );
+        return formatter.error(
+          res,
+          'Error: The password you entered does not meet the password requirements. The password must be at least 8 characters long, including at least one uppercase letter, one lowercase letter, one digit or special character, and cannot contain a period or a newline. Please try again.',
+        );
       }
       //Check if the current name and email exists on the database
       const users = await User.findAll({
@@ -45,7 +45,7 @@ module.exports = {
         },
       });
       if (users.length > 0) {
-        return res.status(400).json('This email or name is already in use');
+        return formatter.error(res, 'This email or name is already in use');
       }
       //After all the verification we can create the user
 
@@ -71,15 +71,19 @@ module.exports = {
           };
           const info = await transporter.sendMail(sendEmail);
 
-          return res
-            .status(201)
-            .json({ message: 'Please check your email to confirm your account' });
+          return formatter.success(
+            res,
+            { message: 'Please check your email to confirm your account' },
+            201,
+          );
         })
         .catch((err) => {
           console.log(err);
+          return formatter.error(res, 'Error creating user', 500);
         });
     } catch (e) {
       console.log(e);
+      return formatter.error(res, 'Server error', 500);
     }
   },
 
@@ -89,28 +93,27 @@ module.exports = {
       const { email, passw } = req.body;
       //verify if the email exists on our database
       const user = await User.findOne({
-        where: {
-          email: email,
-        },
+        where: { email },
       });
 
       if (!user) {
-        return res.status(400).json('User Not Founded');
+        return formatter.error(res, 'User Not Found', 404);
       }
 
       if (!user.confirmed) {
-        return res.status(400).json('Confirm your email');
+        return formatter.error(res, 'Please confirm your email', 403);
       }
 
       //verify if the password equals to the one on the database
       if (await bcrypt.compare(passw, user.hash_passwd)) {
         const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
-        return res.status(200).json({ token });
+        return formatter.success(res, { token });
       } else {
-        return res.status(400).json('Wrong Password');
+        return formatter.error(res, 'Invalid credentials');
       }
     } catch (e) {
-      console.log(e);
+      console.error(e);
+      return formatter.error(res, 'Server error', 500);
     }
   },
 
@@ -128,13 +131,14 @@ module.exports = {
       console.log(exp);
       if (Date.now() >= exp * 1000) {
         // The token has expired
-        return res.status(401).json('Token has expired');
+        return formatter.error(res, 'Token has expired', 401);
       }
       //Update the confirmed in the database
       await User.update({ confirmed: true }, { where: { email: email } });
-      return res.status(200).json('Confirmed Email');
+      return formatter.success(res, { message: 'Confirmed Email' });
     } catch (e) {
       console.log(e);
+      return formatter.error(res, 'Invalid token', 400);
     }
   },
 
@@ -160,15 +164,17 @@ module.exports = {
       const info = await transporter.sendMail(sendEmail);
 
       if (info && info.accepted.length > 0) {
-        return res.status(201).json({ message: 'Please check your email to confirm your account' });
+        return formatter.success(
+          res,
+          { message: 'Please check your email to confirm your account' },
+          201,
+        );
       } else {
-        // Handle error sending email
-        return res
-          .status(500)
-          .json({ message: 'Failed to send confirmation email. Please try again.' });
+        return formatter.error(res, 'Failed to send confirmation email. Please try again.', 500);
       }
     } catch (e) {
       console.log(e);
+      return formatter.error(res, 'Server error', 500);
     }
   },
 
@@ -176,9 +182,10 @@ module.exports = {
     try {
       const users = await User.findAll();
 
-      return res.status(200).json(users);
+      return formatter.success(res, users);
     } catch (e) {
       console.log(e);
+      return formatter.error(res, 'Error fetching users', 500);
     }
   },
 
@@ -211,7 +218,7 @@ module.exports = {
           },
         });
 
-        return res.status(200).json(users);
+        return formatter.success(res, users);
       } else {
         const users = await User.findAll({
           where: {
@@ -234,10 +241,11 @@ module.exports = {
           },
         });
 
-        return res.status(200).json(users);
+        return formatter.success(res, users);
       }
     } catch (e) {
       console.log(e);
+      return formatter.error(res, 'Error searching users', 500);
     }
   },
 
@@ -251,9 +259,10 @@ module.exports = {
         },
       });
 
-      return res.status(200).json(users);
+      return formatter.success(res, users);
     } catch (e) {
       console.log(e);
+      return formatter.error(res, 'Error fetching blocked users', 500);
     }
   },
 
@@ -261,9 +270,10 @@ module.exports = {
     const { email } = req.params;
     try {
       await User.update({ blocked_at: new Date() }, { where: { email: email } });
-      return res.status(200).json('User Blocked with sucess');
+      return formatter.success(res, { message: 'User Blocked with success' });
     } catch (e) {
       console.log(e);
+      return formatter.error(res, 'Error blocking user', 500);
     }
   },
 
@@ -271,87 +281,106 @@ module.exports = {
     const { email } = req.params;
     try {
       await User.update({ blocked_at: null }, { where: { email: email } });
-      return res.status(200).json('User Unblocked with sucess');
+      return formatter.success(res, { message: 'User Unblocked with success' });
     } catch (e) {
       console.log(e);
+      return formatter.error(res, 'Error unblocking user', 500);
     }
   },
 
   async changePassword(req, res) {
     const { email, password, oldPassword } = req.body;
-    //verify if the email exists on our database
-    const user = await User.findOne({
-      where: {
-        email: email,
-      },
-    });
+    try {
+      //verify if the email exists on our database
+      const user = await User.findOne({
+        where: {
+          email: email,
+        },
+      });
 
-    //See if the old Password equal to the one in the database
-    if (await bcrypt.compare(oldPassword, user.hash_passwd)) {
-      //verify if the password is valid
-      //Check if it is a valid password the password
-      if (!validatePassw(password)) {
-        return res
-          .status(400)
-          .json(
-            'Error: The password you entered does not meet the password requirements. The password must be at least 8 characters long, including at least one uppercase letter, one lowercase letter, one digit or special character, and cannot contain a period or a newline. Please try again.',
+      //See if the old Password equal to the one in the database
+      if (await bcrypt.compare(oldPassword, user.hash_passwd)) {
+        //verify if the password is valid
+        //Check if it is a valid password the password
+        if (!validatePassw(password)) {
+          return formatter.error(
+            res,
+            'Error: The password you entered does not meet the password requirements. The password must be at least 8 characters long, including at least one uppercase letter, one lowercase letter, one digit or special character, and cannot contain a period or a newline. Please try again.'
           );
-      } else {
-        //Create a hashed password
-        const hash_passw = await bcrypt.hash(password, 10);
-        //see if the hash pasword equals to the same in the database
-        if (await bcrypt.compare(password, user.hash_passwd)) {
-          return res
-            .status(400)
-            .json('The current password is equal to the one you are trying to change');
+        } else {
+          //Create a hashed password
+          const hash_passw = await bcrypt.hash(password, 10);
+          //see if the hash pasword equals to the same in the database
+          if (await bcrypt.compare(password, user.hash_passwd)) {
+            return formatter.error(
+              res,
+              'The current password is equal to the one you are trying to change'
+            );
+          }
+          await User.update({ hash_passwd: hash_passw }, { where: { email: email } });
+          return formatter.success(res, { message: 'Password Changed with success' });
         }
-        await User.update({ hash_passwd: hash_passw }, { where: { email: email } });
-        return res.status(200).json('Password Changed with sucess');
+      } else {
+        return formatter.error(res, 'The old password is wrong.');
       }
-    } else {
-      return res.status(400).json('The old password is wrong.');
+    } catch (e) {
+      console.log(e);
+      return formatter.error(res, 'Server error', 500);
     }
   },
 
   async changeUsername(req, res) {
     const { username, email, password } = req.body;
 
-    const user = await User.findOne({
-      where: {
-        email: email,
-      },
-    });
-
-    //verify if the password equals to the one on the database
-    if (await bcrypt.compare(password, user.hash_passwd)) {
-      //Check if the current name and email exists on the database
-      const users = await User.findAll({
+    try {
+      const user = await User.findOne({
         where: {
-          name: username,
+          email: email,
         },
       });
 
-      if (users.length > 0) {
-        return res.status(400).json('This name is already in use');
-      } else {
-        await User.update({ name: username }, { where: { email: email } });
-        return res.status(200).json('Username Updated');
+      if (!user) {
+        return formatter.error(res, 'User not found');
       }
-    } else {
-      return res.status(400).json('Wrong Password');
+
+      //verify if the password equals to the one on the database
+      if (await bcrypt.compare(password, user.hash_passwd)) {
+        //Check if the current name and email exists on the database
+        const users = await User.findAll({
+          where: {
+            name: username,
+          },
+        });
+
+        if (users.length > 0) {
+          return formatter.error(res, 'This name is already in use');
+        } else {
+          await User.update({ name: username }, { where: { email: email } });
+          return formatter.success(res, { message: 'Username Updated' });
+        }
+      } else {
+        return formatter.error(res, 'Wrong Password');
+      }
+    } catch (e) {
+      console.log(e);
+      return formatter.error(res, 'Server error', 500);
     }
   },
 
   async resetPassw(req, res) {
     const { email } = req.body;
 
-    const user = await User.findOne({
-      where: {
-        email: email,
-      },
-    });
+    try {
+      const user = await User.findOne({
+        where: {
+          email: email,
+        },
+      });
 
-    if (user) {
+      if (!user) {
+        return formatter.error(res, 'Invalid Email');
+      }
+
       if (user.confirmed) {
         try {
           const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '10m' });
@@ -365,39 +394,43 @@ module.exports = {
           };
 
           const info = await transporter.sendMail(sendEmail);
-          return res.status(201).json({ message: 'Please check your email to reset the password' });
+          return formatter.success(
+            res,
+            { message: 'Please check your email to reset the password' },
+            201,
+          );
         } catch (error) {
-          /* empty */
+          return formatter.error(res, 'Error sending email', 500);
         }
       } else {
-        return res.status(400).json('Please confirm your email first');
+        return formatter.error(res, 'Please confirm your email first');
       }
-    } else {
-      return res.status(400).json('Invalid Email');
+    } catch (e) {
+      console.log(e);
+      return formatter.error(res, 'Server error', 500);
     }
   },
 
   async passwordChange(req, res) {
     const { email, password } = req.body;
-
-    //Check if it is a valid password the password
-    if (!validatePassw(password)) {
-      return res
-        .status(400)
-        .json(
-          'Error: The password you entered does not meet the password requirements. The password must be at least 8 characters long, including at least one uppercase letter, one lowercase letter, one digit or special character, and cannot contain a period or a newline. Please try again.',
-        );
-    }
-
-    //Create a hashed password
-    const hash_passw = await bcrypt.hash(password, 10);
-
     try {
-      await User.update({ hash_passw: hash_passw }, { where: { email: email } });
+      //Check if it is a valid password the password
+      if (!validatePassw(password)) {
+        return res
+          .status(400)
+          .json(
+            'Error: The password you entered does not meet the password requirements. The password must be at least 8 characters long, including at least one uppercase letter, one lowercase letter, one digit or special character, and cannot contain a period or a newline. Please try again.',
+          );
+      }
 
-      return res.status(200).json('Password changed');
+      //Create a hashed password
+      const hash_passw = await bcrypt.hash(password, 10);
+
+      await User.update({ hash_passw: hash_passw }, { where: { email: email } });
+      return formatter.success(res, { message: 'Password changed' });
     } catch (e) {
-      /* empty */
+      console.log(e);
+      return formatter.error(res, 'Error changing password', 500);
     }
   },
 };
