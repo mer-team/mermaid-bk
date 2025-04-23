@@ -2,6 +2,7 @@ require('dotenv').config();
 const { Op } = require('sequelize');
 const { Song, Sequelize } = require('../models/index');
 var search = require('youtube-search');
+const formatter = require('../utils/responseFormatter');
 
 var opts = {
   maxResults: 1,
@@ -19,9 +20,10 @@ module.exports = {
         order: [['updatedAt', 'DESC']],
       });
 
-      return res.status(200).json(songs);
+      return formatter.success(res, songs);
     } catch (e) {
       console.log(e);
+      return formatter.error(res, 'Error fetching songs', 500);
     }
   },
 
@@ -37,9 +39,10 @@ module.exports = {
         },
       });
 
-      return res.status(200).json(songs);
+      return formatter.success(res, songs);
     } catch (e) {
       console.log(e);
+      return formatter.error(res, 'Error fetching song', 500);
     }
   },
 
@@ -60,9 +63,10 @@ module.exports = {
         },
       });
 
-      return res.status(200).json(songs);
+      return formatter.success(res, songs);
     } catch (e) {
       console.log(e);
+      return formatter.error(res, 'Error filtering songs by name', 500);
     }
   },
 
@@ -83,13 +87,14 @@ module.exports = {
         },
       });
 
-      return res.status(200).json(songs);
+      return formatter.success(res, songs);
     } catch (e) {
       console.log(e);
+      return formatter.error(res, 'Error filtering songs by emotion', 500);
     }
   },
 
-  //Get a song by name
+  //Get a song by name and emotion
   async filterByAll(req, res) {
     try {
       var { title, emotion } = req.params;
@@ -111,9 +116,10 @@ module.exports = {
         },
       });
 
-      return res.status(200).json(songs);
+      return formatter.success(res, songs);
     } catch (e) {
       console.log(e);
+      return formatter.error(res, 'Error filtering songs by name and emotion', 500);
     }
   },
 
@@ -130,9 +136,10 @@ module.exports = {
       song.hits = song.hits + 1;
 
       await Song.update({ hits: song.hits }, { where: { id: song_id } });
-      return res.status(200).json('Hit updated');
+      return formatter.success(res, { message: 'Hit updated' });
     } catch (e) {
       console.log(e);
+      return formatter.error(res, 'Error updating hits', 500);
     }
   },
 
@@ -146,9 +153,10 @@ module.exports = {
         },
       });
 
-      return res.status(200).json(song.hits);
+      return formatter.success(res, { hits: song.hits });
     } catch (e) {
       console.log(e);
+      return formatter.error(res, 'Error fetching hits', 500);
     }
   },
 
@@ -166,9 +174,10 @@ module.exports = {
           },
         },
       });
-      return res.status(200).json(songs);
+      return formatter.success(res, songs);
     } catch (e) {
       console.log(e);
+      return formatter.error(res, 'Error fetching queued songs', 500);
     }
   },
 
@@ -184,9 +193,10 @@ module.exports = {
           },
         },
       });
-      return res.status(200).json(songs);
+      return formatter.success(res, songs);
     } catch (e) {
       console.log(e);
+      return formatter.error(res, 'Error fetching queued songs by IP', 500);
     }
   },
 
@@ -197,9 +207,10 @@ module.exports = {
           external_id: req.params.id,
         },
       });
-      return res.status(200).json('User deleted with sucess');
+      return formatter.success(res, { message: 'Song deleted successfully' });
     } catch (e) {
       console.log(e);
+      return formatter.error(res, 'Error deleting song', 500);
     }
   },
 
@@ -212,20 +223,20 @@ module.exports = {
         x = new Date(song.duration).getMinutes();
         total += x;
       });
-      return res.status(200).json(total);
+      return formatter.success(res, { totalStreamedMinutes: total });
     } catch (e) {
       console.log(e);
+      return formatter.error(res, 'Error calculating streamed minutes', 500);
     }
   },
 
   async AnalysedVideos(req, res) {
     try {
-      var x = 0;
-      var total = 0;
       const songs = await Song.findAll();
-      return res.status(200).json(songs.length);
+      return formatter.success(res, { totalAnalysedVideos: songs.length });
     } catch (e) {
       console.log(e);
+      return formatter.error(res, 'Error fetching analysed videos', 500);
     }
   },
 
@@ -244,6 +255,7 @@ module.exports = {
       return res.status(200).json(songs.slice(0, 3));
     } catch (e) {
       console.log(e);
+      return formatter.error(res, 'Error fetching latest classifications', 500);
     }
   },
 };
