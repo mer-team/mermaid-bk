@@ -5,7 +5,7 @@ var search = require('youtube-search');
 
 var opts = {
   maxResults: 1,
-  key: 'AIzaSyCVdyNQUbauI-DBDZ_a9GoRy3ukrIFiHMU',
+  key: process.env.YOUTUBE_API_KEY,
 };
 
 module.exports = {

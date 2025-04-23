@@ -28,7 +28,7 @@ async function saveLog(msg, id) {
 //Save the song to the database
 function saveTheSong(songId) {
   var opts = {
-    key: process.env.YOUTUBE_API_KEY, //TODO: fix this with env vars
+    key: process.env.YOUTUBE_API_KEY,
   };
 
   search(`https://www.youtube.com/watch?v=${songId}`, opts, async function (err, results) {
