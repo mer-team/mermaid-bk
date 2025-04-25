@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const { Song, Sequelize } = require('../models/index');
 var search = require('youtube-search');
 const formatter = require('../utils/responseFormatter');
+const winston = require('../utils/logger'); // Custom logger
 
 var opts = {
   maxResults: 1,
@@ -19,10 +20,10 @@ module.exports = {
         },
         order: [['updatedAt', 'DESC']],
       });
-
+      winston.info('Fetched all processed songs');
       return formatter.success(res, songs);
     } catch (e) {
-      console.log(e);
+      winston.error(`Error fetching songs: ${e.message}`);
       return formatter.error(res, 'Error fetching songs', 500);
     }
   },
@@ -41,7 +42,7 @@ module.exports = {
 
       return formatter.success(res, songs);
     } catch (e) {
-      console.log(e);
+      winston.error(`Error fetching songs: ${e.message}`);
       return formatter.error(res, 'Error fetching song', 500);
     }
   },
@@ -65,7 +66,7 @@ module.exports = {
 
       return formatter.success(res, songs);
     } catch (e) {
-      console.log(e);
+      winston.error(`Error fetching songs: ${e.message}`);
       return formatter.error(res, 'Error filtering songs by name', 500);
     }
   },
@@ -89,7 +90,7 @@ module.exports = {
 
       return formatter.success(res, songs);
     } catch (e) {
-      console.log(e);
+      winston.error(`Error fetching songs: ${e.message}`);
       return formatter.error(res, 'Error filtering songs by emotion', 500);
     }
   },
@@ -118,7 +119,7 @@ module.exports = {
 
       return formatter.success(res, songs);
     } catch (e) {
-      console.log(e);
+      winston.error(`Error fetching songs: ${e.message}`);
       return formatter.error(res, 'Error filtering songs by name and emotion', 500);
     }
   },
@@ -138,7 +139,7 @@ module.exports = {
       await Song.update({ hits: song.hits }, { where: { id: song_id } });
       return formatter.success(res, { message: 'Hit updated' });
     } catch (e) {
-      console.log(e);
+      winston.error(`Error fetching songs: ${e.message}`);
       return formatter.error(res, 'Error updating hits', 500);
     }
   },
@@ -155,7 +156,7 @@ module.exports = {
 
       return formatter.success(res, { hits: song.hits });
     } catch (e) {
-      console.log(e);
+      winston.error(`Error fetching songs: ${e.message}`);
       return formatter.error(res, 'Error fetching hits', 500);
     }
   },
@@ -176,7 +177,7 @@ module.exports = {
       });
       return formatter.success(res, songs);
     } catch (e) {
-      console.log(e);
+      winston.error(`Error fetching songs: ${e.message}`);
       return formatter.error(res, 'Error fetching queued songs', 500);
     }
   },
@@ -195,7 +196,7 @@ module.exports = {
       });
       return formatter.success(res, songs);
     } catch (e) {
-      console.log(e);
+      winston.error(`Error fetching songs: ${e.message}`);
       return formatter.error(res, 'Error fetching queued songs by IP', 500);
     }
   },
@@ -209,7 +210,7 @@ module.exports = {
       });
       return formatter.success(res, { message: 'Song deleted successfully' });
     } catch (e) {
-      console.log(e);
+      winston.error(`Error fetching songs: ${e.message}`);
       return formatter.error(res, 'Error deleting song', 500);
     }
   },
@@ -225,7 +226,7 @@ module.exports = {
       });
       return formatter.success(res, { totalStreamedMinutes: total });
     } catch (e) {
-      console.log(e);
+      winston.error(`Error fetching songs: ${e.message}`);
       return formatter.error(res, 'Error calculating streamed minutes', 500);
     }
   },
@@ -235,7 +236,7 @@ module.exports = {
       const songs = await Song.findAll();
       return formatter.success(res, { totalAnalysedVideos: songs.length });
     } catch (e) {
-      console.log(e);
+      winston.error(`Error fetching analysed videos: ${e.message}`);
       return formatter.error(res, 'Error fetching analysed videos', 500);
     }
   },
@@ -254,7 +255,7 @@ module.exports = {
 
       return res.status(200).json(songs.slice(0, 3));
     } catch (e) {
-      console.log(e);
+      winston.error(`Error fetching latest classifications: ${e.message}`);
       return formatter.error(res, 'Error fetching latest classifications', 500);
     }
   },

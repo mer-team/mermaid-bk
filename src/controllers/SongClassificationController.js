@@ -2,7 +2,6 @@ require('dotenv').config();
 const { Song_Classification } = require('../models/index');
 const { Log, Song } = require('../models/index');
 const async = require('async');
-const { io } = require('../index');
 const { Op } = require('sequelize');
 var search = require('youtube-search');
 const { sendMessage } = require('../Services/rabbitmqService');

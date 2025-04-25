@@ -1,6 +1,7 @@
 const http = require('http');
 const socketIo = require('socket.io');
-const { app, connectedSong } = require('./app');
+const app = require('./app');
+const winston = require('./utils/logger'); // Custom logger
 require('dotenv').config(); // Load environment variables
 
 // Create HTTP server
@@ -14,22 +15,28 @@ const io = socketIo(server, {
   withCredentials: true,
 });
 
-// Handle socket.io connections
+// WebSocket connection logic
+const connectedSong = {}; // Shared object for WebSocket connections
 io.on('connection', (socket) => {
   const { song_id } = socket.handshake.query;
   connectedSong[song_id] = socket.id;
+  winston.info(`WebSocket connected: song_id=${song_id}, socket_id=${socket.id}`);
+
+  socket.on('disconnect', () => {
+    delete connectedSong[song_id];
+    winston.info(`WebSocket disconnected: song_id=${song_id}`);
+  });
 });
 
-// Attach socket.io to the app
+// Attach socket.io and connectedSong to the app
 app.use((req, res, next) => {
   req.io = io;
-  return next();
+  req.connectedSong = connectedSong;
+  next();
 });
 
 // Start the server
 const PORT = process.env.PORT || 8000;
 server.listen(PORT, () => {
-  console.log(`[mermaid-api] server running on port ${PORT}`);
+  winston.info(`[mermaid-api] Server running on http://localhost:${PORT}`);
 });
-
-module.exports = { server, io };
