@@ -6,6 +6,7 @@ const { io } = require('../index');
 const { Op } = require('sequelize');
 var search = require('youtube-search');
 const { sendMessage } = require('../Services/rabbitmqService');
+const formatter = require('../utils/responseFormatter');
 
 //////////////////////////////////////////////////////////////
 //Functions in test///////////////////////////////////////////
@@ -248,9 +249,10 @@ module.exports = {
           song_id: id,
         },
       });
-      return res.status(200).json(classifications);
+      return formatter.success(res, classifications);
     } catch (e) {
       console.log(e);
+      return formatter.error(res, 'Error fetching song classifications', 500);
     }
   },
 
@@ -263,20 +265,28 @@ module.exports = {
       userId = user_id;
       //Before doing any classification we have to see if the song is already on the database
       if ((await isAlreadyOnTheDatabase(external_id)) != null) {
-        return res.status(400).json('This song is already at the queue for classification.');
+        return formatter.error(res, 'This song is already in the queue for classification.', 400);
       }
-      //Calculate the song limits the user has to have in the queue based on if his logged or not
+      //Calculate the song limits the user has to have in the queue based on if they are logged in or not
       if (user_id != 'null') {
         ip = '';
         var lim = await howManySongsBasedOnUserId(user_id);
         if (lim >= 6) {
-          return res.status(400).json('You have already reached the limit for song classification');
+          return formatter.error(
+            res,
+            'You have already reached the limit for song classification',
+            400,
+          );
         }
       } else {
         var lim = await howManySongsBasedOnUserIp();
         console.log(lim);
         if (lim >= 3) {
-          return res.status(400).json('You have already reached the limit for song classification');
+          return formatter.error(
+            res,
+            'You have already reached the limit for song classification',
+            400,
+          );
         }
       }
 
@@ -286,9 +296,10 @@ module.exports = {
       startClassification(external_id);
 
       //Simulating the classification and creating random logs to send to the frontend
-      return res.status(200).json('The song was added to the queue');
+      return formatter.success(res, 'The song was added to the queue');
     } catch (error) {
       console.log(error);
+      return formatter.error(res, 'Error classifying the song', 500);
     }
   },
 };
