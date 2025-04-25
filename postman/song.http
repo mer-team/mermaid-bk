@@ -1,0 +1,43 @@
+@song_id = 1
+
+###
+
+### Create a new song
+POST http://localhost:8000/song
+Content-Type: application/json
+
+{
+  "external_id": "dQw4w9WgXcQ",
+  "title": "Never Gonna Give You Up",
+  "artist": "Rick Astley",
+  "duration": "00:03:32",
+  "year": 1987,
+  "genre": "Pop",
+  "description": "A classic hit by Rick Astley.",
+  "status": "processed"
+}
+
+###
+
+### Get all songs
+GET http://localhost:8000/song
+
+###
+
+### Get a specific song by ID
+GET http://localhost:8000/song/{{song_id}}
+
+###
+
+### Update a song's hits
+POST http://localhost:8000/song/hits/{{song_id}}
+Content-Type: application/json
+
+{
+  "hits": 1
+}
+
+###
+
+### Delete a song by ID
+DELETE http://localhost:8000/song/{{song_id}}

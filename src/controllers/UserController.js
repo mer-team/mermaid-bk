@@ -305,7 +305,7 @@ module.exports = {
         if (!validatePassw(password)) {
           return formatter.error(
             res,
-            'Error: The password you entered does not meet the password requirements. The password must be at least 8 characters long, including at least one uppercase letter, one lowercase letter, one digit or special character, and cannot contain a period or a newline. Please try again.'
+            'Error: The password you entered does not meet the password requirements. The password must be at least 8 characters long, including at least one uppercase letter, one lowercase letter, one digit or special character, and cannot contain a period or a newline. Please try again.',
           );
         } else {
           //Create a hashed password
@@ -314,7 +314,7 @@ module.exports = {
           if (await bcrypt.compare(password, user.hash_passwd)) {
             return formatter.error(
               res,
-              'The current password is equal to the one you are trying to change'
+              'The current password is equal to the one you are trying to change',
             );
           }
           await User.update({ hash_passwd: hash_passw }, { where: { email: email } });

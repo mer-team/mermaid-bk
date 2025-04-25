@@ -24,7 +24,7 @@ function error(res, message, statusCode = 400) {
   });
 }
 
-export default {
+module.exports = {
   success,
   error,
 };

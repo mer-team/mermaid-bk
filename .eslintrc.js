@@ -2,6 +2,7 @@ module.exports = {
   env: {
     node: true,
     es2021: true,
+    jest: true,
   },
   // parser: '@typescript-eslint/parser', // Specifies the ESLint parser
   parserOptions: {
@@ -19,4 +20,12 @@ module.exports = {
     // e.g. "@typescript-eslint/explicit-function-return-type": "off",
     'prettier/prettier': ['warn', { endOfLine: 'auto' }],
   },
+  overrides: [
+    {
+      files: ['src/migrations/**/*.js', 'src/seeders/**/*.js'],
+      rules: {
+        'no-unused-vars': ['error', { argsIgnorePattern: '^Sequelize$' }], // Ignore unused Sequelize variables
+      },
+    },
+  ],
 };

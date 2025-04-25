@@ -7,40 +7,40 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       song_id: {
-        type: Sequelize.INTEGER, 
-        references: {model: "Songs", key: "id"}, 
-        onUpdate: "CASCADE", 
-        onDelete: "CASCADE"
+        type: Sequelize.INTEGER,
+        references: { model: 'Songs', key: 'id' },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
       source_id: {
-        type: Sequelize.INTEGER, 
-        references: {model: "Sources", key: "id"}, 
-        onUpdate: "CASCADE", 
-        onDelete: "CASCADE"
+        type: Sequelize.INTEGER,
+        references: { model: 'Sources', key: 'id' },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
       start: {
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       end: {
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       emotion: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('Song_Segments');
-  }
+  },
 };

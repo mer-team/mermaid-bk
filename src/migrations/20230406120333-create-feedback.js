@@ -7,40 +7,40 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       song_id: {
-        type: Sequelize.INTEGER, 
-        references: {model: "Songs", key: "id"}, 
-        onUpdate: "CASCADE", 
-        onDelete: "CASCADE"
+        type: Sequelize.INTEGER,
+        references: { model: 'Songs', key: 'id' },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
       agree: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       disagree: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       annotation: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       user_id: {
-        type: Sequelize.INTEGER, 
-        references: {model: "Users", key: "id"}, 
-        onUpdate: "CASCADE", 
-        onDelete: "CASCADE"
+        type: Sequelize.INTEGER,
+        references: { model: 'Users', key: 'id' },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('Feedbacks');
-  }
+  },
 };

@@ -1,18 +1,12 @@
-const express = require('express');
-const cors = require('cors');
-const route = require('./routes');
-const app = express();
 const http = require('http');
 const socketIo = require('socket.io');
+const { app, connectedSong } = require('./app');
+require('dotenv').config(); // Load environment variables
+
+// Create HTTP server
 const server = http.createServer(app);
-const requestIp = require('request-ip');
-const swaggerUI = require('swagger-ui-express');
-const swaggerDocs = require('./swagger.json');
 
-// load vars from .env (do I need to repeat this in other places? test!)
-require('dotenv').config();
-
-//setup the server to send realtime updates to the frontend
+// Setup socket.io
 const io = socketIo(server, {
   cors: {
     origin: process.env.REACT_APP_SOCKET_URL || 'https://mermaid.dei.uc.pt',
@@ -20,28 +14,22 @@ const io = socketIo(server, {
   withCredentials: true,
 });
 
-const connectedSong = {};
-
-app.use(cors());
+// Handle socket.io connections
 io.on('connection', (socket) => {
   const { song_id } = socket.handshake.query;
   connectedSong[song_id] = socket.id;
 });
 
+// Attach socket.io to the app
 app.use((req, res, next) => {
   req.io = io;
-  req.connectedSong = connectedSong;
   return next();
 });
 
-app.use(requestIp.mw()); //middleware to get the ip of the user
-app.use(cors());
-app.use(express.json());
-app.use(route);
-app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
-
-server.listen(8000, () => {
-  console.log('[mermaid-api] server running on port 8000');
+// Start the server
+const PORT = process.env.PORT || 8000;
+server.listen(PORT, () => {
+  console.log(`[mermaid-api] server running on port ${PORT}`);
 });
 
-module.exports = { io };
+module.exports = { server, io };

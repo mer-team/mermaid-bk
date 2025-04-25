@@ -32,7 +32,16 @@
           "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
         "editor.formatOnSave": true,
-        "javascript.suggest.paths": false
+        "javascript.suggest.paths": false,
+        // Indent Rainbow settings
+        "indentRainbow.indicatorStyle": "light",
+        "indentRainbow.lightIndicatorStyleLineWidth": 1,
+        "indentRainbow.colors": [
+          "rgba(255,255,64,0.3)",
+          "rgba(127,255,127,0.3)",
+          "rgba(255,127,255,0.3)",
+          "rgba(79,236,236,0.3)"
+        ]
       },
       "extensions": [
         "esbenp.prettier-vscode",
@@ -45,11 +54,15 @@
         "vincaslt.highlight-matching-tag",
         "vscode-icons-team.vscode-icons",
         "mtxr.sqltools",
-        "mtxr.sqltools-driver-pg"
+        "mtxr.sqltools-driver-pg",
+        "bierner.markdown-mermaid",
+        "usernamehw.errorlens",
+        "oderwat.indent-rainbow",
+        "humao.rest-client"
       ]
     }
   }
 
   // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-  // "remoteUser": "root" node
+  // "remoteUser": "root"
 }

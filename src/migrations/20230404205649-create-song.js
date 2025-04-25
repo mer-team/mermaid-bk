@@ -7,70 +7,70 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       external_id: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       link: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       title: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       artist: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       duration: {
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       year: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       date: {
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       genre: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       description: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
       },
       hits: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       waveform: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       status: {
-        type: Sequelize.ENUM("queued", "processing", "processed", "error", "cancelled")
+        type: Sequelize.ENUM('queued', 'processing', 'processed', 'error', 'cancelled'),
       },
       thumbnailHQ: {
-        type: Sequelize.STRING
-      }, 
+        type: Sequelize.STRING,
+      },
       thumbnailMQ: {
-        type: Sequelize.STRING
-      }, 
+        type: Sequelize.STRING,
+      },
       general_classification: {
-        type: Sequelize.STRING
-      }, 
+        type: Sequelize.STRING,
+      },
       added_by_ip: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       added_by_user: {
-        type: Sequelize.STRING
-      }, 
+        type: Sequelize.STRING,
+      },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('Songs');
-  }
+  },
 };

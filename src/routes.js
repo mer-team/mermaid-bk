@@ -61,6 +61,12 @@ route.get('/feedback/agrees/:song_id', FeedbackController.getTotalAgrees);
 route.get('/feedback/disagrees/:song_id', FeedbackController.getTotalDisagrees);
 route.get('/feedback/opinion/:user_id/:song_id', FeedbackController.getUserOpinion);
 route.delete('/feedback/:user_id/:song_id', FeedbackController.undoFeedback);
+
+// Health check route
+route.get('/up', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 module.exports = route;
 
 //rabbitMQ
