@@ -1,240 +1,467 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "MERmaid Web App API"
+    "title": "Mermaid API",
+    "description": "API documentation for Mermaid music emotion detection service",
+    "version": "0.3.0"
   },
-
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development server"
+    }
+  ],
   "tags": [
     {
       "name": "Users",
-      "description": "Everythying about the users"
+      "description": "User management endpoints"
     },
     {
-      "name": "Music",
-      "description": "Everythying about the songs"
+      "name": "Songs",
+      "description": "Song-related endpoints"
+    },
+    {
+      "name": "Classifications",
+      "description": "Song classification endpoints"
     },
     {
       "name": "Feedback",
-      "description": "Everythying about the feedback of the songs"
+      "description": "User feedback on song classifications"
+    },
+    {
+      "name": "System",
+      "description": "System maintenance endpoints"
     }
   ],
-
   "paths": {
-    "/signup": {
+    "/users/signup": {
       "post": {
-        "summary": "User sign up",
-        "tags": ["Users"]
+        "tags": ["Users"],
+        "summary": "Register a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully"
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        }
       }
     },
-
-    "/login": {
+    "/users/login": {
       "post": {
-        "summary": "User Login",
-        "tags": ["Users"]
+        "tags": ["Users"],
+        "summary": "User login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
       }
     },
-
-    "/confirm/{token}": {
+    "/users": {
       "get": {
-        "summary": "Validate user account",
-        "tags": ["Users"]
+        "tags": ["Users"],
+        "summary": "Get current user information",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User information retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
       }
     },
-
-    "/user": {
+    "/users/all": {
       "get": {
-        "summary": "Get user data by the token",
-        "tags": ["Users"]
+        "tags": ["Users"],
+        "summary": "Get all users (admin only)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Users retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
       }
     },
-
-    "/user/newtoken": {
+    "/songs": {
       "get": {
-        "summary": "Resend the email of verification to the user",
-        "tags": ["Users"]
+        "tags": ["Songs"],
+        "summary": "Get all songs",
+        "responses": {
+          "200": {
+            "description": "List of songs"
+          }
+        }
       }
     },
-
-    "/user/bynameoremail": {
+    "/songs/{id}": {
       "get": {
-        "summary": "Get user by name or email",
-        "tags": ["Users"]
+        "tags": ["Songs"],
+        "summary": "Get a specific song by ID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Song ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Song details"
+          },
+          "404": {
+            "description": "Song not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Songs"],
+        "summary": "Delete a song",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Song ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Song deleted successfully"
+          },
+          "404": {
+            "description": "Song not found"
+          }
+        }
       }
     },
-
-    "/user/ip": {
-      "get": {
-        "summary": "Get the user ip",
-        "tags": ["Users"]
-      }
-    },
-
-    "/user/blocked": {
-      "get": {
-        "summary": "Get only blocked users",
-        "tags": ["Users"]
-      }
-    },
-    "/user/blockuser/{email}": {
+    "/songs/{song_id}/hits": {
       "post": {
-        "summary": "Block a user",
-        "tags": ["Users"]
-      }
-    },
-    "/user/unblockuser/{email}": {
-      "post": {
-        "summary": "Unblock a user",
-        "tags": ["Users"]
-      }
-    },
-    "/user/getall": {
-      "get": {
-        "summary": "Get all users",
-        "tags": ["Users"]
-      }
-    },
-    "/user/change/password": {
-      "post": {
-        "summary": "Change user password",
-        "tags": ["Users"]
-      }
-    },
-    "/user/change/username": {
-      "post": {
-        "summary": "Change username",
-        "tags": ["Users"]
-      }
-    },
-    "/user/reset/password": {
-      "post": {
-        "summary": "Reset user password by asking for the old one and updating by the new one",
-        "tags": ["Users"]
-      }
-    },
-    "/user/change/reset/password": {
-      "post": {
-        "summary": "Route used in case the user forgets his old password ",
-        "tags": ["Users"]
-      }
-    },
-
-    "/song": {
-      "get": {
-        "summary": "Get all the songs in the database",
-        "tags": ["Music"]
-      }
-    },
-    "/song/{id}": {
-      "get": {
-        "summary": "Get a song by id",
-        "tags": ["Music"]
-      }
-    },
-    "/song/name/{title}": {
-      "get": {
-        "summary": "Filter songs by title",
-        "tags": ["Music"]
-      }
-    },
-    "/song/emotion/{emotion}": {
-      "get": {
-        "summary": "Filter songs by emotion",
-        "tags": ["Music"]
-      }
-    },
-    "/song/name/{title}/emotion/{emotion}": {
-      "get": {
-        "summary": "Filter songs by title and emotion",
-        "tags": ["Music"]
-      }
-    },
-    "/song/getqueuesongs/{user_id}": {
-      "get": {
-        "summary": "Get queued songs for a user",
-        "tags": ["Music"]
-      }
-    },
-    "/song/hits/{song_id}": {
-      "post": {
-        "summary": "Update hits for a song",
-        "tags": ["Music"]
+        "tags": ["Songs"],
+        "summary": "Update song hit count",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "song_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Song ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hit count updated"
+          },
+          "404": {
+            "description": "Song not found"
+          }
+        }
       },
       "get": {
-        "summary": "Get hits for a song",
-        "tags": ["Music"]
+        "tags": ["Songs"],
+        "summary": "Get song hit count",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "song_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Song ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hit count retrieved"
+          },
+          "404": {
+            "description": "Song not found"
+          }
+        }
       }
     },
-    "/song/delete/{id}": {
-      "delete": {
-        "summary": "Delete a song",
-        "tags": ["Music"]
-      }
-    },
-    "/song/get/streamedminutes": {
+    "/songs/filter/name/{title}": {
       "get": {
-        "summary": "Get streamed minutes",
-        "tags": ["Music"]
+        "tags": ["Songs"],
+        "summary": "Filter songs by title",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "title",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Song title"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of filtered songs"
+          }
+        }
       }
     },
-    "/song/get/analysed/videos": {
+    "/songs/filter/emotion/{emotion}": {
       "get": {
-        "summary": "Get analysed videos",
-        "tags": ["Music"]
-      }
-    },
-    "/song/get/latest/classifications": {
-      "get": {
-        "summary": "Get latest classifications",
-        "tags": ["Music"]
-      }
-    },
-    "/songbyip": {
-      "get": {
-        "summary": "Get queued songs by IP",
-        "tags": ["Music"]
+        "tags": ["Songs"],
+        "summary": "Filter songs by emotion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "emotion",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Emotion type"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of filtered songs"
+          }
+        }
       }
     },
     "/classifications": {
       "get": {
-        "summary": "Get the song classification",
-        "tags": ["Music"]
+        "tags": ["Classifications"],
+        "summary": "Get all song classifications",
+        "responses": {
+          "200": {
+            "description": "List of classifications"
+          }
+        }
       }
     },
-    "/song/classification/song/{external_id}/user/{user_id}": {
+    "/classifications/songs/{external_id}/users/{user_id}": {
       "post": {
+        "tags": ["Classifications"],
         "summary": "Classify a song",
-        "tags": ["Music"]
+        "parameters": [
+          {
+            "in": "path",
+            "name": "external_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "External song ID"
+          },
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "User ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "emotion": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Classification created successfully"
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        }
       }
     },
-
-    "/feedback/agree/disagree/{agreeordisagree}/user/{user_id}/song/{song_id}": {
+    "/feedbacks/songs/{song_id}/users/{user_id}/{agreeordisagree}": {
       "post": {
-        "summary": "Post feedback",
-        "tags": ["Feedback"]
+        "tags": ["Feedback"],
+        "summary": "Submit feedback on a song classification",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "song_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Song ID"
+          },
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "User ID"
+          },
+          {
+            "in": "path",
+            "name": "agreeordisagree",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["agree", "disagree"]
+            },
+            "description": "Feedback type"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Feedback submitted successfully"
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        }
       }
     },
-    "/feedback/agrees/{song_id}": {
+    "/feedbacks/songs/{song_id}/agrees": {
       "get": {
+        "tags": ["Feedback"],
         "summary": "Get total agrees for a song",
-        "tags": ["Feedback"]
+        "parameters": [
+          {
+            "in": "path",
+            "name": "song_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Song ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Total agrees count"
+          },
+          "404": {
+            "description": "Song not found"
+          }
+        }
       }
     },
-    "/feedback/disagrees/{song_id}": {
+    "/feedbacks/songs/{song_id}/disagrees": {
       "get": {
+        "tags": ["Feedback"],
         "summary": "Get total disagrees for a song",
-        "tags": ["Feedback"]
+        "parameters": [
+          {
+            "in": "path",
+            "name": "song_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Song ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Total disagrees count"
+          },
+          "404": {
+            "description": "Song not found"
+          }
+        }
       }
     },
-    "/feedback/opinion/{user_id}/{song_id}": {
+    "/up": {
       "get": {
-        "summary": "Get user opinion for a song",
-        "tags": ["Feedback"]
+        "tags": ["System"],
+        "summary": "Health check endpoint",
+        "responses": {
+          "200": {
+            "description": "API is up and running"
+          }
+        }
       }
-    },
-    "/feedback/{user_id}/{song_id}": {
-      "delete": {
-        "summary": "Undo feedback for a song",
-        "tags": ["Feedback"]
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   }
