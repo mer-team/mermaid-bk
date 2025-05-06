@@ -45,8 +45,8 @@ winston.info(`Server running in ${env} mode`);
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 winston.info('Swagger API documentation available at /api-docs');
 
-// Routes
-app.use(routes);
+// Routes - Using the new modular routes structure
+app.use('/', routes);
 winston.info('Routes initialized.');
 
 // Handle 404 errors
