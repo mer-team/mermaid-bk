@@ -1,5 +1,5 @@
 var amqp = require('amqplib/callback_api');
-const { Log, Song } = require('../src/models/index');
+const { Log, Song } = require('../../../src/models/index');
 const { server } = require('../src/index');
 const socketIO = require('socket.io');
 var search = require('youtube-search');
