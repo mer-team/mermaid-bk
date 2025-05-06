@@ -1,6 +1,7 @@
 require('dotenv').config();
-const { User } = require('../src/models/index');
 const { verify } = require('jsonwebtoken');
+
+const { User } = require('../src/models/index');
 
 const validateToken = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
