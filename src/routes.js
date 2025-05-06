@@ -1,13 +1,11 @@
 const express = require('express');
 const route = express.Router();
 
-const UserController = require('./controllers/UserController');
-const SongController = require('./controllers/SongController');
-const SongClassificationController = require('./controllers/SongClassificationController.js');
-
-const { validateToken } = require('./JWT');
 const FeedbackController = require('./controllers/FeedbackController');
-
+const SongClassificationController = require('./controllers/SongClassificationController.js');
+const SongController = require('./controllers/SongController');
+const UserController = require('./controllers/UserController');
+const { validateToken } = require('./JWT');
 const { sendMessage } = require('./Services/rabbitmqService');
 
 //Register User on the database
@@ -43,23 +41,29 @@ route.get('/song/hits/:song_id', SongController.getHits);
 route.delete('/song/delete/:id', SongController.deleteSong);
 route.get('/song/get/streamedminutes', SongController.getStreamedMinutes);
 route.get('/song/get/analysed/videos', SongController.AnalysedVideos);
-route.get('/song/get/latest/classifications', SongController.getLatestClassifications);
+route.get(
+  '/song/get/latest/classifications',
+  SongController.getLatestClassifications
+);
 route.get('/songbyip', SongController.getQueueSongsByIp);
 //Get the song classification given the id of the song
 route.get('/classifications', SongClassificationController.index);
 route.post(
   '/song/classification/song/:external_id/user/:user_id',
-  SongClassificationController.classify,
+  SongClassificationController.classify
 );
 
 //Agree or Disagree with a classification
 route.post(
   '/feedback/agree/disagree/:agreeordisagree/user/:user_id/song/:song_id',
-  FeedbackController.index,
+  FeedbackController.index
 );
 route.get('/feedback/agrees/:song_id', FeedbackController.getTotalAgrees);
 route.get('/feedback/disagrees/:song_id', FeedbackController.getTotalDisagrees);
-route.get('/feedback/opinion/:user_id/:song_id', FeedbackController.getUserOpinion);
+route.get(
+  '/feedback/opinion/:user_id/:song_id',
+  FeedbackController.getUserOpinion
+);
 route.delete('/feedback/:user_id/:song_id', FeedbackController.undoFeedback);
 
 // Health check route

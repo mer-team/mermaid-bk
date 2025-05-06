@@ -31,7 +31,13 @@ module.exports = (sequelize, DataTypes) => {
       thumbnailMQ: DataTypes.STRING,
       hits: DataTypes.INTEGER,
       waveform: DataTypes.STRING,
-      status: DataTypes.ENUM('queued', 'processing', 'processed', 'error', 'cancelled'),
+      status: DataTypes.ENUM(
+        'queued',
+        'processing',
+        'processed',
+        'error',
+        'cancelled'
+      ),
       added_by_ip: DataTypes.STRING,
       added_by_user: DataTypes.STRING,
       general_classification: DataTypes.STRING,
@@ -39,7 +45,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: 'Song',
-    },
+    }
   );
   return Song;
 };

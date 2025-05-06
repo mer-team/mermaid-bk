@@ -1,5 +1,7 @@
 const http = require('http');
+
 const socketIo = require('socket.io');
+
 const app = require('./app');
 const winston = require('./utils/logger'); // Custom logger
 require('dotenv').config(); // Load environment variables
@@ -20,7 +22,9 @@ const connectedSong = {}; // Shared object for WebSocket connections
 io.on('connection', (socket) => {
   const { song_id } = socket.handshake.query;
   connectedSong[song_id] = socket.id;
-  winston.info(`WebSocket connected: song_id=${song_id}, socket_id=${socket.id}`);
+  winston.info(
+    `WebSocket connected: song_id=${song_id}, socket_id=${socket.id}`
+  );
 
   socket.on('disconnect', () => {
     delete connectedSong[song_id];

@@ -31,7 +31,10 @@ const logger = createLogger({
     // For production, use JSON format for better log processing
     env === 'production'
       ? format.json()
-      : format.printf(({ timestamp, level, message }) => `${timestamp} [${level}]: ${message}`),
+      : format.printf(
+          ({ timestamp, level, message }) =>
+            `${timestamp} [${level}]: ${message}`
+        )
   ),
   transports: [
     // Console output - silent in test mode
@@ -39,7 +42,10 @@ const logger = createLogger({
       silent: env === 'test',
       format: format.combine(
         format.colorize(),
-        format.printf(({ timestamp, level, message }) => `${timestamp} [${level}]: ${message}`),
+        format.printf(
+          ({ timestamp, level, message }) =>
+            `${timestamp} [${level}]: ${message}`
+        )
       ),
     }),
     // Always log errors to file

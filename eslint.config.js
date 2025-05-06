@@ -1,89 +1,75 @@
-const { configs } = require('@eslint/js');
-const prettierConfig = require('eslint-config-prettier');
-const eslintPluginPrettier = require('eslint-plugin-prettier');
-const eslintPluginSecurity = require('eslint-plugin-security');
-const eslintPluginJest = require('eslint-plugin-jest');
-const eslintPluginImport = require('eslint-plugin-import');
+const securityPlugin = require('eslint-plugin-security');
+const jestPlugin = require('eslint-plugin-jest');
 
 module.exports = [
-  configs.recommended,
-  prettierConfig,
-  eslintPluginSecurity.configs.recommended,
-  eslintPluginImport.configs.recommended,
   {
-    languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-      globals: {
-        // Node.js global variables
-        process: 'readonly',
-        require: 'readonly',
-        module: 'writable',
-        __dirname: 'readonly',
-        __filename: 'readonly',
-        // Jest global variables
-        jest: 'readonly',
-        describe: 'readonly',
-        it: 'readonly',
-        expect: 'readonly',
-        beforeEach: 'readonly',
-        afterEach: 'readonly',
-        beforeAll: 'readonly',
-        afterAll: 'readonly',
-      },
-    },
-    linterOptions: {
-      reportUnusedDisableDirectives: true,
-    },
+    ignores: ['node_modules/**', 'build/**', 'dist/**', 'coverage/**'],
+  },
+  {
+    files: ['src/**/*.js'],
     plugins: {
-      prettier: eslintPluginPrettier,
-      security: eslintPluginSecurity,
-      jest: eslintPluginJest,
-      import: eslintPluginImport,
+      security: securityPlugin,
+      jest: jestPlugin,
+    },
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
     },
     rules: {
-      'prettier/prettier': ['warn', { endOfLine: 'auto' }],
-      // Node.js specific rules
-      'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
-      'no-process-exit': 'error',
-      'no-path-concat': 'error',
-      'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
-      'consistent-return': 'error',
-      // Import rules
-      'import/first': 'error',
-      'import/no-duplicates': 'error',
-      'import/order': [
+      // Best practices
+      'no-console': 'warn',
+      'no-eval': 'error',
+      'no-var': 'error',
+      'prefer-const': 'error',
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+
+      // Style
+      semi: ['error', 'always'],
+      quotes: ['error', 'single', { avoidEscape: true }],
+      'comma-dangle': ['error', 'always-multiline'],
+      indent: ['error', 2],
+      'arrow-spacing': 'error',
+      'object-curly-spacing': ['error', 'always'],
+      'key-spacing': ['error', { beforeColon: false, afterColon: true }],
+      'no-trailing-spaces': 'error',
+      'max-len': ['warn', { code: 100, ignoreUrls: true }],
+
+      // Import
+      'sort-imports': [
         'error',
         {
-          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-          'newlines-between': 'always',
-          alphabetize: { order: 'asc', caseInsensitive: true },
+          ignoreCase: true,
+          ignoreDeclarationSort: true,
+          ignoreMemberSort: false,
+          memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
+          allowSeparatedGroups: true,
         },
       ],
+
       // Security best practices
       'security/detect-object-injection': 'warn',
       'security/detect-non-literal-fs-filename': 'warn',
     },
-    ignores: ['node_modules/**', 'build/**', 'dist/**', 'coverage/**'],
-    files: ['src/**/*.js'],
-    overrides: [
-      {
-        files: ['src/migrations/**/*.js', 'src/seeders/**/*.js'],
-        rules: {
-          'no-unused-vars': ['error', { argsIgnorePattern: '^Sequelize$' }],
-        },
-      },
-      // Jest test specific rules
-      {
-        files: ['tests/**/*.js', '**/*.test.js'],
-        rules: {
-          'jest/no-disabled-tests': 'warn',
-          'jest/no-focused-tests': 'error',
-          'jest/no-identical-title': 'error',
-          'jest/prefer-to-have-length': 'warn',
-          'jest/valid-expect': 'error',
-        },
-      },
-    ],
+  },
+  // Override for migration and seeder files
+  {
+    files: ['src/migrations/**/*.js', 'src/seeders/**/*.js'],
+    rules: {
+      'no-unused-vars': ['error', { argsIgnorePattern: '^Sequelize$' }],
+    },
+  },
+  // Override for Jest test files
+  {
+    files: ['tests/**/*.js', '**/*.test.js'],
+    plugins: {
+      jest: jestPlugin,
+    },
+    rules: {
+      'jest/no-disabled-tests': 'warn',
+      'jest/no-focused-tests': 'error',
+      'jest/no-identical-title': 'error',
+      'jest/prefer-to-have-length': 'warn',
+      'jest/valid-expect': 'error',
+    },
   },
 ];
