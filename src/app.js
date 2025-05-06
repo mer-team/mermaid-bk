@@ -1,12 +1,17 @@
-const express = require('express');
 const cors = require('cors');
+const express = require('express');
 const requestIp = require('request-ip');
 const swaggerUI = require('swagger-ui-express');
-const swaggerDocs = require('./swagger.json');
+
+const {
+  requestLogger,
+  errorHandler,
+  notFoundHandler,
+} = require('./middleware');
 const routes = require('./routes');
-const morgan = require('morgan');
-const winston = require('./utils/logger'); // Custom logger
-require('dotenv').config(); // Load environment variables
+const swaggerDocs = require('./swagger.json');
+const winston = require('./utils/logger');
+require('dotenv').config();
 
 /**
  * Express Application Setup
@@ -26,20 +31,8 @@ app.use(cors());
 app.use(requestIp.mw()); // Middleware to get the IP of the user
 app.use(express.json()); // Parse JSON requests
 
-// Logging middleware
-const env = process.env.NODE_ENV || 'development';
-if (env !== 'test') {
-  app.use(
-    morgan(env === 'production' ? 'combined' : 'dev', {
-      stream: {
-        write: (message) => winston.debug(message.trim()), // Use debug for HTTP logs
-      },
-      skip: (req) => req.url === '/up', // Skip health check logs
-    }),
-  );
-}
-
-winston.info(`Server running in ${env} mode`);
+// Custom request logging
+app.use(requestLogger);
 
 // Swagger setup
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
@@ -49,16 +42,8 @@ winston.info('Swagger API documentation available at /api-docs');
 app.use('/', routes);
 winston.info('Routes initialized.');
 
-// Handle 404 errors
-app.use((req, res) => {
-  winston.warn(`404 Not Found: ${req.method} ${req.url}`);
-  res.status(404).json({ error: 'Not Found' });
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  winston.error(`Internal Server Error: ${err.message}`);
-  res.status(500).json({ error: 'Internal Server Error' });
-});
+// Error handling middleware (must be after routes)
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 module.exports = app;
