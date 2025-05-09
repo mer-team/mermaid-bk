@@ -21,7 +21,11 @@ module.exports = {
     ],
     'scope-enum': [2, 'always', ['api', 'web', 'mer', 'all']],
     'scope-empty': [2, 'never'],
-    'subject-case': [2, 'always', ['sentence-case', 'start-case', 'lower-case']],
+    'subject-case': [
+      2,
+      'always',
+      ['sentence-case', 'start-case', 'lower-case'],
+    ],
     'subject-max-length': [2, 'always', 80], // Enforce max subject length
   },
 };

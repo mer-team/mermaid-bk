@@ -35,36 +35,40 @@ async function saveSong(id, ip, classification) {
     key: 'AIzaSyC-Du9-yLtOM0ZgbNPfuTsKvQviFqaGsV0',
   };
 
-  search(`https://www.youtube.com/watch?v=${id}`, opts, async function (err, results) {
-    if (err) return console.log(err);
+  search(
+    `https://www.youtube.com/watch?v=${id}`,
+    opts,
+    async function (err, results) {
+      if (err) return console.log(err);
 
-    //Keep the song in the database
-    const song = await Song.create({
-      external_id: results[0].id,
-      link: results[0].link,
-      title: results[0].title,
-      artist: results[0].channelTitle,
-      duration: new Date(0, 0, 0, 0, 2, 20), //Default the api dont give this data
-      year: new Date(results[0].publishedAt).getFullYear(),
-      date: new Date(results[0].publishedAt),
-      genre: 'Salsa, Kuduro, Romance', //Default the api dont give this data
-      description: results[0].description,
-      thumbnailHQ: results[0].thumbnails.high.url,
-      thumbnailMQ: results[0].thumbnails.medium.url,
-      hits: 0,
-      waveform: 'dQw4w9WgXcQ.png',
-      status: 'processed',
-      added_by_ip: ip,
-      general_classification: classification,
-    })
-      .then((song) => {
-        songId = song.id;
-        console.log(`https://www.youtube.com/watch?v=${id}`);
+      //Keep the song in the database
+      const song = await Song.create({
+        external_id: results[0].id,
+        link: results[0].link,
+        title: results[0].title,
+        artist: results[0].channelTitle,
+        duration: new Date(0, 0, 0, 0, 2, 20), //Default the api dont give this data
+        year: new Date(results[0].publishedAt).getFullYear(),
+        date: new Date(results[0].publishedAt),
+        genre: 'Salsa, Kuduro, Romance', //Default the api dont give this data
+        description: results[0].description,
+        thumbnailHQ: results[0].thumbnails.high.url,
+        thumbnailMQ: results[0].thumbnails.medium.url,
+        hits: 0,
+        waveform: 'dQw4w9WgXcQ.png',
+        status: 'processed',
+        added_by_ip: ip,
+        general_classification: classification,
       })
-      .catch((e) => {
-        console.log(e);
-      });
-  });
+        .then((song) => {
+          songId = song.id;
+          console.log(`https://www.youtube.com/watch?v=${id}`);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    }
+  );
 }
 
 async function classifySong(message) {
@@ -172,7 +176,7 @@ const startScript = async () => {
         async function (msg) {
           await classifySong(msg);
         },
-        { noAck: true },
+        { noAck: true }
       );
     });
   });
