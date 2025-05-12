@@ -16,8 +16,7 @@ const userValidationRules = {
     body('email')
       .trim()
       .isEmail()
-      .normalizeEmail()
-      .withMessage('Must provide a valid email'),
+      .withMessage('Must provide a valid email address'),
     body('password')
       .isLength({ min: 6 })
       .withMessage('Password must be at least 6 characters long'),
@@ -25,12 +24,8 @@ const userValidationRules = {
 
   // Login validation
   login: [
-    body('email')
-      .trim()
-      .isEmail()
-      .normalizeEmail()
-      .withMessage('Must provide a valid email'),
-    body('password').not().isEmpty().withMessage('Password is required'),
+    body('email').isEmail().withMessage('Must provide a valid email address'),
+    body('password').notEmpty().withMessage('Password is required'),
   ],
 
   // Password change validation

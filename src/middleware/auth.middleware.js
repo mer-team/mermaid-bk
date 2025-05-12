@@ -2,7 +2,9 @@
  * Authentication middleware for JWT token validation
  */
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET } = process.env;
+
+// Use test-secret as fallback for testing purposes
+const JWT_SECRET = process.env.JWT_SECRET || 'test-secret';
 
 /**
  * Validates JWT token from request headers
@@ -11,32 +13,26 @@ const { JWT_SECRET } = process.env;
  * @param {Function} next - Express next function
  */
 const validateToken = (req, res, next) => {
+  // Get token from Authorization header
   const authHeader = req.headers.authorization;
-
   if (!authHeader) {
-    return res.status(401).json({ error: 'No token provided' });
+    return res
+      .status(401)
+      .json({ message: 'No authorization header provided' });
   }
 
-  const parts = authHeader.split(' ');
-
-  if (parts.length !== 2) {
-    return res.status(401).json({ error: 'Token error' });
-  }
-
-  const [scheme, token] = parts;
-
-  if (!/^Bearer$/i.test(scheme)) {
-    return res.status(401).json({ error: 'Token malformatted' });
+  const token = authHeader.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ message: 'No token provided' });
   }
 
   jwt.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) {
-      return res.status(401).json({ error: 'Invalid token' });
+      return res.status(401).json({ message: 'Invalid token' });
     }
 
-    req.userId = decoded.id;
-    req.userRole = decoded.role;
-    return next();
+    req.user = decoded;
+    next();
   });
 };
 

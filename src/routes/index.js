@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { sendMessage } = require('../Services/rabbitmqService');
+const { sendMessage } = require('../services/rabbitmqService');
 
 const classificationRoutes = require('./classificationRoutes');
 const feedbackRoutes = require('./feedbackRoutes');
@@ -24,7 +24,13 @@ router.use('/feedbacks', feedbackRoutes);
 
 router.get('/queue/send', async (req, res) => {
   try {
-    await sendMessage('videoDownloadQueue', 'Test message from /send route');
+    await sendMessage(
+      'videoDownloadQueue',
+      JSON.stringify({
+        url: 'https://example.com/video',
+        format: 'mp4',
+      })
+    );
     res.status(200).send('Message sent to RabbitMQ');
   } catch (error) {
     console.error('Error sending message to RabbitMQ:', error);
