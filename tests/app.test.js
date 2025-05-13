@@ -1,6 +1,6 @@
 const request = require('supertest');
 const app = require('../../src/app');
-const routes = require('../../src/routes');
+const routes = require('../../src/routes/index');
 const {
   requestLogger,
   errorHandler,
