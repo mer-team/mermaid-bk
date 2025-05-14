@@ -24,10 +24,10 @@ describe('Classification Routes', () => {
 
     // Mock controller methods with simple implementations
     SongClassificationController.index.mockImplementation((req, res) =>
-      res.status(200).json({ classifications: [] }),
+      res.status(200).json({ classifications: [] })
     );
     SongClassificationController.classify.mockImplementation((req, res) =>
-      res.status(201).json({ message: 'Classification submitted' }),
+      res.status(201).json({ message: 'Classification submitted' })
     );
   });
 

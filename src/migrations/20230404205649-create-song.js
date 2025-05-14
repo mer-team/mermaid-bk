@@ -48,7 +48,7 @@ module.exports = {
           'processing',
           'processed',
           'error',
-          'cancelled',
+          'cancelled'
         ),
       },
       thumbnailHQ: {

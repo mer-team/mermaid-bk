@@ -61,7 +61,7 @@ describe('Logging Middleware', () => {
         url: '/test-path',
         ip: '127.0.0.1',
         userAgent: 'Jest Test Agent',
-      }),
+      })
     );
 
     // Check that next() was called
@@ -79,7 +79,7 @@ describe('Logging Middleware', () => {
         url: '/test-path',
         statusCode: 200,
         duration: 0,
-      }),
+      })
     );
   });
 
@@ -91,7 +91,7 @@ describe('Logging Middleware', () => {
     // Should use warn for error status codes
     expect(winston.warn).toHaveBeenCalledWith(
       `Response: 404 (0ms)`,
-      expect.any(Object),
+      expect.any(Object)
     );
   });
 

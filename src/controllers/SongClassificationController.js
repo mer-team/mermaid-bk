@@ -4,7 +4,7 @@ const { Log, Song } = require('../models/index');
 const async = require('async');
 const { Op } = require('sequelize');
 var search = require('youtube-search');
-const { sendMessage } = require('../Services/rabbitmqService');
+const { sendMessage } = require('../services/rabbitmqService');
 const formatter = require('../utils/responseFormatter');
 
 //////////////////////////////////////////////////////////////
@@ -61,7 +61,7 @@ function saveTheSong(songId) {
         .catch((e) => {
           console.log(e);
         });
-    },
+    }
   );
 }
 
@@ -76,7 +76,7 @@ async function updateStateSong(status, songId) {
 async function updateProcessed(emotion, songId) {
   await Song.update(
     { status: 'processed', general_classification: emotion },
-    { where: { external_id: songId } },
+    { where: { external_id: songId } }
   );
 }
 ///////////////////////////////////////////////////7777777////
@@ -116,7 +116,7 @@ const classificationQueue = async.queue(async (song, callback) => {
         });
         await sendMessage(
           'videoDownloadQueue',
-          `Video downloaded for song ID: ${song}, Title: ${songDetails.title}`,
+          `Video downloaded for song ID: ${song}, Title: ${songDetails.title}`
         );
       }
     }, 8000);
@@ -243,7 +243,7 @@ module.exports = {
         return formatter.error(
           res,
           'This song is already in the queue for classification.',
-          400,
+          400
         );
       }
       //Calculate the song limits the user has to have in the queue based on if they are logged in or not
@@ -254,7 +254,7 @@ module.exports = {
           return formatter.error(
             res,
             'You have already reached the limit for song classification',
-            400,
+            400
           );
         }
       } else {
@@ -264,7 +264,7 @@ module.exports = {
           return formatter.error(
             res,
             'You have already reached the limit for song classification',
-            400,
+            400
           );
         }
       }

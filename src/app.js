@@ -1,7 +1,8 @@
 const cors = require('cors');
 const express = require('express');
 const requestIp = require('request-ip');
-const swaggerUI = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 
 const {
   requestLogger,
@@ -9,7 +10,6 @@ const {
   notFoundHandler,
 } = require('./middleware');
 const routes = require('./routes');
-const swaggerDocs = require('./swagger.json');
 const winston = require('./utils/logger');
 require('dotenv').config();
 
@@ -35,7 +35,30 @@ app.use(express.json()); // Parse JSON requests
 app.use(requestLogger);
 
 // Swagger setup
-app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
+const swaggerDefinition = {
+  openapi: '3.0.0',
+  info: {
+    title: 'Mermaid API',
+    version: '0.3.0',
+    description:
+      'API documentation for the MERmaid Music Emotion Recognition system',
+  },
+  servers: [
+    {
+      url: 'http://localhost:3000',
+      description: 'Development server',
+    },
+  ],
+};
+
+const options = {
+  swaggerDefinition,
+  apis: ['./src/routes/*.js'], // Path to the API docs
+};
+
+const swaggerSpec = swaggerJsdoc(options);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 winston.info('Swagger API documentation available at /api-docs');
 
 // Routes - Using the new modular routes structure

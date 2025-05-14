@@ -42,7 +42,7 @@ startScript = async () => {
           // Simulate processing steps, the goal here as to call an api to report logs and pass info
           await processSong(msg);
         },
-        { noAck: true },
+        { noAck: true }
       );
     });
   });

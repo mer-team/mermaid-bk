@@ -33,8 +33,8 @@ const logger = createLogger({
       ? format.json()
       : format.printf(
           ({ timestamp, level, message }) =>
-            `${timestamp} [${level}]: ${message}`,
-        ),
+            `${timestamp} [${level}]: ${message}`
+        )
   ),
   transports: [
     // Console output - silent in test mode
@@ -44,8 +44,8 @@ const logger = createLogger({
         format.colorize(),
         format.printf(
           ({ timestamp, level, message }) =>
-            `${timestamp} [${level}]: ${message}`,
-        ),
+            `${timestamp} [${level}]: ${message}`
+        )
       ),
     }),
     // Always log errors to file

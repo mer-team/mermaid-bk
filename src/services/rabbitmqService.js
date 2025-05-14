@@ -21,7 +21,7 @@ function sendMessage(queue, msg) {
         channel.assertQueue(queue, { durable: false });
         channel.sendToQueue(queue, Buffer.from(msg));
         winston.info(
-          `Message sent to RabbitMQ: queue=${queue}, message=${msg}`,
+          `Message sent to RabbitMQ: queue=${queue}, message=${msg}`
         );
       });
 
@@ -29,7 +29,7 @@ function sendMessage(queue, msg) {
         connection.close();
         winston.debug('RabbitMQ connection closed');
       }, 500);
-    },
+    }
   );
 }
 

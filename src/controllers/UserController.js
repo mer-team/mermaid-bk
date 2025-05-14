@@ -36,7 +36,7 @@ module.exports = {
       if (!validatePassw(passw)) {
         return formatter.error(
           res,
-          'Error: The password you entered does not meet the password requirements. The password must be at least 8 characters long, including at least one uppercase letter, one lowercase letter, one digit or special character, and cannot contain a period or a newline. Please try again.',
+          'Error: The password you entered does not meet the password requirements. The password must be at least 8 characters long, including at least one uppercase letter, one lowercase letter, one digit or special character, and cannot contain a period or a newline. Please try again.'
         );
       }
       //Check if the current name and email exists on the database
@@ -77,7 +77,7 @@ module.exports = {
           return formatter.success(
             res,
             { message: 'Please check your email to confirm your account' },
-            201,
+            201
           );
         })
         .catch((err) => {
@@ -174,13 +174,13 @@ module.exports = {
         return formatter.success(
           res,
           { message: 'Please check your email to confirm your account' },
-          201,
+          201
         );
       } else {
         return formatter.error(
           res,
           'Failed to send confirmation email. Please try again.',
-          500,
+          500
         );
       }
     } catch (e) {
@@ -212,14 +212,14 @@ module.exports = {
                 email: Sequelize.where(
                   Sequelize.fn('LOWER', Sequelize.col('email')),
                   'LIKE',
-                  `%${email}%`,
+                  `%${email}%`
                 ),
               },
               {
                 name: Sequelize.where(
                   Sequelize.fn('LOWER', Sequelize.col('name')),
                   'LIKE',
-                  `%${name}%`,
+                  `%${name}%`
                 ),
               },
             ],
@@ -238,14 +238,14 @@ module.exports = {
                 email: Sequelize.where(
                   Sequelize.fn('LOWER', Sequelize.col('email')),
                   'LIKE',
-                  `%${email}%`,
+                  `%${email}%`
                 ),
               },
               {
                 name: Sequelize.where(
                   Sequelize.fn('LOWER', Sequelize.col('name')),
                   'LIKE',
-                  `%${name}%`,
+                  `%${name}%`
                 ),
               },
             ],
@@ -282,7 +282,7 @@ module.exports = {
     try {
       await User.update(
         { blocked_at: new Date() },
-        { where: { email: email } },
+        { where: { email: email } }
       );
       return formatter.success(res, { message: 'User Blocked with success' });
     } catch (e) {
@@ -319,7 +319,7 @@ module.exports = {
         if (!validatePassw(password)) {
           return formatter.error(
             res,
-            'Error: The password you entered does not meet the password requirements. The password must be at least 8 characters long, including at least one uppercase letter, one lowercase letter, one digit or special character, and cannot contain a period or a newline. Please try again.',
+            'Error: The password you entered does not meet the password requirements. The password must be at least 8 characters long, including at least one uppercase letter, one lowercase letter, one digit or special character, and cannot contain a period or a newline. Please try again.'
           );
         } else {
           //Create a hashed password
@@ -328,12 +328,12 @@ module.exports = {
           if (await bcrypt.compare(password, user.hash_passwd)) {
             return formatter.error(
               res,
-              'The current password is equal to the one you are trying to change',
+              'The current password is equal to the one you are trying to change'
             );
           }
           await User.update(
             { hash_passwd: hash_passw },
-            { where: { email: email } },
+            { where: { email: email } }
           );
           return formatter.success(res, {
             message: 'Password Changed with success',
@@ -418,7 +418,7 @@ module.exports = {
           return formatter.success(
             res,
             { message: 'Please check your email to reset the password' },
-            201,
+            201
           );
         } catch (error) {
           return formatter.error(res, 'Error sending email', 500);
@@ -440,7 +440,7 @@ module.exports = {
         return res
           .status(400)
           .json(
-            'Error: The password you entered does not meet the password requirements. The password must be at least 8 characters long, including at least one uppercase letter, one lowercase letter, one digit or special character, and cannot contain a period or a newline. Please try again.',
+            'Error: The password you entered does not meet the password requirements. The password must be at least 8 characters long, including at least one uppercase letter, one lowercase letter, one digit or special character, and cannot contain a period or a newline. Please try again.'
           );
       }
 
@@ -449,7 +449,7 @@ module.exports = {
 
       await User.update(
         { hash_passw: hash_passw },
-        { where: { email: email } },
+        { where: { email: email } }
       );
       return formatter.success(res, { message: 'Password changed' });
     } catch (e) {

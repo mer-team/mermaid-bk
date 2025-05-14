@@ -21,7 +21,7 @@ module.exports = {
             if (feedback.dataValues.agree == 1 && agreeordisagree == 2) {
               await Feedback.update(
                 { disagree: 1, agree: 0 },
-                { where: { id: feedback.dataValues.id } },
+                { where: { id: feedback.dataValues.id } }
               );
               return res.status(200).json('U have now disagreed');
             }
@@ -32,7 +32,7 @@ module.exports = {
             ) {
               await Feedback.update(
                 { agree: 1, disagree: 0 },
-                { where: { id: feedback.dataValues.id } },
+                { where: { id: feedback.dataValues.id } }
               );
               return res.status(200).json('U have now agreed');
             }

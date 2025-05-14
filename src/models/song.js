@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
         'processing',
         'processed',
         'error',
-        'cancelled',
+        'cancelled'
       ),
       added_by_ip: DataTypes.STRING,
       added_by_user: DataTypes.STRING,
@@ -45,7 +45,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: 'Song',
-    },
+    }
   );
   return Song;
 };

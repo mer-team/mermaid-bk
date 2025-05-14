@@ -23,7 +23,7 @@ io.on('connection', (socket) => {
   const { song_id } = socket.handshake.query;
   connectedSong[song_id] = socket.id;
   winston.info(
-    `WebSocket connected: song_id=${song_id}, socket_id=${socket.id}`,
+    `WebSocket connected: song_id=${song_id}, socket_id=${socket.id}`
   );
 
   socket.on('disconnect', () => {

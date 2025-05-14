@@ -24,19 +24,19 @@ describe('Feedback Routes', () => {
 
     // Mock controller methods with simple implementations
     FeedbackController.index.mockImplementation((req, res) =>
-      res.status(201).json({ message: 'Feedback submitted' }),
+      res.status(201).json({ message: 'Feedback submitted' })
     );
     FeedbackController.getTotalAgrees.mockImplementation((req, res) =>
-      res.status(200).json({ agrees: 5 }),
+      res.status(200).json({ agrees: 5 })
     );
     FeedbackController.getTotalDisagrees.mockImplementation((req, res) =>
-      res.status(200).json({ disagrees: 3 }),
+      res.status(200).json({ disagrees: 3 })
     );
     FeedbackController.getUserOpinion.mockImplementation((req, res) =>
-      res.status(200).json({ opinion: 'agree' }),
+      res.status(200).json({ opinion: 'agree' })
     );
     FeedbackController.undoFeedback.mockImplementation((req, res) =>
-      res.status(200).json({ message: 'Feedback removed' }),
+      res.status(200).json({ message: 'Feedback removed' })
     );
   });
 

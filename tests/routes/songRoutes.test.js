@@ -24,43 +24,43 @@ describe('Song Routes', () => {
 
     // Mock controller methods with simple implementations
     SongController.index.mockImplementation((req, res) =>
-      res.status(200).json({ songs: [] }),
+      res.status(200).json({ songs: [] })
     );
     SongController.show.mockImplementation((req, res) =>
-      res.status(200).json({ song: { id: 1 } }),
+      res.status(200).json({ song: { id: 1 } })
     );
     SongController.filterByName.mockImplementation((req, res) =>
-      res.status(200).json({ songs: [] }),
+      res.status(200).json({ songs: [] })
     );
     SongController.filterByEmotion.mockImplementation((req, res) =>
-      res.status(200).json({ songs: [] }),
+      res.status(200).json({ songs: [] })
     );
     SongController.filterByAll.mockImplementation((req, res) =>
-      res.status(200).json({ songs: [] }),
+      res.status(200).json({ songs: [] })
     );
     SongController.updateHits.mockImplementation((req, res) =>
-      res.status(200).json({ message: 'Hits updated' }),
+      res.status(200).json({ message: 'Hits updated' })
     );
     SongController.getHits.mockImplementation((req, res) =>
-      res.status(200).json({ hits: 10 }),
+      res.status(200).json({ hits: 10 })
     );
     SongController.getQueueSongs.mockImplementation((req, res) =>
-      res.status(200).json({ songs: [] }),
+      res.status(200).json({ songs: [] })
     );
     SongController.getQueueSongsByIp.mockImplementation((req, res) =>
-      res.status(200).json({ songs: [] }),
+      res.status(200).json({ songs: [] })
     );
     SongController.deleteSong.mockImplementation((req, res) =>
-      res.status(200).json({ message: 'Song deleted' }),
+      res.status(200).json({ message: 'Song deleted' })
     );
     SongController.getStreamedMinutes.mockImplementation((req, res) =>
-      res.status(200).json({ minutes: 120 }),
+      res.status(200).json({ minutes: 120 })
     );
     SongController.AnalysedVideos.mockImplementation((req, res) =>
-      res.status(200).json({ count: 5 }),
+      res.status(200).json({ count: 5 })
     );
     SongController.getLatestClassifications.mockImplementation((req, res) =>
-      res.status(200).json({ classifications: [] }),
+      res.status(200).json({ classifications: [] })
     );
   });
 
@@ -103,7 +103,7 @@ describe('Song Routes', () => {
 
     test('GET /filter/name/:title/emotion/:emotion should call SongController.filterByAll', async () => {
       const response = await request(app).get(
-        '/filter/name/test-song/emotion/happy',
+        '/filter/name/test-song/emotion/happy'
       );
 
       expect(response.status).toBe(200);
