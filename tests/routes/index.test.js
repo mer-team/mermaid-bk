@@ -39,7 +39,7 @@ describe('Routes Index', () => {
       expect(response.text).toBe('Message sent to RabbitMQ');
       expect(sendMessage).toHaveBeenCalledWith(
         'videoDownloadQueue',
-        'Test message from /send route'
+        'Test message from /send route',
       );
     });
 

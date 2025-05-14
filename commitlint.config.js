@@ -1,7 +1,7 @@
 module.exports = {
   extends: ['@commitlint/config-conventional'],
   rules: {
-    'body-max-line-length': [2, 'always', 100],
+    'body-max-line-length': [2, 'always', 120],
     'type-enum': [
       2,
       'always',
@@ -19,13 +19,11 @@ module.exports = {
         'test',
       ],
     ],
-    'scope-enum': [2, 'always', ['api', 'web', 'mer', 'all']],
-    'scope-empty': [2, 'never'],
     'subject-case': [
       2,
       'always',
       ['sentence-case', 'start-case', 'lower-case'],
     ],
-    'subject-max-length': [2, 'always', 80], // Enforce max subject length
+    'subject-max-length': [2, 'always', 100], // Enforce max subject length
   },
 };

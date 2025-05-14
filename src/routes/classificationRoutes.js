@@ -17,7 +17,7 @@ router.post(
   '/songs/:external_id/users/:user_id',
   songValidationRules.classification,
   validate,
-  SongClassificationController.classify
+  SongClassificationController.classify,
 );
 
 module.exports = router;

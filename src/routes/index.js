@@ -29,7 +29,7 @@ router.get('/queue/send', async (req, res) => {
       JSON.stringify({
         url: 'https://example.com/video',
         format: 'mp4',
-      })
+      }),
     );
     res.status(200).send('Message sent to RabbitMQ');
   } catch (error) {

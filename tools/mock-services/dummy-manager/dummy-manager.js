@@ -96,7 +96,7 @@ startScript = async () => {
             channel.ack(msg); // Or you can nack the message using channel.nack(msg) if you want to discard it.
           }
         },
-        {}
+        {},
       ); //, { noAck: true });
     });
   });

@@ -1,2 +1,18 @@
-# Enforce Unix newlines
+# Ensure consistent line endings
 * text=auto eol=lf
+
+# Treat JSON files as text
+*.json text
+
+# Treat Markdown files as text
+*.md text
+
+# Treat shell scripts as text
+*.sh text eol=lf
+
+# Ignore binary files for diff
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.mp3 binary
+*.wav binary

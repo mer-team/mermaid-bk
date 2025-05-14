@@ -27,46 +27,46 @@ describe('User Routes', () => {
 
     // Mock controller methods with simple implementations
     UserController.store.mockImplementation((req, res) =>
-      res.status(201).json({ message: 'User created' })
+      res.status(201).json({ message: 'User created' }),
     );
     UserController.index.mockImplementation((req, res) =>
-      res.status(200).json({ token: 'fake-token' })
+      res.status(200).json({ token: 'fake-token' }),
     );
     UserController.validate.mockImplementation((req, res) =>
-      res.status(200).json({ message: 'Email validated' })
+      res.status(200).json({ message: 'Email validated' }),
     );
     UserController.resendEmail.mockImplementation((req, res) =>
-      res.status(200).json({ message: 'Email resent' })
+      res.status(200).json({ message: 'Email resent' }),
     );
     UserController.resetPassw.mockImplementation((req, res) =>
-      res.status(200).json({ message: 'Password reset email sent' })
+      res.status(200).json({ message: 'Password reset email sent' }),
     );
     UserController.passwordChange.mockImplementation((req, res) =>
-      res.status(200).json({ message: 'Password changed' })
+      res.status(200).json({ message: 'Password changed' }),
     );
     UserController.show.mockImplementation((req, res) =>
-      res.status(200).json({ user: { id: 1 } })
+      res.status(200).json({ user: { id: 1 } }),
     );
     UserController.changePassword.mockImplementation((req, res) =>
-      res.status(200).json({ message: 'Password changed' })
+      res.status(200).json({ message: 'Password changed' }),
     );
     UserController.changeUsername.mockImplementation((req, res) =>
-      res.status(200).json({ message: 'Username changed' })
+      res.status(200).json({ message: 'Username changed' }),
     );
     UserController.getUsers.mockImplementation((req, res) =>
-      res.status(200).json({ users: [] })
+      res.status(200).json({ users: [] }),
     );
     UserController.getUsersByEmailOrUsername.mockImplementation((req, res) =>
-      res.status(200).json({ users: [] })
+      res.status(200).json({ users: [] }),
     );
     UserController.getOnlyBlockedUsers.mockImplementation((req, res) =>
-      res.status(200).json({ users: [] })
+      res.status(200).json({ users: [] }),
     );
     UserController.blockUser.mockImplementation((req, res) =>
-      res.status(200).json({ message: 'User blocked' })
+      res.status(200).json({ message: 'User blocked' }),
     );
     UserController.unblockUser.mockImplementation((req, res) =>
-      res.status(200).json({ message: 'User unblocked' })
+      res.status(200).json({ message: 'User unblocked' }),
     );
   });
 

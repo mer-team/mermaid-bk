@@ -18,21 +18,21 @@ router.get(
   '/filter/name/:title',
   songValidationRules.filter,
   validate,
-  SongController.filterByName
+  SongController.filterByName,
 );
 
 router.get(
   '/filter/emotion/:emotion',
   songValidationRules.filter,
   validate,
-  SongController.filterByEmotion
+  SongController.filterByEmotion,
 );
 
 router.get(
   '/filter/name/:title/emotion/:emotion',
   songValidationRules.filter,
   validate,
-  SongController.filterByAll
+  SongController.filterByAll,
 );
 
 // Song statistics and user-specific song routes
@@ -48,17 +48,17 @@ router.delete('/:id', validateToken, SongController.deleteSong);
 router.get(
   '/stats/streamed-minutes',
   validateToken,
-  SongController.getStreamedMinutes
+  SongController.getStreamedMinutes,
 );
 router.get(
   '/stats/analyzed-videos',
   validateToken,
-  SongController.AnalysedVideos
+  SongController.AnalysedVideos,
 );
 router.get(
   '/stats/latest-classifications',
   validateToken,
-  SongController.getLatestClassifications
+  SongController.getLatestClassifications,
 );
 
 module.exports = router;

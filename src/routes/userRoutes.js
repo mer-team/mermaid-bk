@@ -15,14 +15,14 @@ router.post(
   '/signup',
   userValidationRules.signup,
   validate,
-  UserController.store
+  UserController.store,
 );
 
 router.post(
   '/login',
   userValidationRules.login,
   validate,
-  UserController.index
+  UserController.index,
 );
 
 router.get('/confirm/:token', UserController.validate);
@@ -38,7 +38,7 @@ router.post(
   validateToken,
   userValidationRules.passwordChange,
   validate,
-  UserController.changePassword
+  UserController.changePassword,
 );
 
 router.post('/change/username', validateToken, UserController.changeUsername);
@@ -49,25 +49,25 @@ router.post(
   '/search',
   validateToken,
   requireAdmin,
-  UserController.getUsersByEmailOrUsername
+  UserController.getUsersByEmailOrUsername,
 );
 router.get(
   '/blocked',
   validateToken,
   requireAdmin,
-  UserController.getOnlyBlockedUsers
+  UserController.getOnlyBlockedUsers,
 );
 router.post(
   '/block/:email',
   validateToken,
   requireAdmin,
-  UserController.blockUser
+  UserController.blockUser,
 );
 router.post(
   '/unblock/:email',
   validateToken,
   requireAdmin,
-  UserController.unblockUser
+  UserController.unblockUser,
 );
 
 module.exports = router;

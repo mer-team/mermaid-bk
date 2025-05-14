@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: 'Song_Segments',
-    }
+    },
   );
   return Song_Segments;
 };

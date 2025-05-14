@@ -14,7 +14,7 @@ router.post(
   '/songs/:song_id/users/:user_id/:agreeordisagree',
   feedbackValidationRules.submit,
   validate,
-  FeedbackController.index
+  FeedbackController.index,
 );
 
 // Get feedback statistics
@@ -26,7 +26,7 @@ router.get('/users/:user_id/songs/:song_id', FeedbackController.getUserOpinion);
 router.delete(
   '/users/:user_id/songs/:song_id',
   validateToken,
-  FeedbackController.undoFeedback
+  FeedbackController.undoFeedback,
 );
 
 module.exports = router;

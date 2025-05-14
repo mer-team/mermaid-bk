@@ -27,66 +27,56 @@ async function saveLog(msg, id) {
 }
 //Save the song to the database
 function saveTheSong(songId) {
-  var opts = {
-    key: process.env.YOUTUBE_API_KEY,
-  };
+  var opts = { key: process.env.YOUTUBE_API_KEY };
 
-  search(`https://www.youtube.com/watch?v=${songId}`, opts, async function (err, results) {
-    if (err) return console.log(err);
+  search(
+    `https://www.youtube.com/watch?v=${songId}`,
+    opts,
+    async function (err, results) {
+      if (err) return console.log(err);
 
-    //Keep the song in the database
-    const song = await Song.create({
-      external_id: results[0].id,
-      link: results[0].link,
-      title: results[0].title,
-      artist: results[0].channelTitle,
-      duration: new Date(0, 0, 0, 0, 2, 20), //Default the api dont give this data
-      year: new Date(results[0].publishedAt).getFullYear(),
-      date: new Date(results[0].publishedAt),
-      genre: 'Salsa, Kuduro, Romance', //Default the api dont give this data
-      description: results[0].description,
-      thumbnailHQ: results[0].thumbnails.high.url,
-      thumbnailMQ: results[0].thumbnails.medium.url,
-      hits: 0,
-      waveform: 'dQw4w9WgXcQ.png',
-      status: 'queued',
-      added_by_ip: ip,
-      added_by_user: userId,
-      general_classification: '',
-    })
-      .then((song) => {
-        console.log('Song saved');
+      //Keep the song in the database
+      const song = await Song.create({
+        external_id: results[0].id,
+        link: results[0].link,
+        title: results[0].title,
+        artist: results[0].channelTitle,
+        duration: new Date(0, 0, 0, 0, 2, 20), //Default the api dont give this data
+        year: new Date(results[0].publishedAt).getFullYear(),
+        date: new Date(results[0].publishedAt),
+        genre: 'Salsa, Kuduro, Romance', //Default the api dont give this data
+        description: results[0].description,
+        thumbnailHQ: results[0].thumbnails.high.url,
+        thumbnailMQ: results[0].thumbnails.medium.url,
+        hits: 0,
+        waveform: 'dQw4w9WgXcQ.png',
+        status: 'queued',
+        added_by_ip: ip,
+        added_by_user: userId,
+        general_classification: '',
       })
-      .catch((e) => {
-        console.log(e);
-      });
-  });
+        .then((song) => {
+          console.log('Song saved');
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+  );
 }
 
 //See if the user has
 
 //Update the state of the song
 async function updateStateSong(status, songId) {
-  await Song.update(
-    {
-      status: status,
-    },
-    {
-      where: { external_id: songId },
-    },
-  );
+  await Song.update({ status: status }, { where: { external_id: songId } });
 }
 
 //Update the classifitication of the song
 async function updateProcessed(emotion, songId) {
   await Song.update(
-    {
-      status: 'processed',
-      general_classification: emotion,
-    },
-    {
-      where: { external_id: songId },
-    },
+    { status: 'processed', general_classification: emotion },
+    { where: { external_id: songId } },
   );
 }
 ///////////////////////////////////////////////////7777777////
@@ -121,7 +111,9 @@ const classificationQueue = async.queue(async (song, callback) => {
           song_id: `${song}`,
           state: 'Video Dowloaded',
         });
-        const songDetails = await Song.findOne({ where: { external_id: song } });
+        const songDetails = await Song.findOne({
+          where: { external_id: song },
+        });
         await sendMessage(
           'videoDownloadQueue',
           `Video downloaded for song ID: ${song}, Title: ${songDetails.title}`,
@@ -203,23 +195,14 @@ function startClassification(song) {
 
 //see if the song is already on the database
 async function isAlreadyOnTheDatabase(song_id) {
-  const song = await Song.findOne({
-    where: {
-      external_id: song_id,
-    },
-  });
+  const song = await Song.findOne({ where: { external_id: song_id } });
   return song;
 }
 
 //see if the user based on his id has how many songs in the database
 async function howManySongsBasedOnUserId(id) {
   const song = await Song.findAll({
-    where: {
-      added_by_user: id,
-      status: {
-        [Op.ne]: 'processed',
-      },
-    },
+    where: { added_by_user: id, status: { [Op.ne]: 'processed' } },
   });
 
   return song.length;
@@ -227,12 +210,7 @@ async function howManySongsBasedOnUserId(id) {
 
 async function howManySongsBasedOnUserIp() {
   const song = await Song.findAll({
-    where: {
-      added_by_ip: ip,
-      status: {
-        [Op.ne]: 'processed',
-      },
-    },
+    where: { added_by_ip: ip, status: { [Op.ne]: 'processed' } },
   });
 
   return song.length;
@@ -244,9 +222,7 @@ module.exports = {
       const { id } = req.headers;
       console.log(id);
       const classifications = await Song_Classification.findAll({
-        where: {
-          song_id: id,
-        },
+        where: { song_id: id },
       });
       return formatter.success(res, classifications);
     } catch (e) {
@@ -264,7 +240,11 @@ module.exports = {
       userId = user_id;
       //Before doing any classification we have to see if the song is already on the database
       if ((await isAlreadyOnTheDatabase(external_id)) != null) {
-        return formatter.error(res, 'This song is already in the queue for classification.', 400);
+        return formatter.error(
+          res,
+          'This song is already in the queue for classification.',
+          400,
+        );
       }
       //Calculate the song limits the user has to have in the queue based on if they are logged in or not
       if (user_id != 'null') {

@@ -38,7 +38,7 @@ describe('Auth Middleware', () => {
       expect(jwt.verify).toHaveBeenCalledWith(
         'valid-token',
         'test-secret',
-        expect.any(Function)
+        expect.any(Function),
       );
       expect(req.userId).toBe(123);
       expect(req.userRole).toBe('user');
@@ -83,7 +83,7 @@ describe('Auth Middleware', () => {
       expect(jwt.verify).toHaveBeenCalledWith(
         'valid-token',
         'test-secret',
-        expect.any(Function)
+        expect.any(Function),
       );
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith({ error: 'Invalid token' });

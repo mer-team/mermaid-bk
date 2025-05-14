@@ -120,7 +120,11 @@ module.exports = {
       return formatter.success(res, songs);
     } catch (e) {
       winston.error(`Error fetching songs: ${e.message}`);
-      return formatter.error(res, 'Error filtering songs by name and emotion', 500);
+      return formatter.error(
+        res,
+        'Error filtering songs by name and emotion',
+        500,
+      );
     }
   },
 

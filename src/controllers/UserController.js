@@ -7,7 +7,8 @@ const jwt = require('jsonwebtoken');
 const formatter = require('../utils/responseFormatter');
 
 function validatePassw(passwd) {
-  const regex = /(?=^.{8,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/;
+  const regex =
+    /(?=^.{8,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/;
   return regex.test(passwd);
 }
 
@@ -53,7 +54,9 @@ module.exports = {
       const hash_passw = await bcrypt.hash(passw, 10);
 
       // Generate a token secret key
-      const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
+      const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: '1d',
+      });
 
       User.create({
         email: email,
@@ -106,7 +109,9 @@ module.exports = {
 
       //verify if the password equals to the one on the database
       if (await bcrypt.compare(passw, user.hash_passwd)) {
-        const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, {
+          expiresIn: '1h',
+        });
         return formatter.success(res, { token });
       } else {
         return formatter.error(res, 'Invalid credentials');
@@ -151,7 +156,9 @@ module.exports = {
       const decoded = jwt.decode(accessToken);
       const email = decoded.email;
       // Generate a token secret key
-      const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
+      const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: '1d',
+      });
 
       //Send the confirmation email
       const sendEmail = {
@@ -170,7 +177,11 @@ module.exports = {
           201,
         );
       } else {
-        return formatter.error(res, 'Failed to send confirmation email. Please try again.', 500);
+        return formatter.error(
+          res,
+          'Failed to send confirmation email. Please try again.',
+          500,
+        );
       }
     } catch (e) {
       console.log(e);
@@ -269,7 +280,10 @@ module.exports = {
   async blockUser(req, res) {
     const { email } = req.params;
     try {
-      await User.update({ blocked_at: new Date() }, { where: { email: email } });
+      await User.update(
+        { blocked_at: new Date() },
+        { where: { email: email } },
+      );
       return formatter.success(res, { message: 'User Blocked with success' });
     } catch (e) {
       console.log(e);
@@ -317,8 +331,13 @@ module.exports = {
               'The current password is equal to the one you are trying to change',
             );
           }
-          await User.update({ hash_passwd: hash_passw }, { where: { email: email } });
-          return formatter.success(res, { message: 'Password Changed with success' });
+          await User.update(
+            { hash_passwd: hash_passw },
+            { where: { email: email } },
+          );
+          return formatter.success(res, {
+            message: 'Password Changed with success',
+          });
         }
       } else {
         return formatter.error(res, 'The old password is wrong.');
@@ -383,7 +402,9 @@ module.exports = {
 
       if (user.confirmed) {
         try {
-          const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '10m' });
+          const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, {
+            expiresIn: '10m',
+          });
 
           //Send the confirmation email
           const sendEmail = {
@@ -426,7 +447,10 @@ module.exports = {
       //Create a hashed password
       const hash_passw = await bcrypt.hash(password, 10);
 
-      await User.update({ hash_passw: hash_passw }, { where: { email: email } });
+      await User.update(
+        { hash_passw: hash_passw },
+        { where: { email: email } },
+      );
       return formatter.success(res, { message: 'Password changed' });
     } catch (e) {
       console.log(e);

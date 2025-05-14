@@ -6,61 +6,84 @@
   "service": "api",
   "workspaceFolder": "/workspaces/mermaid-api",
   "shutdownAction": "stopCompose",
-
-  // Features to add to the dev container. More info: https://containers.dev/features.
-  // "features": {},
-
-  //"runArgs": ["--env-file", ".env", "--name", "mermaid-api-devcontainer"],
-
-  // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  "forwardPorts": [8000],
-
-  // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "yarn install",
-
-  // Configure tool-specific properties.
+  // Customizations for Visual Studio Code inside the devcontainer
   "customizations": {
     "vscode": {
+      // VS Code settings to apply inside the devcontainer
       "settings": {
+        // Automatically detect ESLint working directories
+        "eslint.workingDirectories": [{ "mode": "auto" }],
+
+        // Require a Prettier configuration file for formatting
         "prettier.requireConfig": true,
-        //"eslint.format.enable": false,
+
+        // Set the default formatter to Prettier
         "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "[javascript]": {
-          "editor.defaultFormatter": "esbenp.prettier-vscode"
-        },
-        "[typescript]": {
-          "editor.defaultFormatter": "esbenp.prettier-vscode"
-        },
+
+        // Enable format-on-save
         "editor.formatOnSave": true,
+
+        // Automatically fix ESLint and MarkdownLint issues on save
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit",
+          "source.fixAll.markdownlint": "explicit"
+        },
+
+        // Validate JavaScript files with ESLint
+        "eslint.validate": ["javascript"], // Validate JavaScript files
+
+        // Always show the ESLint status in the status bar
+        "eslint.alwaysShowStatus": true,
+
+        // Enable Jest support in VS Code
+        "jest.enable": true,
+
+        // Disable JavaScript path suggestions
         "javascript.suggest.paths": false,
-        // Indent Rainbow settings
-        "indentRainbow.indicatorStyle": "light",
-        "indentRainbow.lightIndicatorStyleLineWidth": 1,
+
+        // MarkdownLint configuration
+        "markdownlint.config": {
+          "default": true
+        },
+
+        // Indent Rainbow Configuration
+        "indentRainbow.indicatorStyle": "light", // Use light mode for indicators
+        "indentRainbow.lightIndicatorStyleLineWidth": 1, // 1-pixel wide lines
         "indentRainbow.colors": [
-          "rgba(255,255,64,0.3)",
-          "rgba(127,255,127,0.3)",
-          "rgba(255,127,255,0.3)",
-          "rgba(79,236,236,0.3)"
+          "rgba(255,255,64,0.3)", // Yellow
+          "rgba(127,255,127,0.3)", // Green
+          "rgba(255,127,255,0.3)", // Pink
+          "rgba(79,236,236,0.3)" // Cyan
         ]
       },
       "extensions": [
-        "esbenp.prettier-vscode",
-        "dbaeumer.vscode-eslint",
-        "mikestead.dotenv",
-        "christian-kohler.path-intellisense",
-        "mutantdino.resourcemonitor",
-        "waderyan.gitblame",
-        "mhutchie.git-graph",
-        "vincaslt.highlight-matching-tag",
-        "vscode-icons-team.vscode-icons",
-        "mtxr.sqltools",
-        "mtxr.sqltools-driver-pg",
-        "bierner.markdown-mermaid",
-        "usernamehw.errorlens",
-        "oderwat.indent-rainbow",
-        "humao.rest-client"
+        "esbenp.prettier-vscode", // Prettier - Code formatter
+        "dbaeumer.vscode-eslint", // ESLint integration for VS Code
+        "mikestead.dotenv", // .env file syntax highlighting
+        "christian-kohler.path-intellisense", // Path auto-completion for filenames
+        "mutantdino.resourcemonitor", // Resource monitor (CPU, memory, etc.)
+        "waderyan.gitblame", // Git blame annotations in the editor
+        "donjayamanne.githistory", // View git history and search commits
+        "vincaslt.highlight-matching-tag", // Highlights matching HTML/XML tags
+        "vscode-icons-team.vscode-icons", // File and folder icons for VS Code
+        "mtxr.sqltools", // SQL database management and querying
+        "mtxr.sqltools-driver-pg", // PostgreSQL driver for SQLTools
+        "bierner.markdown-mermaid", // Mermaid diagrams in Markdown preview
+        "usernamehw.errorlens", // Inline error and warning highlighting
+        "oderwat.indent-rainbow", // Colorful indentation guides
+        "humao.rest-client", // Send HTTP requests and view responses
+        "ms-azuretools.vscode-docker", // Docker support for VS Code
+        "exiasr.hadolint", // Dockerfile linter (Hadolint)
+        "davidanson.vscode-markdownlint", // Markdown linting and style checking
+        "humao.rest-client", // (Duplicate) REST Client extension
+        "github.copilot", // GitHub Copilot AI code suggestions
+        "github.copilot-chat" // GitHub Copilot Chat for conversational AI
       ]
     }
+  },
+  "postCreateCommand": "yarn install",
+  "remoteEnv": {
+    "NODE_ENV": "development"
   }
 
   // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.

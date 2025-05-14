@@ -67,7 +67,7 @@ async function saveSong(id, ip, classification) {
         .catch((e) => {
           console.log(e);
         });
-    }
+    },
   );
 }
 
@@ -176,7 +176,7 @@ const startScript = async () => {
         async function (msg) {
           await classifySong(msg);
         },
-        { noAck: true }
+        { noAck: true },
       );
     });
   });
