@@ -13,11 +13,49 @@ In brief:
 
 **Note: this project uses yarn, do not use npm!**
 
+## Yarn v4 (Berry) Usage
+
+> **Important:** This project uses [Yarn v4 (Berry)](https://yarnpkg.com/) as its package manager. **Do not use npm or node commands for dependency management.**
+
+If you are using the provided devcontainer setup, the correct version of Yarn will be installed automatically. No manual installation is needed.
+
+### Essential Yarn v4 Commands
+
+- `yarn install`  
+  Installs all project dependencies as specified in the manifest files.
+
+- `yarn run <script>`  
+  Runs a script defined in the `package.json` scripts section.
+
+- `yarn add <package>`  
+  Adds a dependency to your project.  
+  Use `yarn add -D <package>` to add as a devDependency.
+
+- `yarn remove <package>`  
+  Removes a dependency from your project.
+
+- `yarn upgrade-interactive`  
+  Interactive interface to upgrade dependencies.
+
+- `yarn dlx <package> [args...]`  
+  Run a package without installing it permanently (similar to `npx`).
+
+- `yarn info <package>`  
+  Shows information about a package. To inspect all use `yarn info`
+
+- `yarn npm audit`  
+  Checks for known security issues in dependencies.
+
+- `yarn why <package>`  
+  Shows why a package is installed and which dependencies require it.
+
+For more details, see the [Yarn documentation](https://yarnpkg.com/cli/).
+
 ## Running the Project
 
 **Please check the dev-orchestrator repo first, this now requires the external docker network `mermaid-dev-network`.**
 
-The API is containerized, check all the docker-compose* and Dockerfile* under the project root and .devcontainer/.
+The API is containerized, check all the docker-compose*and Dockerfile* under the project root and .devcontainer/.
 
 To run / dev the project install:
 
@@ -71,10 +109,10 @@ code .
 
 When running the full dev stack, several services are available:
 
-- The API - http://localhost:8000
-- The API Swagger docs - http://localhost:8000/api-docs
-- The RabbitMQ UI - http://localhost:15672/
-- The MailCatcher UI - http://localhost:1080/
+- The API - <http://localhost:8000>
+- The API Swagger docs - <http://localhost:8000/api-docs>
+- The RabbitMQ UI - <http://localhost:15672/>
+- The MailCatcher UI - <http://localhost:1080/>
 - The DB can be accessed using the SQLTools extension
   - Preconfigured, check VSCode left-menu.
 
@@ -86,7 +124,7 @@ Check all the .env\* files for details on the ENV vars currently passed to all t
 
 On first start the DB needs to be created, inside the project folder:
 
-```
+```bash
 cd src
 npx sequelize-cli db:migrate
 npx sequelize-cli db:seed:all
