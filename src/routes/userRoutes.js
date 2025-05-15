@@ -10,7 +10,31 @@ const {
 
 const router = express.Router();
 
-// Public routes
+/**
+ * @swagger
+ * /users/signup:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *       400:
+ *         description: Bad request
+ */
 router.post(
   '/signup',
   userValidationRules.signup,
@@ -18,6 +42,29 @@ router.post(
   UserController.store
 );
 
+/**
+ * @swagger
+ * /users/login:
+ *   post:
+ *     summary: User login
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *       401:
+ *         description: Unauthorized
+ */
 router.post(
   '/login',
   userValidationRules.login,
@@ -30,7 +77,20 @@ router.get('/newtoken', UserController.resendEmail);
 router.post('/reset/password', UserController.resetPassw);
 router.post('/reset/password/change', UserController.passwordChange);
 
-// Protected routes - require authentication
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Get current user information
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User information retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
 router.get('/', validateToken, UserController.show);
 
 router.post(
@@ -43,7 +103,20 @@ router.post(
 
 router.post('/change/username', validateToken, UserController.changeUsername);
 
-// Admin routes - require admin role
+/**
+ * @swagger
+ * /users/all:
+ *   get:
+ *     summary: Get all users (admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Users retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
 router.get('/all', validateToken, requireAdmin, UserController.getUsers);
 router.post(
   '/search',

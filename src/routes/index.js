@@ -9,7 +9,30 @@ const userRoutes = require('./userRoutes');
 
 const router = express.Router();
 
-// Health check route
+/**
+ * @swagger
+ * /up:
+ *   get:
+ *     summary: Health check endpoint
+ *     description: |
+ *       Returns a simple status object to indicate that the API is running and reachable.
+ *       Useful for uptime monitoring and automated health checks.
+ *     tags: [System]
+ *     operationId: healthCheck
+ *     responses:
+ *       200:
+ *         description: API is up and running
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: ok
+ *             example:
+ *               status: ok
+ */
 router.get('/up', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
@@ -22,6 +45,28 @@ router.use('/feedbacks', feedbackRoutes);
 
 // RabbitMQ route
 
+/**
+ * @swagger
+ * /queue/send:
+ *   get:
+ *     summary: Send a test message to the RabbitMQ video download queue
+ *     description: |
+ *       Sends a sample message to the `videoDownloadQueue` in RabbitMQ.
+ *       This is typically used to verify RabbitMQ integration and message delivery.
+ *     tags: [System]
+ *     operationId: sendRabbitMQTestMessage
+ *     responses:
+ *       200:
+ *         description: Message sent to RabbitMQ successfully
+ *         content:
+ *           text/plain:
+ *             example: Message sent to RabbitMQ
+ *       500:
+ *         description: Failed to send message to RabbitMQ
+ *         content:
+ *           text/plain:
+ *             example: Failed to send message to RabbitMQ
+ */
 router.get('/queue/send', async (req, res) => {
   try {
     await sendMessage(

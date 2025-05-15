@@ -1,2 +1,10 @@
-ARG VARIANT="20-buster"
+ARG VARIANT="22-bookworm"
 FROM mcr.microsoft.com/devcontainers/javascript-node:1-${VARIANT}
+
+# Install Hadolint
+RUN curl -Lo /usr/local/bin/hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64 && \
+    chmod +x /usr/local/bin/hadolint
+
+# Enable Corepack to manage Yarn versions (recommended for Yarn Berry/Modern)
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+RUN corepack enable

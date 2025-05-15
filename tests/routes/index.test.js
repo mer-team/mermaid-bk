@@ -1,10 +1,10 @@
 const request = require('supertest');
 const express = require('express');
 const router = require('../../src/routes');
-const { sendMessage } = require('../../src/Services/rabbitmqService');
+const { sendMessage } = require('../../src/services/rabbitmqService');
 
 // Mock the rabbitmqService
-jest.mock('../../src/Services/rabbitmqService', () => ({
+jest.mock('../../src/services/rabbitmqService', () => ({
   sendMessage: jest.fn(),
 }));
 

@@ -12,11 +12,7 @@ const validateToken = async (req, res, next) => {
   try {
     const decoded = verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
     console.log(decoded);
-    const userData = await User.findOne({
-      where: {
-        email: decoded.email,
-      },
-    });
+    const userData = await User.findOne({ where: { email: decoded.email } });
 
     if (!userData) {
       return res.status(403).json({ error: 'The user does not exist!' });

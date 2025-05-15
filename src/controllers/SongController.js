@@ -58,7 +58,7 @@ module.exports = {
           title: Sequelize.where(
             Sequelize.fn('LOWER', Sequelize.col('title')),
             'LIKE',
-            `%${title}%`,
+            `%${title}%`
           ),
           status: 'processed',
         },
@@ -82,7 +82,7 @@ module.exports = {
           general_classification: Sequelize.where(
             Sequelize.fn('LOWER', Sequelize.col('general_classification')),
             'LIKE',
-            `%${emotion}%`,
+            `%${emotion}%`
           ),
           status: 'processed',
         },
@@ -106,12 +106,12 @@ module.exports = {
           title: Sequelize.where(
             Sequelize.fn('LOWER', Sequelize.col('title')),
             'LIKE',
-            `%${title}%`,
+            `%${title}%`
           ),
           general_classification: Sequelize.where(
             Sequelize.fn('LOWER', Sequelize.col('general_classification')),
             'LIKE',
-            `%${emotion}%`,
+            `%${emotion}%`
           ),
           status: 'processed',
         },
@@ -120,7 +120,11 @@ module.exports = {
       return formatter.success(res, songs);
     } catch (e) {
       winston.error(`Error fetching songs: ${e.message}`);
-      return formatter.error(res, 'Error filtering songs by name and emotion', 500);
+      return formatter.error(
+        res,
+        'Error filtering songs by name and emotion',
+        500
+      );
     }
   },
 
