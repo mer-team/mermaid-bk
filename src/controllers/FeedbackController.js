@@ -9,37 +9,37 @@ module.exports = {
       const { user_id, agreeordisagree, song_id } = req.params;
 
       //Before creating the feedback we have to see if the user has a feedback already in this song
-      const feedback = await Feedback.findOne({
+      await Feedback.findOne({
         where: { user_id: user_id, song_id: song_id },
       })
-        .then(async (feedback) => {
+        .then(async (_feedback) => {
           //If the user has already a feedback made , we have to update and not create another
           //Now we have to see if his feedback is different than the other he has
           //That means that we have to see if the user has agreed or disagreed on his latest feedback
-          if (feedback != null) {
+          if (_feedback != null) {
             //if the user has agreed and now is not then
-            if (feedback.dataValues.agree == 1 && agreeordisagree == 2) {
+            if (_feedback.dataValues.agree == 1 && agreeordisagree == 2) {
               await Feedback.update(
                 { disagree: 1, agree: 0 },
-                { where: { id: feedback.dataValues.id } }
+                { where: { id: _feedback.dataValues.id } }
               );
               return res.status(200).json('U have now disagreed');
             }
             //if the user has not agreed and now is
             else if (
-              feedback.dataValues.disagree == 1 &&
+              _feedback.dataValues.disagree == 1 &&
               agreeordisagree == 1
             ) {
               await Feedback.update(
                 { agree: 1, disagree: 0 },
-                { where: { id: feedback.dataValues.id } }
+                { where: { id: _feedback.dataValues.id } }
               );
               return res.status(200).json('U have now agreed');
             }
             //if the user has the same opinion
             else if (
-              (feedback.dataValues.agree == 1 && agreeordisagree == 1) ||
-              (feedback.dataValues.disagree == 1 && agreeordisagree == 2)
+              (_feedback.dataValues.agree == 1 && agreeordisagree == 1) ||
+              (_feedback.dataValues.disagree == 1 && agreeordisagree == 2)
             ) {
               return res.status(200).json('The feedback is the same');
             }
@@ -52,7 +52,7 @@ module.exports = {
                 disagree: 0,
                 user_id: user_id,
               })
-                .then((feedback) => {
+                .then((_feedback) => {
                   return res.status(200).json('Feedback created');
                 })
                 .catch((e) => {
@@ -65,7 +65,7 @@ module.exports = {
                 disagree: 1,
                 user_id: user_id,
               })
-                .then((feedback) => {
+                .then((_feedback) => {
                   return res.status(200).json('Feedback created');
                 })
                 .catch((e) => {
@@ -86,11 +86,11 @@ module.exports = {
   async getTotalAgrees(req, res) {
     const { song_id } = req.params;
     try {
-      const feedback = await Feedback.findAll({
+      await Feedback.findAll({
         where: { agree: 1, song_id: song_id },
       })
-        .then(async (feedback) => {
-          return res.status(200).json(feedback.length);
+        .then(async (_feedback) => {
+          return res.status(200).json(_feedback.length);
         })
         .catch((e) => {
           console.log(e);
@@ -104,11 +104,11 @@ module.exports = {
   async getTotalDisagrees(req, res) {
     const { song_id } = req.params;
     try {
-      const feedback = await Feedback.findAll({
+      await Feedback.findAll({
         where: { disagree: 1, song_id: song_id },
       })
-        .then(async (feedback) => {
-          return res.status(200).json(feedback.length);
+        .then(async (_feedback) => {
+          return res.status(200).json(_feedback.length);
         })
         .catch((e) => {
           console.log(e);
@@ -122,11 +122,11 @@ module.exports = {
   async getUserOpinion(req, res) {
     const { song_id, user_id } = req.params;
     try {
-      const feedback = await Feedback.findAll({
+      await Feedback.findAll({
         where: { user_id: user_id, song_id: song_id },
       })
-        .then((feedback) => {
-          return res.status(200).json(feedback);
+        .then((_feedback) => {
+          return res.status(200).json(_feedback);
         })
         .catch((e) => {
           console.log(e);
@@ -139,10 +139,10 @@ module.exports = {
   async undoFeedback(req, res) {
     const { user_id, song_id } = req.params;
     try {
-      const feedback = await Feedback.destroy({
+      await Feedback.destroy({
         where: { user_id: user_id, song_id: song_id },
       })
-        .then((feedback) => {
+        .then((_feedback) => {
           return res.status(200).json('feedback deleted');
         })
         .catch((e) => {

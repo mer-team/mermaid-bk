@@ -1,14 +1,14 @@
 require('dotenv').config();
 const { Op } = require('sequelize');
 const { Song, Sequelize } = require('../models/index');
-var search = require('youtube-search');
+// var search = require('youtube-search'); // Commented out as it's unused
 const formatter = require('../utils/responseFormatter');
 const winston = require('../utils/logger'); // Custom logger
 
-var opts = {
-  maxResults: 1,
-  key: process.env.YOUTUBE_API_KEY,
-};
+// var opts = {  // Commented out as it's unused
+//   maxResults: 1,
+//   key: process.env.YOUTUBE_API_KEY,
+// };
 
 module.exports = {
   //Get the Songs in the database
@@ -207,7 +207,7 @@ module.exports = {
 
   async deleteSong(req, res) {
     try {
-      const songs = await Song.destroy({
+      await Song.destroy({
         where: {
           external_id: req.params.id,
         },

@@ -22,7 +22,8 @@ async function saveLog(msg) {
     song_id: songId,
     type: 'info',
   })
-    .then((log) => {
+    .then((_log) => {
+      // Changed 'log' to '_log' to match unused variable pattern
       console.log('Log created');
     })
     .catch((e) => {
@@ -42,7 +43,7 @@ async function saveSong(id, ip, classification) {
       if (err) return console.log(err);
 
       //Keep the song in the database
-      const song = await Song.create({
+      await Song.create({
         external_id: results[0].id,
         link: results[0].link,
         title: results[0].title,
@@ -60,8 +61,8 @@ async function saveSong(id, ip, classification) {
         added_by_ip: ip,
         general_classification: classification,
       })
-        .then((song) => {
-          songId = song.id;
+        .then((_song) => {
+          songId = _song.id;
           console.log(`https://www.youtube.com/watch?v=${id}`);
         })
         .catch((e) => {
@@ -71,13 +72,14 @@ async function saveSong(id, ip, classification) {
   );
 }
 
-async function classifySong(message) {
+async function classifySong(_message) {
   const delay = Math.floor(Math.random() * 10000); // Random delay between 0 and 5 seconds
   var log = '';
-  var result = '';
+  // var result = ''; // Commented out as it's unused
   const emotions = ['Happy', 'Sad', 'Calm', 'Tense'];
   var rnd = Math.floor(Math.random() * emotions.length);
-  const emotion = emotions[rnd];
+  // Safe array access with bounds check
+  const emotion = rnd >= 0 && rnd < emotions.length ? emotions[rnd] : 'Unknown';
   //Salvar a musica na base de dados
   try {
     await saveSong(msg, '0.0.0.0', emotion);

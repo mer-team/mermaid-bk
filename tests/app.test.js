@@ -1,17 +1,18 @@
 const request = require('supertest');
 const app = require('../../src/app');
 const routes = require('../../src/routes/index');
-const {
-  requestLogger,
-  errorHandler,
-  notFoundHandler,
-} = require('../../src/middleware');
+// commented out to fix unused vars lint error
+// const {
+//   requestLogger: _requestLogger,
+//   errorHandler: _errorHandler,
+//   notFoundHandler: _notFoundHandler,
+// } = require('../../src/middleware');
 
 // Mock dependencies
 jest.mock('../../src/routes');
 jest.mock('../../src/middleware', () => ({
   requestLogger: jest.fn((req, res, next) => next()),
-  errorHandler: jest.fn((err, req, res, next) => {
+  errorHandler: jest.fn((err, req, res, _next) => {
     res.status(err.status || 500).json({ error: err.message });
   }),
   notFoundHandler: jest.fn((req, res, next) => {

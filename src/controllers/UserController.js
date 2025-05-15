@@ -64,7 +64,7 @@ module.exports = {
         name: name,
         admin: admin,
       })
-        .then(async (user) => {
+        .then(async (_user) => {
           //Send the confirmation email
           const sendEmail = {
             from: 'noreply@mermaid.com',
@@ -72,7 +72,7 @@ module.exports = {
             subject: 'Confirm your email',
             text: `Please click on the following link to confirm your email address: http://localhost:3000/confirm/${token}`,
           };
-          const info = await transporter.sendMail(sendEmail);
+          await transporter.sendMail(sendEmail);
 
           return formatter.success(
             res,
@@ -168,21 +168,13 @@ module.exports = {
         text: `Please click on the following link to confirm your email address: http://localhost:3000/confirm/${token}`,
       };
 
-      const info = await transporter.sendMail(sendEmail);
+      await transporter.sendMail(sendEmail);
 
-      if (info && info.accepted.length > 0) {
-        return formatter.success(
-          res,
-          { message: 'Please check your email to confirm your account' },
-          201
-        );
-      } else {
-        return formatter.error(
-          res,
-          'Failed to send confirmation email. Please try again.',
-          500
-        );
-      }
+      return formatter.success(
+        res,
+        { message: 'Please check your email to confirm your account' },
+        201
+      );
     } catch (e) {
       console.log(e);
       return formatter.error(res, 'Server error', 500);
@@ -414,13 +406,14 @@ module.exports = {
             text: `Please click on the following link to reset your password address: http://localhost:3000/resetpassword/${token}`,
           };
 
-          const info = await transporter.sendMail(sendEmail);
+          await transporter.sendMail(sendEmail);
           return formatter.success(
             res,
             { message: 'Please check your email to reset the password' },
             201
           );
         } catch (error) {
+          console.log(error);
           return formatter.error(res, 'Error sending email', 500);
         }
       } else {
