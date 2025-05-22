@@ -4,11 +4,9 @@ const requestIp = require('request-ip');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
-const {
-  requestLogger,
-  errorHandler,
-  notFoundHandler,
-} = require('./middleware');
+const { requestLogger } = require('./middleware');
+const { errorHandler } = require('./middleware');
+const { notFoundHandler } = require('./middleware/error.middleware');
 const routes = require('./routes');
 const winston = require('./utils/logger');
 require('dotenv').config();
