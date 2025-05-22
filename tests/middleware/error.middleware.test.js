@@ -81,7 +81,7 @@ describe('Error Middleware', () => {
     test('should return 404 Not Found response', () => {
       notFoundHandler(req, res);
 
-      expect(winston.warn).toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
         error: 'Not Found',

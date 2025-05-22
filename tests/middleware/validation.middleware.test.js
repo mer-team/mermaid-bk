@@ -6,22 +6,36 @@ const {
   feedbackValidationRules,
 } = require('../../src/middleware/validation.middleware');
 
-// Mock express-validator
-jest.mock('express-validator', () => ({
-  body: jest.fn().mockReturnThis(),
-  param: jest.fn().mockReturnThis(),
-  validationResult: jest.fn(),
-  isEmail: jest.fn().mockReturnThis(),
-  trim: jest.fn().mockReturnThis(),
-  normalizeEmail: jest.fn().mockReturnThis(),
-  isLength: jest.fn().mockReturnThis(),
-  not: jest.fn().mockReturnThis(),
-  isEmpty: jest.fn().mockReturnThis(),
-  isIn: jest.fn().mockReturnThis(),
-  withMessage: jest.fn().mockReturnThis(),
-  optional: jest.fn().mockReturnThis(),
-  isString: jest.fn().mockReturnThis(),
-}));
+// Enhanced mock for express-validator
+jest.mock('express-validator', () => {
+  // Create a chainable mock function that returns itself
+  const chainableMock = () => {
+    const mock = jest.fn().mockReturnThis();
+    // Add all the common validator methods
+    mock.trim = jest.fn().mockReturnThis();
+    mock.isEmail = jest.fn().mockReturnThis();
+    mock.isLength = jest.fn().mockReturnThis();
+    mock.withMessage = jest.fn().mockReturnThis();
+    mock.matches = jest.fn().mockReturnThis();
+    mock.normalizeEmail = jest.fn().mockReturnThis();
+    mock.isIn = jest.fn().mockReturnThis();
+    mock.not = jest.fn().mockReturnThis();
+    mock.isEmpty = jest.fn().mockReturnThis();
+    mock.optional = jest.fn().mockReturnThis();
+    mock.isString = jest.fn().mockReturnThis();
+    mock.isInt = jest.fn().mockReturnThis();
+    mock.custom = jest.fn().mockReturnThis();
+    mock.notEmpty = jest.fn().mockReturnThis();
+    return mock;
+  };
+
+  return {
+    body: chainableMock,
+    param: chainableMock,
+    query: chainableMock,
+    validationResult: jest.fn(),
+  };
+});
 
 describe('Validation Middleware', () => {
   let req;
