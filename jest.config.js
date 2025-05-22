@@ -21,6 +21,12 @@ module.exports = {
   // Test file pattern
   testMatch: ['**/tests/**/*.test.js'], // Default test file pattern
 
+  // Paths to ignore when looking for modules (resolves Haste module naming collision)
+  modulePathIgnorePatterns: [
+    '<rootDir>/tools/mock-services/dummy-service/',
+    '<rootDir>/tools/mock-services/dummy-worker/',
+    '<rootDir>/tools/mock-services/dummy-manager/',
+  ],
   // Coverage thresholds
   coverageThreshold: {
     global: {
