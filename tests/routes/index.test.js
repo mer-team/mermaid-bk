@@ -1,11 +1,11 @@
 const request = require('supertest');
 const express = require('express');
-const router = require('../../src/routes');
+const router = require('../../src/routes/index');
 const { sendMessage } = require('../../src/services/rabbitmqService');
 
-// Mock the rabbitmqService
+// Mock the RabbitMQ service
 jest.mock('../../src/services/rabbitmqService', () => ({
-  sendMessage: jest.fn(),
+  sendMessage: jest.fn().mockResolvedValue(true),
 }));
 
 describe('Routes Index', () => {
@@ -13,43 +13,51 @@ describe('Routes Index', () => {
 
   beforeEach(() => {
     app = express();
+    app.use(express.json());
     app.use('/', router);
-  });
-
-  afterEach(() => {
     jest.clearAllMocks();
   });
 
   describe('Health Check Route', () => {
-    test('GET /up should return status 200 and "ok" message', async () => {
-      const response = await request(app).get('/up');
-
+    it('GET /health should return 200 OK', async () => {
+      const response = await request(app).get('/health');
       expect(response.status).toBe(200);
       expect(response.body).toEqual({ status: 'ok' });
     });
   });
 
   describe('RabbitMQ Route', () => {
-    test('GET /queue/send should send a message to RabbitMQ and return 200', async () => {
-      sendMessage.mockResolvedValue();
-
+    it('GET /queue/send should send a message to RabbitMQ and return 200', async () => {
       const response = await request(app).get('/queue/send');
 
       expect(response.status).toBe(200);
       expect(response.text).toBe('Message sent to RabbitMQ');
       expect(sendMessage).toHaveBeenCalledWith(
         'videoDownloadQueue',
-        'Test message from /send route'
+        JSON.stringify({
+          url: 'https://example.com/video',
+          format: 'mp4',
+        })
       );
     });
 
-    test('GET /queue/send should return 500 when RabbitMQ fails', async () => {
-      sendMessage.mockRejectedValue(new Error('RabbitMQ connection failed'));
+    it('GET /queue/send should return 500 when RabbitMQ service fails', async () => {
+      sendMessage.mockRejectedValueOnce(
+        new Error('RabbitMQ connection failed')
+      );
 
       const response = await request(app).get('/queue/send');
 
       expect(response.status).toBe(500);
       expect(response.text).toBe('Failed to send message to RabbitMQ');
+    });
+  });
+
+  describe('Up Route', () => {
+    it('GET /up should return 200 and json status', async () => {
+      const response = await request(app).get('/up');
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ status: 'ok' });
     });
   });
 });

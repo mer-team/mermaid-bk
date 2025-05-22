@@ -1,7 +1,8 @@
+const { body, param, validationResult } = require('express-validator');
+
 /**
  * Request validation middleware using express-validator
  */
-const { body, param, validationResult } = require('express-validator');
 
 /**
  * User validation rules

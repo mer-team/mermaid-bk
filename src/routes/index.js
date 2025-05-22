@@ -1,17 +1,20 @@
 const express = require('express');
-
+const router = express.Router();
+const userRoutes = require('./userRoutes');
+const songRoutes = require('./songRoutes');
+const feedbackRoutes = require('./feedbackRoutes');
+const classificationRoutes = require('./classificationRoutes');
 const { sendMessage } = require('../services/rabbitmqService');
 
-const classificationRoutes = require('./classificationRoutes');
-const feedbackRoutes = require('./feedbackRoutes');
-const songRoutes = require('./songRoutes');
-const userRoutes = require('./userRoutes');
-
-const router = express.Router();
+// Mount all route files
+router.use('/users', userRoutes);
+router.use('/songs', songRoutes);
+router.use('/feedback', feedbackRoutes);
+router.use('/classifications', classificationRoutes);
 
 /**
  * @swagger
- * /up:
+ * /health:
  *   get:
  *     summary: Health check endpoint
  *     description: |
@@ -33,17 +36,9 @@ const router = express.Router();
  *             example:
  *               status: ok
  */
-router.get('/up', (req, res) => {
+router.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
-
-// Register routes
-router.use('/users', userRoutes);
-router.use('/songs', songRoutes);
-router.use('/classifications', classificationRoutes);
-router.use('/feedbacks', feedbackRoutes);
-
-// RabbitMQ route
 
 /**
  * @swagger
@@ -81,6 +76,11 @@ router.get('/queue/send', async (req, res) => {
     console.error('Error sending message to RabbitMQ:', error);
     res.status(500).send('Failed to send message to RabbitMQ');
   }
+});
+
+// Add a /up route for health checks
+router.get('/up', (req, res) => {
+  res.status(200).json({ status: 'ok' });
 });
 
 module.exports = router;
