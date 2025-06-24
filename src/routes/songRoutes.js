@@ -553,7 +553,7 @@ router.get(
  *               error: Error fetching analysed videos
  */
 router.get(
-  '/stats/analyzed-videos',
+  '/stats/analysed-videos',
 
   SongController.AnalysedVideos
 );
