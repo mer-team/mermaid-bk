@@ -519,7 +519,7 @@ router.get('/ip/queue', SongController.getQueueSongsByIp);
  */
 router.get(
   '/stats/streamed-minutes',
-  validateToken,
+
   SongController.getStreamedMinutes
 );
 
@@ -554,7 +554,7 @@ router.get(
  */
 router.get(
   '/stats/analyzed-videos',
-  validateToken,
+
   SongController.AnalysedVideos
 );
 
