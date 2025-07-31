@@ -519,7 +519,7 @@ router.get('/ip/queue', SongController.getQueueSongsByIp);
  */
 router.get(
   '/stats/streamed-minutes',
-  validateToken,
+
   SongController.getStreamedMinutes
 );
 
@@ -553,8 +553,8 @@ router.get(
  *               error: Error fetching analysed videos
  */
 router.get(
-  '/stats/analyzed-videos',
-  validateToken,
+  '/stats/analysed-videos',
+
   SongController.AnalysedVideos
 );
 

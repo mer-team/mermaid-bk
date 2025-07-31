@@ -158,15 +158,15 @@ describe('Song Routes', () => {
       const response = await request(app).get('/stats/streamed-minutes');
 
       expect(response.status).toBe(200);
-      expect(middleware.validateToken).toHaveBeenCalled();
+
       expect(SongController.getStreamedMinutes).toHaveBeenCalled();
     });
 
     test('GET /stats/analyzed-videos should call SongController.AnalysedVideos', async () => {
-      const response = await request(app).get('/stats/analyzed-videos');
+      const response = await request(app).get('/stats/analysed-videos');
 
       expect(response.status).toBe(200);
-      expect(middleware.validateToken).toHaveBeenCalled();
+
       expect(SongController.AnalysedVideos).toHaveBeenCalled();
     });
 
