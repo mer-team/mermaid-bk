@@ -93,7 +93,9 @@ module.exports = {
   //Login the user and return the jwt token
   async index(req, res) {
     try {
-      const { email, passw } = req.body;
+      const { email, password } = req.body;
+      console.log('Email: %s, Password: %s', email, password);
+      console.log('Body: %j', req.body);
       //verify if the email exists on our database
       const user = await User.findOne({
         where: { email },
@@ -108,7 +110,7 @@ module.exports = {
       }
 
       //verify if the password equals to the one on the database
-      if (await bcrypt.compare(passw, user.hash_passwd)) {
+      if (await bcrypt.compare(password, user.hash_passwd)) {
         const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, {
           expiresIn: '1h',
         });
@@ -269,8 +271,40 @@ module.exports = {
     }
   },
 
+  async isBlockedUser(req, res) {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return formatter.error(res, 'Email is required', 400);
+      }
+      const blockedUser = await User.findOne({
+        where: {
+          email: email,
+          blocked_at: {
+            [Op.ne]: null,
+          },
+        },
+      });
+      if (!blockedUser) {
+        return formatter.success(
+          res,
+          { message: 'User is not blocked', status: 'OK' },
+          200
+        );
+      }
+      return formatter.success(
+        res,
+        { message: 'User is blocked', status: 'blocked' },
+        200
+      );
+    } catch (e) {
+      console.log(e);
+      return formatter.error(res, 'Error checking if user is blocked', 500);
+    }
+  },
+
   async blockUser(req, res) {
-    const { email } = req.params;
+    const { email } = req.body;
     try {
       await User.update(
         { blocked_at: new Date() },
