@@ -130,6 +130,8 @@ router.get(
   requireAdmin,
   UserController.getOnlyBlockedUsers
 );
+router.post('/isblocked', validate, UserController.isBlockedUser);
+
 router.post(
   '/block/:email',
   validateToken,
