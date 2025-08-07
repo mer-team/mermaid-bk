@@ -1,0 +1,5 @@
+### Send RabbitMQ Test Message
+GET http://localhost:8000/songs/sendQueueMessage
+
+### API Documentation (Swagger)
+GET http://localhost:8000/api-docs
