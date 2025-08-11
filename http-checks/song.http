@@ -1,0 +1,51 @@
+@song_id =  1
+@external_id = dQw4w9WgXcQ
+@sample_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQGFkbWluLmNvbSIsImlhdCI6MTc1NDkzNDQwOSwiZXhwIjoxNzU0OTM4MDA5fQ.CfP_zzwTZodlQ_IMQGoH5J0uwPQHe5iar8GU4n8rt_Q
+@user_id = 1
+@user_ip = 192.168.1.1
+@song_title = Rick Astley - Never Gonna Give You Up (Official Music Video)
+@emotion = Happy
+
+### Get all songs
+GET http://localhost:8000/songs/
+
+### Get a specific song by ID
+GET http://localhost:8000/songs/{{external_id}}
+
+### Get songs by title/name
+GET http://localhost:8000/songs/filter/name/{{song_title}}
+
+### Get songs by emotion
+GET http://localhost:8000/songs/filter/emotion/{{emotion}}
+
+### Get songs by name and emotion
+GET http://localhost:8000/songs/filter/name/{{song_title}}/emotion/{{emotion}}
+
+### Get queue songs by IP
+GET http://localhost:8000/songs/ip/queue
+
+### Update song hits
+POST http://localhost:8000/songs/{{song_id}}/hits
+
+### Get song hits
+GET http://localhost:8000/songs/{{song_id}}/hits
+
+### Get total streamed minutes
+GET http://localhost:8000/songs/stats/streamed-minutes
+
+### Get analysed videos count
+GET http://localhost:8000/songs/stats/analysed-videos
+
+
+### /ToDo fix below
+
+### Get queue songs for user
+GET http://localhost:8000/songs/queue/user/{{user_id}}
+
+### Get latest classifications
+GET http://localhost:8000/songs/stats/latest-classifications
+Authorization: Bearer {{sample_token}}
+
+### Delete a song by ID (requires auth)
+DELETE http://localhost:8000/songs/{{song_id}}
+Authorization: Bearer {{sample_token}}
