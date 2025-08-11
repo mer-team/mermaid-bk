@@ -1,0 +1,22 @@
+@song_id = 1
+@user_id = 1
+@sample_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQGFkbWluLmNvbSIsImlhdCI6MTc1NDU5MDM5NywiZXhwIjoxNzU0NTkzOTk3fQ.fz_sQyXoIq9xHXp4VyBy_49N3QOw7Q-FPFtSJFuT-4M
+
+### Submit feedback - Agree with song classification
+POST http://localhost:8000/feedback/songs/{{song_id}}/users/{{user_id}}/agree
+
+### Submit feedback - Disagree with song classification
+POST http://localhost:8000/feedback/songs/{{song_id}}/users/{{user_id}}/disagree
+
+### Get total agrees for a song
+GET http://localhost:8000/feedback/songs/{{song_id}}/agrees
+
+### Get total disagrees for a song
+GET http://localhost:8000/feedback/songs/{{song_id}}/disagrees
+
+### Get user's opinion/feedback on a song
+GET http://localhost:8000/feedback/users/{{user_id}}/songs/{{song_id}}
+
+### Delete user's feedback on a song (requires auth)
+DELETE http://localhost:8000/feedback/users/{{user_id}}/songs/{{song_id}}
+Authorization: Bearer {{sample_token}}
