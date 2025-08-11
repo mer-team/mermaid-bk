@@ -1,0 +1,101 @@
+@sample_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQGFkbWluLmNvbSIsImlhdCI6MTc1NDkzNTQzOSwiZXhwIjoxNzU0OTM5MDM5fQ.G-WqMPfph80n7X5A8sOcJIS2oDLgSzjIYWIZ2kj7JEE
+
+
+### Confirm User (Email Validation)
+GET http://localhost:8000/users/confirm/{{sample_token}}
+
+### Resend Email Token
+GET http://localhost:8000/users/newtoken
+
+### Get Current User Data (requires auth)
+GET http://localhost:8000/users/
+Authorization: Bearer {{sample_token}}
+
+### Get All Users (admin only)
+GET http://localhost:8000/users/all
+Authorization: Bearer {{sample_token}}
+
+### Get Only Blocked Users (admin only)
+GET http://localhost:8000/users/blocked
+Authorization: Bearer {{sample_token}}
+
+
+### User Registration
+POST http://localhost:8000/users/signup
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "email": "test@example.com",
+  "password": "Test12345@"
+}
+
+### User Login
+POST http://localhost:8000/users/login
+Content-Type: application/json
+
+{
+  "email": "admin@admin.com",
+  "password": "admin"
+}
+
+### Reset Password (Request)
+POST http://localhost:8000/users/reset/password
+Content-Type: application/json
+
+{
+  "email": "admin@admin.com"
+}
+
+### Change Reset Password (With Token)
+POST http://localhost:8000/users/reset/password/change
+Content-Type: application/json
+
+{
+  "token": "reset-token-here",
+  "newPassword": "Newpassword123"
+}
+
+### Change Password (requires auth)
+POST http://localhost:8000/users/change/password
+Authorization: Bearer {{sample_token}}
+Content-Type: application/json
+
+{
+  "oldPassword": "currentpassword",
+  "newPassword": "newpassword123"
+}
+
+### Change Username (requires auth)
+POST http://localhost:8000/users/change/username
+Authorization: Bearer {{sample_token}}
+Content-Type: application/json
+
+{
+  "newUsername": "newusername"
+}
+
+### Search Users by Email or Username (admin only)
+POST http://localhost:8000/users/search
+Authorization: Bearer {{sample_token}}
+Content-Type: application/json
+
+{
+  "email": "admin@admin.com"
+}
+
+### Check if User is Blocked
+POST http://localhost:8000/users/isblocked
+Content-Type: application/json
+
+{
+  "email": "admin@admin.com"
+}
+
+### Block User (admin only)
+POST http://localhost:8000/users/block/test@example.com
+Authorization: Bearer {{sample_token}}
+
+### Unblock User (admin only)
+POST http://localhost:8000/users/unblock/test@example.com
+Authorization: Bearer {{sample_token}}
