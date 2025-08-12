@@ -25,9 +25,9 @@ POST http://localhost:8000/users/signup
 Content-Type: application/json
 
 {
-  "username": "testuser",
+  "name": "testuser",
   "email": "test@example.com",
-  "password": "Test12345@"
+  "password": "Testing@123"
 }
 
 ### User Login
