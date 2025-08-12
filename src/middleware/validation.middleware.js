@@ -10,7 +10,7 @@ const { body, param, validationResult } = require('express-validator');
 const userValidationRules = {
   // Signup validation
   signup: [
-    body('username')
+    body('name')
       .trim()
       .isLength({ min: 3, max: 30 })
       .withMessage('Username must be between 3 and 30 characters'),
