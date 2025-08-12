@@ -115,7 +115,7 @@ erDiagram
     User {
         int id PK
         string email
-        string hash_passwd
+        string hash_password
         string name
         boolean admin
         boolean confirmed
