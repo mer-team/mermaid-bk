@@ -38,7 +38,7 @@ describe('User Routes', () => {
     UserController.resendEmail.mockImplementation((req, res) =>
       res.status(200).json({ message: 'Email resent' })
     );
-    UserController.resetPassw.mockImplementation((req, res) =>
+    UserController.resetPassword.mockImplementation((req, res) =>
       res.status(200).json({ message: 'Password reset email sent' })
     );
     UserController.passwordChange.mockImplementation((req, res) =>
@@ -113,13 +113,13 @@ describe('User Routes', () => {
       expect(UserController.resendEmail).toHaveBeenCalled();
     });
 
-    test('POST /reset/password should call UserController.resetPassw', async () => {
+    test('POST /reset/password should call UserController.resetPassword', async () => {
       const response = await request(app)
         .post('/reset/password')
         .send({ email: 'test@example.com' });
 
       expect(response.status).toBe(200);
-      expect(UserController.resetPassw).toHaveBeenCalled();
+      expect(UserController.resetPassword).toHaveBeenCalled();
     });
 
     test('POST /reset/password/change should call UserController.passwordChange', async () => {
