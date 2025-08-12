@@ -6,10 +6,10 @@ const { Op } = require('sequelize');
 const jwt = require('jsonwebtoken');
 const formatter = require('../utils/responseFormatter');
 
-function validatePassw(passwd) {
+function validatePassword(password) {
   const regex =
     /(?=^.{8,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/;
-  return regex.test(passwd);
+  return regex.test(password);
 }
 
 const transporter = nodemailer.createTransport({
@@ -30,10 +30,10 @@ module.exports = {
   async store(req, res) {
     try {
       //getting the name , email and password
-      const { name, email, passw, admin } = req.body;
+      const { name, email, password, admin } = req.body;
 
       //Check if it is a valid password the password
-      if (!validatePassw(passw)) {
+      if (!validatePassword(password)) {
         return formatter.error(
           res,
           'Error: The password you entered does not meet the password requirements. The password must be at least 8 characters long, including at least one uppercase letter, one lowercase letter, one digit or special character, and cannot contain a period or a newline. Please try again.'
@@ -51,7 +51,7 @@ module.exports = {
       //After all the verification we can create the user
 
       //Create a hashed password
-      const hash_passw = await bcrypt.hash(passw, 10);
+      const hash_password = await bcrypt.hash(password, 10);
 
       // Generate a token secret key
       const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, {
@@ -60,7 +60,7 @@ module.exports = {
 
       User.create({
         email: email,
-        hash_passwd: hash_passw,
+        hash_password: hash_password,
         name: name,
         admin: admin,
       })
@@ -110,7 +110,7 @@ module.exports = {
       }
 
       //verify if the password equals to the one on the database
-      if (await bcrypt.compare(password, user.hash_passwd)) {
+      if (await bcrypt.compare(password, user.hash_password)) {
         const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, {
           expiresIn: '1h',
         });
@@ -339,26 +339,26 @@ module.exports = {
       });
 
       //See if the old Password equal to the one in the database
-      if (await bcrypt.compare(oldPassword, user.hash_passwd)) {
+      if (await bcrypt.compare(oldPassword, user.hash_password)) {
         //verify if the password is valid
         //Check if it is a valid password the password
-        if (!validatePassw(password)) {
+        if (!validatePassword(password)) {
           return formatter.error(
             res,
             'Error: The password you entered does not meet the password requirements. The password must be at least 8 characters long, including at least one uppercase letter, one lowercase letter, one digit or special character, and cannot contain a period or a newline. Please try again.'
           );
         } else {
           //Create a hashed password
-          const hash_passw = await bcrypt.hash(password, 10);
+          const hash_password = await bcrypt.hash(password, 10);
           //see if the hash pasword equals to the same in the database
-          if (await bcrypt.compare(password, user.hash_passwd)) {
+          if (await bcrypt.compare(password, user.hash_password)) {
             return formatter.error(
               res,
               'The current password is equal to the one you are trying to change'
             );
           }
           await User.update(
-            { hash_passwd: hash_passw },
+            { hash_password: hash_password },
             { where: { email: email } }
           );
           return formatter.success(res, {
@@ -389,7 +389,7 @@ module.exports = {
       }
 
       //verify if the password equals to the one on the database
-      if (await bcrypt.compare(password, user.hash_passwd)) {
+      if (await bcrypt.compare(password, user.hash_password)) {
         //Check if the current name and email exists on the database
         const users = await User.findAll({
           where: {
@@ -412,7 +412,7 @@ module.exports = {
     }
   },
 
-  async resetPassw(req, res) {
+  async resetPassword(req, res) {
     const { email } = req.body;
 
     try {
@@ -463,7 +463,7 @@ module.exports = {
     const { email, password } = req.body;
     try {
       //Check if it is a valid password the password
-      if (!validatePassw(password)) {
+      if (!validatePassword(password)) {
         return res
           .status(400)
           .json(
@@ -472,10 +472,10 @@ module.exports = {
       }
 
       //Create a hashed password
-      const hash_passw = await bcrypt.hash(password, 10);
+      const hash_password = await bcrypt.hash(password, 10);
 
       await User.update(
-        { hash_passw: hash_passw },
+        { hash_password: hash_password },
         { where: { email: email } }
       );
       return formatter.success(res, { message: 'Password changed' });
