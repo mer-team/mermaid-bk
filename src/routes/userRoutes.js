@@ -74,7 +74,7 @@ router.post(
 
 router.get('/confirm/:token', UserController.validate);
 router.get('/newtoken', UserController.resendEmail);
-router.post('/reset/password', UserController.resetPassw);
+router.post('/reset/password', UserController.resetPassword);
 router.post('/reset/password/change', UserController.passwordChange);
 
 /**
