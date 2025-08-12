@@ -25,7 +25,16 @@
     "preinstall": "npx only-allow yarn",
     "lint-staged": "lint-staged",
     "markdown:lint": "markdownlint '**/*.md' --ignore node_modules",
-    "markdown:fix": "markdownlint --fix '**/*.md' --ignore node_modules"
+    "markdown:fix": "markdownlint --fix '**/*.md' --ignore node_modules",
+    "db:create": "npx sequelize-cli db:create",
+    "db:drop": "npx sequelize-cli db:drop",
+    "db:migrate": "npx sequelize-cli db:migrate",
+    "db:seed": "npx sequelize-cli db:seed:all",
+    "db:migrate:undo": "npx sequelize-cli db:migrate:undo",
+    "db:seed:undo": "npx sequelize-cli db:seed:undo",
+    "db:migrate:undo:all": "npx sequelize-cli db:migrate:undo:all",
+    "db:seed:undo:all": "npx sequelize-cli db:seed:undo:all",
+    "db:reset": "rm -rf src/uploads/final/* && yarn db:drop && yarn db:create && yarn db:migrate && yarn db:seed"
   },
   "dependencies": {
     "amqplib": "^0.10.8",
