@@ -9,7 +9,7 @@
 ### Get all songs
 GET http://localhost:8000/songs/
 
-### Get a specific song by ID
+### Get a specific song by External ID
 GET http://localhost:8000/songs/{{external_id}}
 
 ### Get songs by title/name
