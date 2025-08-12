@@ -53,7 +53,7 @@ Content-Type: application/json
 
 {
   "token": "reset-token-here",
-  "newPassword": "Newpassword123"
+  "password": "Newpassword123"
 }
 
 ### Change Password (requires auth)
@@ -62,8 +62,9 @@ Authorization: Bearer {{sample_token}}
 Content-Type: application/json
 
 {
-  "oldPassword": "currentpassword",
-  "newPassword": "newpassword123"
+  "email": "test@example.com",
+  "oldPassword": "Testing@123",
+  "password": "newpassword@123"
 }
 
 ### Change Username (requires auth)
@@ -72,7 +73,9 @@ Authorization: Bearer {{sample_token}}
 Content-Type: application/json
 
 {
-  "newUsername": "newusername"
+  "username": "newusername",
+  "email": "test@example.com",
+  "password": "newpassword@123"
 }
 
 ### Search Users by Email or Username (admin only)
