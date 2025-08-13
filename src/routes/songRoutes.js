@@ -362,6 +362,7 @@ router.get(
  * /songs/filter/emotion/{emotion}:
  *   get:
  *     summary: Filter songs by emotion
+ *     operationId: filterSongsByEmotion
  *     tags: [Songs]
  *     parameters:
  *       - in: path
@@ -373,6 +374,34 @@ router.get(
  *     responses:
  *       200:
  *         description: List of filtered songs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 songs:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Song'
+ *             example:
+ *               songs:
+ *                 - id: 1
+ *                   external_id: dQw4w9WgXcQ
+ *                   title: Rick Astley - Never Gonna Give You Up (Official Music Video)
+ *                   artist: Rick Astley
+ *                   general_classification: Happy
+ *       400:
+ *         description: Invalid emotion
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: Invalid emotion
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: Error filtering songs by emotion
  */
 router.get(
   '/filter/emotion/:emotion',
@@ -386,6 +415,7 @@ router.get(
  * /songs/filter/name/{title}/emotion/{emotion}:
  *   get:
  *     summary: Filter songs by title and emotion
+ *     operationId: filterSongsByTitleAndEmotion
  *     tags: [Songs]
  *     parameters:
  *       - in: path
@@ -403,6 +433,34 @@ router.get(
  *     responses:
  *       200:
  *         description: List of filtered songs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 songs:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Song'
+ *             example:
+ *               songs:
+ *                 - id: 1
+ *                   external_id: dQw4w9WgXcQ
+ *                   title: Rick Astley - Never Gonna Give You Up (Official Music Video)
+ *                   artist: Rick Astley
+ *                   general_classification: Happy
+ *       400:
+ *         description: Invalid title or emotion
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: Invalid title or emotion
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: Error filtering songs by title and emotion
  */
 router.get(
   '/filter/name/:title/emotion/:emotion',
@@ -441,7 +499,12 @@ router.get(
  *                     $ref: '#/components/schemas/Song'
  *             example:
  *               songs:
- *                 - { ... }
+ *                 - id: 1
+ *                   external_id: dQw4w9WgXcQ
+ *                   title: Rick Astley - Never Gonna Give You Up (Official Music Video)
+ *                   artist: Rick Astley
+ *                   status: queued
+ *                   added_by_user: "42"
  *       401:
  *         description: Unauthorized
  *         content:
@@ -478,7 +541,12 @@ router.get('/user/:user_id/queue', validateToken, SongController.getQueueSongs);
  *                     $ref: '#/components/schemas/Song'
  *             example:
  *               songs:
- *                 - { ... }
+ *                 - id: 1
+ *                   external_id: dQw4w9WgXcQ
+ *                   title: Rick Astley - Never Gonna Give You Up (Official Music Video)
+ *                   artist: Rick Astley
+ *                   status: queued
+ *                   added_by_ip: "1.1.1.1"
  *       500:
  *         description: Internal server error
  *         content:
@@ -495,8 +563,6 @@ router.get('/ip/queue', SongController.getQueueSongsByIp);
  *     summary: Get total streamed minutes
  *     operationId: getStreamedMinutes
  *     tags: [Songs]
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Total streamed minutes
@@ -504,12 +570,6 @@ router.get('/ip/queue', SongController.getQueueSongsByIp);
  *           application/json:
  *             example:
  *               totalStreamedMinutes: 123
- *       401:
- *         description: Unauthorized
- *         content:
- *           application/json:
- *             example:
- *               error: Unauthorized
  *       500:
  *         description: Internal server error
  *         content:
@@ -530,8 +590,6 @@ router.get(
  *     summary: Get total analyzed videos
  *     operationId: getAnalyzedVideos
  *     tags: [Songs]
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Total analyzed videos
@@ -539,12 +597,6 @@ router.get(
  *           application/json:
  *             example:
  *               totalAnalysedVideos: 42
- *       401:
- *         description: Unauthorized
- *         content:
- *           application/json:
- *             example:
- *               error: Unauthorized
  *       500:
  *         description: Internal server error
  *         content:
@@ -577,7 +629,13 @@ router.get(
  *               items:
  *                 $ref: '#/components/schemas/Song'
  *             example:
- *               - { ... }
+ *               - id: 1
+ *                 external_id: dQw4w9WgXcQ
+ *                 title: Rick Astley - Never Gonna Give You Up (Official Music Video)
+ *                 artist: Rick Astley
+ *                 general_classification: Happy
+ *                 createdAt: 2023-01-01T12:00:00.000Z
+ *                 updatedAt: 2023-01-02T12:00:00.000Z
  *       401:
  *         description: Unauthorized
  *         content:
