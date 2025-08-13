@@ -8,6 +8,9 @@ module.exports = {
     try {
       const { user_id, agreeordisagree, song_id } = req.params;
 
+      // ToDo agreeordisagree rn only give disagrees
+      // TRY THIS LATER AND ADD THE === MODS ON 2ND CHECKS const agreeordisagree = parseInt(req.params.agreeordisagree, 10); // Declare once and parse as integer
+
       //Before creating the feedback we have to see if the user has a feedback already in this song
       await Feedback.findOne({
         where: { user_id: user_id, song_id: song_id },
