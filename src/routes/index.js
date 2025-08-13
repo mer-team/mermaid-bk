@@ -78,6 +78,31 @@ router.get('/queue/send', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /up:
+ *   get:
+ *     summary: Simple uptime check endpoint
+ *     description: |
+ *       Returns a simple status object to indicate that the API is up and running.
+ *       This is an alternative health check endpoint, commonly used by load balancers
+ *       and monitoring systems for quick uptime verification.
+ *     tags: [System]
+ *     operationId: uptimeCheck
+ *     responses:
+ *       200:
+ *         description: API is up and running
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: ok
+ *             example:
+ *               status: ok
+ */
 // Add a /up route for health checks
 router.get('/up', (req, res) => {
   res.status(200).json({ status: 'ok' });
