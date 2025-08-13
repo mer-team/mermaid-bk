@@ -247,9 +247,10 @@ module.exports = {
         );
       }
       //Calculate the song limits the user has to have in the queue based on if they are logged in or not
+      var lim;
       if (user_id != 'null') {
         ip = '';
-        var lim = await howManySongsBasedOnUserId(user_id);
+        lim = await howManySongsBasedOnUserId(user_id);
         if (lim >= 6) {
           return formatter.error(
             res,
@@ -258,7 +259,7 @@ module.exports = {
           );
         }
       } else {
-        var lim = await howManySongsBasedOnUserIp();
+        lim = await howManySongsBasedOnUserIp();
         console.log(lim);
         if (lim >= 3) {
           return formatter.error(
