@@ -1,22 +1,5 @@
 'use strict';
 
-
-const duration1 = new Date()
-duration1.setMinutes(3)
-duration1.setSeconds(32)
-
-const duration2 = new Date()
-duration2.setMinutes(5)
-duration2.setSeconds(36)
-
-const duration3 = new Date()
-duration3.setMinutes(3)
-duration3.setSeconds(22)
-
-const duration4 = new Date()
-duration4.setMinutes(3)
-duration4.setSeconds(30)
-
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
@@ -26,7 +9,7 @@ module.exports = {
         link: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", 
         title: "Rick Astley - Never Gonna Give You Up (Official Music Video)",
         artist: "Rick Astley",
-        duration: duration1,
+        duration: 487,
         year: new Date().getFullYear(),
         date: new Date(2009, 9, 25),
         genre: "Dance-pop, Blue-eyed soul, Pop",
@@ -47,7 +30,7 @@ module.exports = {
       link: "https://www.youtube.com/watch?v=igFtut_1drQ", 
       title: "Lil Yachty - sAy sOMETHINg",
       artist: "lil boat",
-      duration: duration2,
+      duration: 554,
       year: new Date().getFullYear(),
       date: new Date(2023, 1, 27),
       genre: "Alternative",
@@ -68,7 +51,7 @@ module.exports = {
       link: "https://www.youtube.com/watch?v=TGgcC5xg9YI", 
       title: "SEE YOU AGAIN featuring Kali Uchis",
       artist: "Tyler, The Creator",
-      duration: duration3,
+      duration: 997,
       year: new Date().getFullYear(),
       date: new Date(2018, 8, 8),
       genre: "Pop rap, Pop",
@@ -89,7 +72,7 @@ module.exports = {
       link: "https://www.youtube.com/watch?v=pRpeEdMmmQ0", 
       title: "Shakira - Waka Waka (This Time for Africa) (The Official 2010 FIFA World Cup™ Song)",
       artist: "Shakira",
-      duration: duration4,
+      duration: 345,
       year: new Date().getFullYear(),
       date: new Date(2010, 6, 4),
       genre: "Pop",

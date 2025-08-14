@@ -22,10 +22,10 @@ module.exports = {
         onDelete: "CASCADE"
       },
       start: {
-        type: Sequelize.DATE
+        type: Sequelize.INTEGER
       },
       end: {
-        type: Sequelize.DATE
+        type: Sequelize.INTEGER
       },
       emotion: {
         type: Sequelize.STRING

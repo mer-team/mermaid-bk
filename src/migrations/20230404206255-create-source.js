@@ -9,7 +9,19 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      name: {
+      song_id: {
+        type: Sequelize.INTEGER,
+        references: { model: "Songs", key: "id" },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE"
+      },
+      lyrics: {
+        type: Sequelize.STRING
+      },
+      instrumental: {
+        type: Sequelize.STRING
+      },
+      voice: {
         type: Sequelize.STRING
       },
       createdAt: {

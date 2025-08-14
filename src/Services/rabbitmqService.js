@@ -9,19 +9,19 @@ function sendMessage(queue, msg) {
       console.error('Failed to connect to RabbitMQ:', error0);
       return;
     }
+
     connection.createChannel(function (error1, channel) {
       if (error1) {
         console.error('Failed to create a channel:', error1);
+        connection.close(); // Close the connection in case of channel creation failure
         return;
       }
+
       channel.assertQueue(queue, { durable: false });
       channel.sendToQueue(queue, Buffer.from(msg));
       console.log(' [x] Sent %s', msg);
-    });
 
-    setTimeout(function () {
-      connection.close();
-    }, 500);
+    });
   });
 }
 

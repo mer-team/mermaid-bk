@@ -31,3 +31,4 @@ EXPOSE 8000
 
 # Start your app
 CMD ["yarn", "start"]
+

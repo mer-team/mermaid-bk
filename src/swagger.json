@@ -1,240 +1,624 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "MERmaid Web App API"
+    "title": "MERmaid Web App API",
+    "version": "1.0.0"
   },
-
   "tags": [
     {
       "name": "Users",
-      "description": "Everythying about the users"
+      "description": "Everything about the users"
     },
     {
       "name": "Music",
-      "description": "Everythying about the songs"
+      "description": "Everything about the songs"
     },
     {
       "name": "Feedback",
-      "description": "Everythying about the feedback of the songs"
+      "description": "Everything about the feedback of the songs"
     }
   ],
-
   "paths": {
-    "/signup": {
-      "post": {
-        "summary": "User sign up",
-        "tags": ["Users"]
-      }
-    },
-
-    "/login": {
-      "post": {
-        "summary": "User Login",
-        "tags": ["Users"]
-      }
-    },
-
-    "/confirm/{token}": {
-      "get": {
-        "summary": "Validate user account",
-        "tags": ["Users"]
-      }
-    },
-
     "/user": {
       "get": {
-        "summary": "Get user data by the token",
-        "tags": ["Users"]
+        "summary": "Get all users in the database",
+        "tags": [
+          "Users"
+        ],
+        "responses": {
+          "200": {
+            "description": "User data retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
-
-    "/user/newtoken": {
+    "/user/{id}": {
       "get": {
-        "summary": "Resend the email of verification to the user",
-        "tags": ["Users"]
+        "summary": "Get user by ID",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User data retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
       }
     },
-
-    "/user/bynameoremail": {
-      "get": {
-        "summary": "Get user by name or email",
-        "tags": ["Users"]
-      }
-    },
-
-    "/user/ip": {
-      "get": {
-        "summary": "Get the user ip",
-        "tags": ["Users"]
-      }
-    },
-
-    "/user/blocked": {
-      "get": {
-        "summary": "Get only blocked users",
-        "tags": ["Users"]
-      }
-    },
-    "/user/blockuser/{email}": {
+    "/user/signup": {
       "post": {
-        "summary": "Block a user",
-        "tags": ["Users"]
+        "summary": "User sign up",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "confirmPassword": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "email",
+                  "password",
+                  "confirmPassword"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User created successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Invalid input data"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
-    "/user/unblockuser/{email}": {
+    "/user/login": {
       "post": {
-        "summary": "Unblock a user",
-        "tags": ["Users"]
+        "summary": "User login",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "example": "jwt-token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Invalid email or password"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
-    "/user/getall": {
-      "get": {
-        "summary": "Get all users",
-        "tags": ["Users"]
-      }
-    },
-    "/user/change/password": {
+    "/user/confirm/{token}": {
       "post": {
-        "summary": "Change user password",
-        "tags": ["Users"]
+        "summary": "Confirm user with a token",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User confirmed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User confirmed successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid token or error during confirmation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Invalid token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found or token expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Token expired or user not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
-    "/user/change/username": {
-      "post": {
-        "summary": "Change username",
-        "tags": ["Users"]
-      }
-    },
-    "/user/reset/password": {
-      "post": {
-        "summary": "Reset user password by asking for the old one and updating by the new one",
-        "tags": ["Users"]
-      }
-    },
-    "/user/change/reset/password": {
-      "post": {
-        "summary": "Route used in case the user forgets his old password ",
-        "tags": ["Users"]
-      }
-    },
-
     "/song": {
       "get": {
-        "summary": "Get all the songs in the database",
-        "tags": ["Music"]
+        "summary": "Get all songs in the database",
+        "tags": [
+          "Music"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of songs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "artist": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
-    "/song/{id}": {
+    "/song/{external_id}": {
       "get": {
-        "summary": "Get a song by id",
-        "tags": ["Music"]
+        "summary": "Get a song by ID",
+        "tags": [
+          "Music"
+        ],
+        "parameters": [
+          {
+            "name": "external_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Song data retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "artist": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Song not found"
+          }
+        }
       }
     },
     "/song/name/{title}": {
       "get": {
         "summary": "Filter songs by title",
-        "tags": ["Music"]
+        "tags": [
+          "Music"
+        ],
+        "parameters": [
+          {
+            "name": "title",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of songs filtered by title",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "artist": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/song/emotion/{emotion}": {
       "get": {
         "summary": "Filter songs by emotion",
-        "tags": ["Music"]
+        "tags": [
+          "Music"
+        ],
+        "parameters": [
+          {
+            "name": "emotion",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of songs filtered by emotion",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "artist": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
-    "/song/name/{title}/emotion/{emotion}": {
-      "get": {
-        "summary": "Filter songs by title and emotion",
-        "tags": ["Music"]
-      }
-    },
-    "/song/getqueuesongs/{user_id}": {
-      "get": {
-        "summary": "Get queued songs for a user",
-        "tags": ["Music"]
-      }
-    },
-    "/song/hits/{song_id}": {
-      "post": {
-        "summary": "Update hits for a song",
-        "tags": ["Music"]
-      },
-      "get": {
-        "summary": "Get hits for a song",
-        "tags": ["Music"]
-      }
-    },
-    "/song/delete/{id}": {
-      "delete": {
-        "summary": "Delete a song",
-        "tags": ["Music"]
-      }
-    },
-    "/song/get/streamedminutes": {
-      "get": {
-        "summary": "Get streamed minutes",
-        "tags": ["Music"]
-      }
-    },
-    "/song/get/analysed/videos": {
-      "get": {
-        "summary": "Get analysed videos",
-        "tags": ["Music"]
-      }
-    },
-    "/song/get/latest/classifications": {
-      "get": {
-        "summary": "Get latest classifications",
-        "tags": ["Music"]
-      }
-    },
-    "/songbyip": {
-      "get": {
-        "summary": "Get queued songs by IP",
-        "tags": ["Music"]
-      }
-    },
-    "/classifications": {
-      "get": {
-        "summary": "Get the song classification",
-        "tags": ["Music"]
-      }
-    },
-    "/song/classification/song/{external_id}/user/{user_id}": {
+    "/song/classify": {
       "post": {
         "summary": "Classify a song",
-        "tags": ["Music"]
+        "tags": [
+          "Music"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "external_id": {
+                    "type": "string"
+                  },
+                  "emotion": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "external_id",
+                  "emotion"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Song classified successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Song classified successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Song not found"
+          }
+        }
       }
     },
-
-    "/feedback/agree/disagree/{agreeordisagree}/user/{user_id}/song/{song_id}": {
+    "/feedback": {
       "post": {
-        "summary": "Post feedback",
-        "tags": ["Feedback"]
+        "summary": "Submit feedback for a song",
+        "tags": [
+          "Feedback"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "external_id": {
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "type": "string"
+                  },
+                  "comment": {
+                    "type": "string"
+                  },
+                  "rating": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "external_id",
+                  "user_id",
+                  "comment",
+                  "rating"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Feedback submitted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Feedback submitted successfully"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
-    "/feedback/agrees/{song_id}": {
+    "/feedback/song/{external_id}": {
       "get": {
-        "summary": "Get total agrees for a song",
-        "tags": ["Feedback"]
-      }
-    },
-    "/feedback/disagrees/{song_id}": {
-      "get": {
-        "summary": "Get total disagrees for a song",
-        "tags": ["Feedback"]
-      }
-    },
-    "/feedback/opinion/{user_id}/{song_id}": {
-      "get": {
-        "summary": "Get user opinion for a song",
-        "tags": ["Feedback"]
-      }
-    },
-    "/feedback/{user_id}/{song_id}": {
-      "delete": {
-        "summary": "Undo feedback for a song",
-        "tags": ["Feedback"]
+        "summary": "Get feedback for a song",
+        "tags": [
+          "Feedback"
+        ],
+        "parameters": [
+          {
+            "name": "external_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feedback retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "user_id": {
+                        "type": "string"
+                      },
+                      "comment": {
+                        "type": "string"
+                      },
+                      "rating": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No feedback found for this song"
+          }
+        }
       }
     }
   }
