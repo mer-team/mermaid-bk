@@ -11,8 +11,10 @@ services:
       - .:/mermaid-api:cached
     networks:
       - mermaid-dev-network
+      - mermaid-audio-processing  # external network
 
   db:
+    container_name: db
     image: postgres:15
     restart: on-failure:10 # Restart policy to automatically restart the container if it fails, up to 10 times
     env_file:
@@ -39,5 +41,7 @@ volumes:
   postgres-data:
 
 networks:
-  mermaid-dev-network:
+  mermaid-dev-network: # internal development network
+  mermaid-audio-processing:
     external: true
+    name: mermaid-audio-processing-network
