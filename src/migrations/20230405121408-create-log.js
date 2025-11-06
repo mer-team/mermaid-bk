@@ -7,34 +7,34 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       message: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       service: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       type: {
-        type: Sequelize.ENUM("info", "warning", "error")
+        type: Sequelize.ENUM('info', 'warning', 'error'),
       },
       song_id: {
         type: Sequelize.INTEGER,
-        references: { model: "Songs", key: "id" },
-        onUpdate: "CASCADE",
-        onDelete: "CASCADE"
+        references: { model: 'Songs', key: 'id' },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('Logs');
-  }
+  },
 };

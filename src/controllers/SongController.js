@@ -42,7 +42,7 @@ const filterByTitleAndArtist = async (req, res) => {
         title: Sequelize.where(
           Sequelize.fn('LOWER', Sequelize.col('title')),
           'LIKE',
-          `%${title.toLowerCase()}%`
+          `%${title.toLowerCase()}%`,
         ),
         status: 'processed',
       },
@@ -54,7 +54,7 @@ const filterByTitleAndArtist = async (req, res) => {
         artist: Sequelize.where(
           Sequelize.fn('LOWER', Sequelize.col('artist')),
           'LIKE',
-          `%${title.toLowerCase()}%`
+          `%${title.toLowerCase()}%`,
         ),
         status: 'processed',
       },
@@ -62,8 +62,7 @@ const filterByTitleAndArtist = async (req, res) => {
 
     // Step 3: Combine results and remove duplicates
     const allMatches = [...titleMatches, ...artistMatches].filter(
-      (song, index, self) =>
-        index === self.findIndex((s) => s.id === song.id) // Remove duplicates based on the song ID
+      (song, index, self) => index === self.findIndex((s) => s.id === song.id), // Remove duplicates based on the song ID
     );
 
     // Return the combined list of songs
@@ -82,7 +81,7 @@ const filterByEmotion = async (req, res) => {
         general_classification: Sequelize.where(
           Sequelize.fn('LOWER', Sequelize.col('general_classification')),
           'LIKE',
-          `%${emotion.toLowerCase()}%`
+          `%${emotion.toLowerCase()}%`,
         ),
         status: 'processed',
       },
@@ -102,12 +101,12 @@ const filterByAll = async (req, res) => {
         title: Sequelize.where(
           Sequelize.fn('LOWER', Sequelize.col('title')),
           'LIKE',
-          `%${title.toLowerCase()}%`
+          `%${title.toLowerCase()}%`,
         ),
         general_classification: Sequelize.where(
           Sequelize.fn('LOWER', Sequelize.col('general_classification')),
           'LIKE',
-          `%${emotion.toLowerCase()}%`
+          `%${emotion.toLowerCase()}%`,
         ),
         status: 'processed',
       },
@@ -124,7 +123,7 @@ const updateHits = async (req, res) => {
     const { song_id } = req.params;
     const [affectedRows] = await Song.update(
       { hits: Sequelize.literal('hits + 1') },
-      { where: { id: song_id } }
+      { where: { id: song_id } },
     );
 
     if (affectedRows === 0) return res.status(404).json({ message: 'Song not found' });
@@ -152,7 +151,7 @@ const getHits = async (req, res) => {
 };
 
 const getQueueSongs = async (req, res) => {
-  const { user_id } = req.params
+  const { user_id } = req.params;
 
   try {
     const songs = await Song.findAll({
@@ -204,7 +203,7 @@ const getStreamedMinutes = async (req, res) => {
     const songs = await Song.findAll();
 
     // Convert duration from seconds to minutes and sum it
-    songs.forEach(song => {
+    songs.forEach((song) => {
       total += Math.floor(song.duration / 60); // Convert seconds to minutes and round down
     });
 
@@ -214,7 +213,6 @@ const getStreamedMinutes = async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
-
 
 const analysedVideos = async (req, res) => {
   try {

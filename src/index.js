@@ -10,7 +10,6 @@ const requestIp = require('request-ip');
 const swaggerUI = require('swagger-ui-express');
 const swaggerDocs = require('./swagger.json');
 
-
 // Load environment variables
 require('dotenv').config();
 

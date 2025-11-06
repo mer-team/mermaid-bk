@@ -5,7 +5,7 @@ const userRoutes = require('./UserRoutes');
 const songRoutes = require('./SongRoutes');
 const songClassificationRoutes = require('./SongClassificationRoutes');
 const feedbackRoutes = require('./FeedbackRoutes');
-const songProcessingRoutes = require("./SongProcessingRoutes");
+const songProcessingRoutes = require('./SongProcessingRoutes');
 
 // Aggregate routes
 router.use('/user', userRoutes);
