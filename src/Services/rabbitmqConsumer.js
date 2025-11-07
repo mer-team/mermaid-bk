@@ -33,7 +33,6 @@ function startConsumer(queue) {
           handleMessage(parsedMessage, connection);
 
           channel.ack(msg);
-
         }
       });
     });
@@ -44,16 +43,32 @@ async function handleMessage(message, connection) {
   try {
     switch (message.type) {
       case 'song_processing_complete':
+        // Final result from pipeline manager
         await axios.post(`${API_BASE_URL}/processing/completed`, message.data);
-        // Close the connection after a music is processed. With more users using the service this strategy needs to be rethink
+        // Close the connection after a music is processed
         connection.close();
         break;
+
       case 'song_processing_log':
+        // Progress logs from microservices
         await axios.post(`${API_BASE_URL}/processing/log`, message.data);
         break;
+
       case 'song_segments':
+        // Segment data from emotion classification
         await axios.post(`${API_BASE_URL}/processing/segments`, message.data);
         break;
+
+      case 'pipeline_stage_update':
+        // Stage updates from pipeline manager (download, segmentation, separation, transcription)
+        await axios.post(`${API_BASE_URL}/processing/stage-update`, message.data);
+        break;
+
+      case 'pipeline_error':
+        // Error notifications from pipeline
+        await axios.post(`${API_BASE_URL}/processing/error`, message.data);
+        break;
+
       default:
         console.warn('Unhandled message type:', message.type);
     }
@@ -61,6 +76,5 @@ async function handleMessage(message, connection) {
     console.error(`Error handling message of type ${message.type}:`, error);
   }
 }
-
 
 module.exports = { startConsumer }; // Export startConsumer
