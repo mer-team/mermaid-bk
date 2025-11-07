@@ -1,5 +1,6 @@
 services:
   api:
+    container_name: api
     build:
       context: .
       dockerfile: Dockerfile.dev
@@ -14,7 +15,7 @@ services:
       - mermaid-audio-processing  # external network
 
   db:
-    container_name: db
+    container_name: api-db
     image: postgres:15
     restart: on-failure:10 # Restart policy to automatically restart the container if it fails, up to 10 times
     env_file:
@@ -27,6 +28,7 @@ services:
       - mermaid-dev-network
 
   mailcatcher:
+    container_name: api-mailcatcher
     image: dockage/mailcatcher:latest
     restart: on-failure:10
     env_file:
