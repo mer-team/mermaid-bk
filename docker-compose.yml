@@ -10,6 +10,10 @@ services:
       - 8000:8000
     volumes:
       - .:/mermaid-api:cached
+      - segments-data:/mermaid-api/src/Uploads/SongSegments:ro
+      - lyrics-data:/mermaid-api/src/Uploads/SongLyrics:ro
+      - separated-data:/mermaid-api/src/Uploads/SongVocals:ro
+      - separated-data:/mermaid-api/src/Uploads/SongInstrumentals:ro
     networks:
       - mermaid-dev-network
       - mermaid-audio-processing  # external network
@@ -41,6 +45,15 @@ services:
 
 volumes:
   postgres-data:
+  segments-data:
+    external: true
+    name: segments-service-data
+  lyrics-data:
+    external: true
+    name: lyrics-service-data
+  separated-data:
+    external: true
+    name: separated-service-data
 
 networks:
   mermaid-dev-network: # internal development network

@@ -5,10 +5,10 @@ const axios = require('axios');
 const async = require('async');
 const search = require('youtube-search');
 const path = require('path');
+const { getVideoProcessingResults } = require('../Services/mongodbService');
 
 // RabbitMQ
 const { sendMessage } = require('../Services/rabbitmqService');
-const { startConsumer } = require('../Services/rabbitmqConsumer');
 
 const API_KEY = process.env.YOUTUBE_API_KEY;
 
@@ -65,7 +65,7 @@ const saveTheSong = async (songId, userId, ip) => {
           duration: durationInSeconds,
           year: new Date(results[0].publishedAt).getFullYear(),
           date: new Date(results[0].publishedAt),
-          genre: 'Salsa, Kuduro, Romance', // Default value
+          genre: '', //'Salsa, Kuduro, Romance', // Default value
           description: results[0].description,
           thumbnailHQ: results[0].thumbnails.high.url,
           thumbnailMQ: results[0].thumbnails.medium.url,
@@ -122,11 +122,6 @@ const classificationQueue = async.queue(async (song_externalID) => {
 
   try {
     await updateStateSong('processing', song_externalID);
-
-    // Start consumers for receiving updates from microservices
-    startConsumer('song_processing_log');
-    startConsumer('song_processing_segments');
-    startConsumer('song_processing_completed');
 
     // Send only the YouTube URL to the manager-requests queue
     // The pipeline manager will orchestrate all microservices
@@ -221,9 +216,123 @@ const getSegments = async (req, res) => {
   try {
     const { song_id } = req.params;
 
-    const segments = await Song_Segments.findAll({ where: { song_id } });
+    const song = await Song.findOne({ where: { id: song_id } });
+    if (!song) {
+      return res.status(404).json({ message: 'Song not found' });
+    }
 
-    return res.status(200).json(segments);
+    // Fetch from MongoDB
+    const mongoData = await getVideoProcessingResults(song.external_id);
+    if (!mongoData || !mongoData.stages?.segmentation) {
+      return res.status(404).json({ message: 'Segments not found' });
+    }
+
+    // Extract segment count and generate segment URLs
+    const segmentCount = mongoData.stages.segmentation.segment_count || 0;
+    const formattedSegments = [];
+
+    // Generate segment info - files are named {title}_segment_{index}.wav
+    for (let i = 0; i < segmentCount; i++) {
+      const paddedIndex = String(i).padStart(3, '0');
+      formattedSegments.push({
+        index: i,
+        url: `${req.protocol}://${req.get('host')}/songSegments/${encodeURIComponent(song.title)}/${encodeURIComponent(song.title)}_segment_${paddedIndex}.wav`,
+      });
+    }
+
+    return res.status(200).json(formattedSegments);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+const getStems = async (req, res) => {
+  try {
+    const { song_id } = req.params;
+
+    const song = await Song.findOne({ where: { id: song_id } });
+    if (!song) {
+      return res.status(404).json({ message: 'Song not found' });
+    }
+
+    // Fetch from MongoDB
+    const mongoData = await getVideoProcessingResults(song.external_id);
+    if (!mongoData || !mongoData.stages?.separation) {
+      return res.status(404).json({ message: 'Stems not found' });
+    }
+
+    const stems = [];
+    const stemTypes = mongoData.stages.separation.stems || ['vocals', 'bass', 'drums', 'other'];
+
+    // Map MongoDB stems to API URLs
+    for (const stemType of stemTypes) {
+      const fileName = `${stemType}.mp3`;
+      stems.push({
+        name: stemType.charAt(0).toUpperCase() + stemType.slice(1),
+        url: `${req.protocol}://${req.get('host')}/songVocals/htdemucs/${encodeURIComponent(song.title)}/${fileName}`,
+      });
+    }
+
+    return res.status(200).json(stems);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+const getFullLyrics = async (req, res) => {
+  try {
+    const { song_id } = req.params;
+
+    const song = await Song.findOne({ where: { id: song_id } });
+    if (!song) {
+      return res.status(404).json({ message: 'Song not found' });
+    }
+
+    // Fetch from MongoDB
+    const mongoData = await getVideoProcessingResults(song.external_id);
+    const transcriptionFull = mongoData?.stages?.transcription_full;
+
+    if (!transcriptionFull || transcriptionFull.status !== 'completed') {
+      return res.status(404).json({ message: 'Full lyrics not available' });
+    }
+
+    // Return lyrics directly from MongoDB document
+    const lyricsContent = transcriptionFull.lyrics || '';
+    return res.status(200).json(lyricsContent)
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+const getVocalLyrics = async (req, res) => {
+  try {
+    const { song_id } = req.params;
+
+    const song = await Song.findOne({ where: { id: song_id } });
+    if (!song) {
+      return res.status(404).json({ message: 'Song not found' });
+    }
+
+    // Fetch from MongoDB
+    const mongoData = await getVideoProcessingResults(song.external_id);
+
+    // Try vocal lyrics first, fallback to full lyrics
+    const transcriptionVocals = mongoData?.stages?.transcription_vocals;
+    const transcriptionFull = mongoData?.stages?.transcription_full;
+
+    let lyricsContent = '';
+    if (transcriptionVocals && transcriptionVocals.status === 'completed' && transcriptionVocals.lyrics) {
+      lyricsContent = transcriptionVocals.lyrics;
+    } else if (transcriptionFull && transcriptionFull.status === 'completed' && transcriptionFull.lyrics) {
+      lyricsContent = transcriptionFull.lyrics;
+    } else {
+      return res.status(404).json({ message: 'Lyrics not found' });
+    }
+
+    return res.status(200).json(lyricsContent)
   } catch (e) {
     console.error(e);
     return res.status(500).json({ message: 'Internal server error' });
@@ -305,6 +414,41 @@ const canClassify = async (userId, ip) => {
   return true; // Allow classification if no previous song found
 };
 
+const checkStatus = async (req, res) => {
+  try {
+    const { external_id } = req.params;
+
+    const song = await Song.findOne({
+      where: { external_id },
+      attributes: ['id', 'external_id', 'status', 'title', 'artist'],
+    });
+
+    if (!song) {
+      // Song not in database
+      return res.status(200).json({
+        exists: false,
+        status: null,
+        message: 'Song not found in database',
+      });
+    }
+
+    // Song exists, return its status
+    return res.status(200).json({
+      exists: true,
+      status: song.status,
+      song: {
+        id: song.id,
+        external_id: song.external_id,
+        title: song.title,
+        artist: song.artist,
+      },
+    });
+  } catch (error) {
+    console.error('Error checking song status:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 const classify = async (req, res) => {
   try {
     const { external_id, user_id } = req.params;
@@ -312,8 +456,11 @@ const classify = async (req, res) => {
 
     request = req;
 
+    console.log(`[Classify] external_id: ${external_id}, user_id: ${user_id}, ip: ${ip}`);
+
     // Check if the song is already in the queue
     if (await isAlreadyOnTheDatabase(external_id)) {
+      console.log('[Classify] Song already in database');
       return res.status(400).json('This song is already in the queue for classification.');
     }
 
@@ -322,9 +469,11 @@ const classify = async (req, res) => {
     // If user is logged in (user_id is not 'null'), use user ID for classification limit
     if (user_id !== 'null') {
       limit = await howManySongsBasedOnUserId(user_id); // Get classification count by user ID
+      console.log(`[Classify] User ${user_id} has classified ${limit} songs`);
 
       if (limit % 5 === 0 && limit > 0) {
         if (!(await canClassify(user_id, null))) {
+          console.log('[Classify] User limit reached');
           return res.status(400).json('You have reached the limit for song classification.');
         }
       }
@@ -332,19 +481,28 @@ const classify = async (req, res) => {
     // If user is a guest (user_id is 'null'), use IP address for classification limit
     else {
       limit = await howManySongsBasedOnUserIp(ip); // Get classification count by IP
+      console.log(`[Classify] Guest IP ${ip} has classified ${limit} songs`);
 
+      // TODO: Re-enable rate limiting in production
+      // Temporarily disabled for testing
+      /*
       if (limit >= 1) {
-        if (!(await canClassify(null, ip))) {
+        const canClassifyResult = await canClassify(null, ip);
+        console.log(`[Classify] Can classify result: ${canClassifyResult}`);
+        if (!canClassifyResult) {
+          console.log('[Classify] Guest limit reached - need to wait 24 hours');
           return res.status(400).json('You have reached the limit for song classification.');
         }
       }
+      */
     }
 
     // Start the classification process
+    console.log('[Classify] Starting classification...');
     startClassification(external_id, user_id, ip);
     return res.status(200).json('The song was added to the queue.');
   } catch (error) {
-    console.error(error);
+    console.error('[Classify] Error:', error);
     return res.status(500).json('Internal server error');
   }
 };
@@ -352,7 +510,11 @@ const classify = async (req, res) => {
 module.exports = {
   index,
   classify,
+  checkStatus,
   getSegments,
+  getStems,
+  getFullLyrics,
+  getVocalLyrics,
   getVoice,
   getLyrics,
   getInstrumental,

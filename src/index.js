@@ -9,6 +9,7 @@ const server = http.createServer(app);
 const requestIp = require('request-ip');
 const swaggerUI = require('swagger-ui-express');
 const swaggerDocs = require('./swagger.json');
+const { startConsumer } = require('./Services/rabbitmqConsumer');
 
 // Load environment variables
 require('dotenv').config();
@@ -42,10 +43,13 @@ app.use(cors()); // CORS middleware
 app.use(express.json()); // Body parsing middleware
 
 // Static file serving
-app.use('/profilePictures', express.static(path.join(__dirname, '/Uploads/ProfilePictures')));
-app.use('/songLyrics', express.static(path.join(__dirname, '/Uploads/SongLyrics')));
-app.use('/songIntrumentals', express.static(path.join(__dirname, '/Uploads/SongInstrumentals')));
-app.use('/songVocals', express.static(path.join(__dirname, '/Uploads/SongVocals')));
+// Use /mermaid-api path where Docker volumes are mounted
+const uploadsPath = '/mermaid-api/src/Uploads';
+app.use('/profilePictures', express.static(path.join(uploadsPath, 'ProfilePictures')));
+app.use('/songLyrics', express.static(path.join(uploadsPath, 'SongLyrics')));
+app.use('/songIntrumentals', express.static(path.join(uploadsPath, 'SongInstrumentals')));
+app.use('/songVocals', express.static(path.join(uploadsPath, 'SongVocals')));
+app.use('/songSegments', express.static(path.join(uploadsPath, 'SongSegments')));
 
 app.use(router);
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
@@ -53,6 +57,15 @@ app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 // Start server
 server.listen(8000, () => {
   console.log('[mermaid-api] server running on port 8000');
+
+  // Initialize RabbitMQ consumers (one time only)
+  console.log('[RabbitMQ] Starting consumers...');
+  startConsumer('song_processing_log');
+  startConsumer('song_processing_segments');
+  startConsumer('song_processing_complete');
+  startConsumer('pipeline_stage_update');
+  startConsumer('pipeline_error');
+  console.log('[RabbitMQ] All consumers initialized');
 });
 
 module.exports = { io };

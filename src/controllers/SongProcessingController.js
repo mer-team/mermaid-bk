@@ -1,4 +1,5 @@
 const { Song, Log: SongLog, Song_Segments: SongSegment, Source } = require('../models/Index');
+const { getVideoProcessingResults } = require('../Services/mongodbService');
 
 // Stage to progress mapping (based on pipeline stages)
 const STAGE_PROGRESS = {
@@ -13,22 +14,26 @@ const STAGE_PROGRESS = {
 };
 
 const handleProcessingComplete = async (req, res) => {
-  const { songId, emotion, lyrics, voice, instrumental } = req.body;
+  console.log(
+    '[API] handleProcessingComplete called with body:',
+    JSON.stringify(req.body, null, 2),
+  );
+
+  const { songId } = req.body;
 
   try {
-    // Paths from microservices follow the pattern:
-    // lyrics: /app/lyrics/{title}_lyrics.txt or {title}_vocals_lyrics.txt
-    // voice: /app/separated/htdemucs/{title}/vocals.mp3
-    // instrumental: /app/separated/htdemucs/{title}/other.mp3 (or combination of drums+bass+other)
+    console.log(`[API] Updating song ${songId.external_id} to processed status...`);
 
-    await Song.update(
-      { status: 'processed', general_classification: emotion },
+    // Simply mark the song as processed
+    // Actual processing results will be fetched from MongoDB on-demand when requested
+    const [updatedRows] = await Song.update(
+      { status: 'processed' },
       { where: { external_id: songId.external_id } },
     );
 
-    await Source.create({ song_id: songId.id, lyrics, voice, instrumental, createdAt: new Date() });
-
+    console.log(`[API] Updated ${updatedRows} rows`);
     console.log(`[API] Song processing completed: ${songId.external_id}`);
+
     res.status(200).json({ message: 'Song processing completed' });
   } catch (error) {
     console.error('Error processing song completion:', error);

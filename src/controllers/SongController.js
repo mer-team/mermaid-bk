@@ -118,15 +118,44 @@ const filterByAll = async (req, res) => {
   }
 };
 
+// Track recent hits to prevent duplicate counting (in-memory cache)
+const recentHits = new Map();
+const HIT_COOLDOWN_MS = 60000; // 1 minute cooldown per user per song
+
 const updateHits = async (req, res) => {
   try {
     const { song_id } = req.params;
+    const userIdentifier = req.clientIp || req.headers['x-forwarded-for'] || 'unknown';
+    const hitKey = `${song_id}-${userIdentifier}`;
+
+    // Check if this user recently hit this song
+    const lastHitTime = recentHits.get(hitKey);
+    const now = Date.now();
+
+    if (lastHitTime && (now - lastHitTime) < HIT_COOLDOWN_MS) {
+      // Too soon, don't increment
+      return res.status(200).json('Hit already counted recently');
+    }
+
     const [affectedRows] = await Song.update(
       { hits: Sequelize.literal('hits + 1') },
       { where: { id: song_id } },
     );
 
     if (affectedRows === 0) return res.status(404).json({ message: 'Song not found' });
+
+    // Store the hit timestamp
+    recentHits.set(hitKey, now);
+
+    // Clean up old entries periodically (prevent memory leak)
+    if (recentHits.size > 10000) {
+      const cutoffTime = now - HIT_COOLDOWN_MS;
+      for (const [key, time] of recentHits.entries()) {
+        if (time < cutoffTime) {
+          recentHits.delete(key);
+        }
+      }
+    }
 
     return res.status(200).json('Hit updated');
   } catch (error) {
