@@ -221,23 +221,83 @@ const getSegments = async (req, res) => {
       return res.status(404).json({ message: 'Song not found' });
     }
 
-    // Fetch from MongoDB
+    // First attempt: read segments saved in SQL (these may include emotion labels)
+    const sqlSegments = await Song_Segments.findAll({ where: { song_id }, order: [['id', 'ASC']] });
+    const uploadsBase = '/mermaid-api/src/Uploads/SongSegments';
+    const fs = require('fs').promises;
+
+    // Find actual directory (may have sanitized name)
+    let actualDirName = null;
+    let segmentFiles = [];
+    try {
+      const allDirs = await fs.readdir(uploadsBase);
+      // Try exact match first
+      if (allDirs.includes(song.title)) {
+        actualDirName = song.title;
+        console.log(`[Segments] Exact directory match: ${actualDirName}`);
+      } else {
+        // Try fuzzy match (remove special chars and compare)
+        const normalize = (str) => str.replace(/[^\w\s-]/g, '').trim();
+        const normalizedTitle = normalize(song.title);
+        actualDirName = allDirs.find((d) => normalize(d) === normalizedTitle) || song.title;
+        console.log(
+          `[Segments] Fuzzy matched directory: ${actualDirName} (from DB: ${song.title})`,
+        );
+      }
+
+      const dirPath = path.join(uploadsBase, actualDirName);
+      segmentFiles = (await fs.readdir(dirPath))
+        .filter((f) => /_segment_\d{3}\.wav$/i.test(f))
+        .sort();
+      console.log(`[Segments] Found ${segmentFiles.length} segment files in ${actualDirName}`);
+    } catch (fsErr) {
+      console.warn(`[Segments] Could not list segment directories:`, fsErr.message);
+      actualDirName = song.title;
+    }
+
+    if (sqlSegments && sqlSegments.length > 0 && segmentFiles.length > 0) {
+      const mapped = sqlSegments.map((seg, i) => {
+        const fileName =
+          segmentFiles[i] || `${actualDirName}_segment_${String(i).padStart(3, '0')}.wav`;
+        return {
+          index: i,
+          start_time: seg.start,
+          end_time: seg.end,
+          emotion: seg.emotion || null,
+          url: `${req.protocol}://${req.get('host')}/songSegments/${encodeURIComponent(actualDirName)}/${encodeURIComponent(fileName)}`,
+        };
+      });
+
+      return res.status(200).json(mapped);
+    }
+
+    // Fallback: Fetch from MongoDB
     const mongoData = await getVideoProcessingResults(song.external_id);
     if (!mongoData || !mongoData.stages?.segmentation) {
       return res.status(404).json({ message: 'Segments not found' });
     }
 
-    // Extract segment count and generate segment URLs
+    // Extract segment count and generate segment URLs using actual directory name
     const segmentCount = mongoData.stages.segmentation.segment_count || 0;
     const formattedSegments = [];
 
-    // Generate segment info - files are named {title}_segment_{index}.wav
-    for (let i = 0; i < segmentCount; i++) {
-      const paddedIndex = String(i).padStart(3, '0');
-      formattedSegments.push({
-        index: i,
-        url: `${req.protocol}://${req.get('host')}/songSegments/${encodeURIComponent(song.title)}/${encodeURIComponent(song.title)}_segment_${paddedIndex}.wav`,
-      });
+    // Use actual files if found, otherwise generate expected names
+    if (segmentFiles.length >= segmentCount) {
+      for (let i = 0; i < segmentCount; i++) {
+        formattedSegments.push({
+          index: i,
+          url: `${req.protocol}://${req.get('host')}/songSegments/${encodeURIComponent(actualDirName)}/${encodeURIComponent(segmentFiles[i])}`,
+        });
+      }
+    } else {
+      // Generate expected filenames
+      for (let i = 0; i < segmentCount; i++) {
+        const paddedIndex = String(i).padStart(3, '0');
+        formattedSegments.push({
+          index: i,
+          url: `${req.protocol}://${req.get('host')}/songSegments/${encodeURIComponent(actualDirName)}/${encodeURIComponent(actualDirName)}_segment_${paddedIndex}.wav`,
+        });
+      }
     }
 
     return res.status(200).json(formattedSegments);
@@ -264,14 +324,56 @@ const getStems = async (req, res) => {
 
     const stems = [];
     const stemTypes = mongoData.stages.separation.stems || ['vocals', 'bass', 'drums', 'other'];
+    const fs = require('fs').promises;
+    const uploadsBase = '/mermaid-api/src/Uploads/SongVocals/htdemucs';
 
-    // Map MongoDB stems to API URLs
-    for (const stemType of stemTypes) {
-      const fileName = `${stemType}.mp3`;
-      stems.push({
-        name: stemType.charAt(0).toUpperCase() + stemType.slice(1),
-        url: `${req.protocol}://${req.get('host')}/songVocals/htdemucs/${encodeURIComponent(song.title)}/${fileName}`,
-      });
+    // Find actual directory (may have sanitized name)
+    let actualDirName = null;
+    try {
+      const allDirs = await fs.readdir(uploadsBase);
+      // Try exact match first
+      if (allDirs.includes(song.title)) {
+        actualDirName = song.title;
+        console.log(`[Stems] Exact directory match: ${actualDirName}`);
+      } else {
+        // Try fuzzy match (remove special chars and compare)
+        const normalize = (str) => str.replace(/[^\w\s-]/g, '').trim();
+        const normalizedTitle = normalize(song.title);
+        actualDirName = allDirs.find((d) => normalize(d) === normalizedTitle) || song.title;
+        console.log(`[Stems] Fuzzy matched directory: ${actualDirName} (from DB: ${song.title})`);
+      }
+    } catch (err) {
+      console.warn(`[Stems] Could not list stem directories:`, err.message);
+      actualDirName = song.title;
+    }
+
+    const dirPath = path.join(uploadsBase, actualDirName);
+
+    try {
+      // get files present in folder
+      const files = await fs.readdir(dirPath);
+
+      for (const stemType of stemTypes) {
+        const fileName = `${stemType}.mp3`;
+        if (files.includes(fileName)) {
+          stems.push({
+            name: stemType.charAt(0).toUpperCase() + stemType.slice(1),
+            url: `${req.protocol}://${req.get('host')}/songVocals/htdemucs/${encodeURIComponent(actualDirName)}/${fileName}`,
+          });
+        } else {
+          console.warn(`[Stems] Missing stem file for ${song.title}: ${fileName}`);
+        }
+      }
+    } catch (fsErr) {
+      console.warn(`[Stems] Could not access stems directory ${dirPath}:`, fsErr.message);
+      // Fallback: return URLs anyway (may 404)
+      for (const stemType of stemTypes) {
+        const fileName = `${stemType}.mp3`;
+        stems.push({
+          name: stemType.charAt(0).toUpperCase() + stemType.slice(1),
+          url: `${req.protocol}://${req.get('host')}/songVocals/htdemucs/${encodeURIComponent(actualDirName)}/${fileName}`,
+        });
+      }
     }
 
     return res.status(200).json(stems);
@@ -300,7 +402,7 @@ const getFullLyrics = async (req, res) => {
 
     // Return lyrics directly from MongoDB document
     const lyricsContent = transcriptionFull.lyrics || '';
-    return res.status(200).json(lyricsContent)
+    return res.status(200).json(lyricsContent);
   } catch (e) {
     console.error(e);
     return res.status(500).json({ message: 'Internal server error' });
@@ -324,15 +426,23 @@ const getVocalLyrics = async (req, res) => {
     const transcriptionFull = mongoData?.stages?.transcription_full;
 
     let lyricsContent = '';
-    if (transcriptionVocals && transcriptionVocals.status === 'completed' && transcriptionVocals.lyrics) {
+    if (
+      transcriptionVocals &&
+      transcriptionVocals.status === 'completed' &&
+      transcriptionVocals.lyrics
+    ) {
       lyricsContent = transcriptionVocals.lyrics;
-    } else if (transcriptionFull && transcriptionFull.status === 'completed' && transcriptionFull.lyrics) {
+    } else if (
+      transcriptionFull &&
+      transcriptionFull.status === 'completed' &&
+      transcriptionFull.lyrics
+    ) {
       lyricsContent = transcriptionFull.lyrics;
     } else {
       return res.status(404).json({ message: 'Lyrics not found' });
     }
 
-    return res.status(200).json(lyricsContent)
+    return res.status(200).json(lyricsContent);
   } catch (e) {
     console.error(e);
     return res.status(500).json({ message: 'Internal server error' });
