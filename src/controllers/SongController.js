@@ -132,7 +132,7 @@ const updateHits = async (req, res) => {
     const lastHitTime = recentHits.get(hitKey);
     const now = Date.now();
 
-    if (lastHitTime && (now - lastHitTime) < HIT_COOLDOWN_MS) {
+    if (lastHitTime && now - lastHitTime < HIT_COOLDOWN_MS) {
       // Too soon, don't increment
       return res.status(200).json('Hit already counted recently');
     }
