@@ -24,15 +24,32 @@ const handleProcessingComplete = async (req, res) => {
   try {
     console.log(`[API] Updating song ${songId.external_id} to processed status...`);
 
-    // Simply mark the song as processed
-    // Actual processing results will be fetched from MongoDB on-demand when requested
-    const [updatedRows] = await Song.update(
-      { status: 'processed' },
-      { where: { external_id: songId.external_id } },
-    );
+    // Fetch processing results from MongoDB to get emotion classification
+    const mongoData = await getVideoProcessingResults(songId.external_id);
+
+    // Extract emotion if available
+    let emotion = null;
+    if (mongoData?.stages?.emotion_classification?.status === 'completed') {
+      emotion = mongoData.stages.emotion_classification.emotion;
+      console.log(`[API] Found emotion classification: ${emotion}`);
+    } else {
+      console.log('[API] No emotion classification found in MongoDB');
+    }
+
+    // Update song status and emotion
+    const updateData = { status: 'processed' };
+    if (emotion) {
+      updateData.general_classification = emotion;
+    }
+
+    const [updatedRows] = await Song.update(updateData, {
+      where: { external_id: songId.external_id },
+    });
 
     console.log(`[API] Updated ${updatedRows} rows`);
-    console.log(`[API] Song processing completed: ${songId.external_id}`);
+    console.log(
+      `[API] Song processing completed: ${songId.external_id}${emotion ? ` (emotion: ${emotion})` : ''}`,
+    );
 
     res.status(200).json({ message: 'Song processing completed' });
   } catch (error) {
