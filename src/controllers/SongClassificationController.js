@@ -138,11 +138,17 @@ const classificationQueue = async.queue(async (song_externalID) => {
 
     // Emit initial progress
     if (songSocket) {
-      request.io.emit('progress', {
+      const progressData = {
         progress: 5,
         song_id: song_externalID,
         state: 'Sent to processing pipeline',
-      });
+      };
+
+      // Emit to specific song room
+      request.io.to(`song_${song_externalID}`).emit('progress', progressData);
+
+      // Emit to global room
+      request.io.to('global').emit('progress', progressData);
     }
 
     // The rest of the process will be handled by:
@@ -156,10 +162,16 @@ const classificationQueue = async.queue(async (song_externalID) => {
     console.error('Error starting classification:', error);
 
     if (songSocket) {
-      request.io.emit('classification-error', {
+      const errorData = {
         songId: song_externalID,
         error: error.message,
-      });
+      };
+
+      // Emit to specific song room
+      request.io.to(`song_${song_externalID}`).emit('classification-error', errorData);
+
+      // Emit to global room
+      request.io.to('global').emit('classification-error', errorData);
     }
   }
 }, 1);
