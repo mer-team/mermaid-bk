@@ -10,6 +10,7 @@ const requestIp = require('request-ip');
 const swaggerUI = require('swagger-ui-express');
 const swaggerDocs = require('./swagger.json');
 const { startConsumer } = require('./Services/rabbitmqConsumer');
+const { startMongoDBPoller } = require('./Services/mongodbPoller');
 
 // Load environment variables
 require('dotenv').config();
@@ -29,7 +30,26 @@ app.use(express.json()); // Body parsing middleware
 
 io.on('connection', (socket) => {
   const { song_id } = socket.handshake.query;
-  connectedSong[song_id] = socket.id;
+
+  if (song_id && song_id !== 'undefined' && song_id !== 'null') {
+    // Specific song listener - join room for this song
+    connectedSong[song_id] = socket.id;
+    socket.join(`song_${song_id}`); // Join song-specific room
+    console.log(`[Socket.io] Client connected for song: ${song_id} (room: song_${song_id})`);
+  } else {
+    // Global listener (e.g., Queue page) - join global room
+    socket.join('global');
+    console.log(`[Socket.io] Global client connected (socket: ${socket.id})`);
+  }
+
+  socket.on('disconnect', () => {
+    if (song_id && connectedSong[song_id] === socket.id) {
+      delete connectedSong[song_id];
+      console.log(`[Socket.io] Client disconnected for song: ${song_id}`);
+    } else {
+      console.log(`[Socket.io] Global client disconnected (socket: ${socket.id})`);
+    }
+  });
 });
 
 app.use((req, res, next) => {
@@ -37,6 +57,9 @@ app.use((req, res, next) => {
   req.connectedSong = connectedSong;
   next();
 });
+
+// Make io accessible via app.get('io')
+app.set('io', io);
 
 app.use(requestIp.mw()); // Middleware to get the IP of the user
 app.use(cors()); // CORS middleware
@@ -66,6 +89,10 @@ server.listen(8000, () => {
   startConsumer('pipeline_stage_update');
   startConsumer('pipeline_error');
   console.log('[RabbitMQ] All consumers initialized');
+
+  // Start MongoDB poller for progress updates (polls every 3 seconds)
+  console.log('[MongoDB Poller] Starting progress polling...');
+  startMongoDBPoller(io, 3000);
 });
 
 module.exports = { io };
