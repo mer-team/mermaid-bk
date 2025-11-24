@@ -11,4 +11,7 @@ router.post('/segments', SongProcessingController.handleSongSegments);
 router.post('/stage-update', SongProcessingController.handleStageUpdate);
 router.post('/error', SongProcessingController.handlePipelineError);
 
+// Get processing progress from MongoDB
+router.get('/progress/:external_id', SongProcessingController.getProcessingProgress);
+
 module.exports = router;
