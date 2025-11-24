@@ -80,7 +80,12 @@ async function handleMessage(message, connection, queue) {
 
       case 'pipeline_stage_update':
         // Stage updates from pipeline manager (download, segmentation, separation, transcription)
+        console.log(
+          '[RabbitMQ Handler] Stage update received:',
+          JSON.stringify(message.data, null, 2),
+        );
         await axios.post(`${API_BASE_URL}/processing/stage-update`, message.data);
+        console.log('[RabbitMQ Handler] Stage update forwarded to API');
         break;
 
       case 'pipeline_error':
