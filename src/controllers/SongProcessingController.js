@@ -145,7 +145,7 @@ const handleProcessingComplete = async (req, res) => {
       io.to('global').emit('progress', progressData);
       io.to('global').emit('song-classified', completionData);
 
-      console.log(`[Socket.io] Emitted completion for song: ${songId.external_id}`);
+      //console.log(`[Socket.io] Emitted completion for song: ${songId.external_id}`);
     }
 
     res.status(200).json({ message: 'Song processing completed' });
@@ -221,7 +221,7 @@ const handleStageUpdate = async (req, res) => {
       // Emit to global room (for Queue page / global listeners)
       io.to('global').emit('progress', progressData);
 
-      console.log(`[Socket.io] Emitted progress: ${progress}% - ${stateMessage} (${external_id})`);
+      //console.log(`[Socket.io] Emitted progress: ${progress}% - ${stateMessage} (${external_id})`);
     } else {
       console.warn('[Socket.io] io instance not available');
     }
