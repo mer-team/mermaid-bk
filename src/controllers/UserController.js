@@ -1,7 +1,7 @@
 const { User } = require('../models/Index');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
-const crypto = require('crypto')
+const crypto = require('crypto');
 const multer = require('multer');
 const sharp = require('sharp');
 const fs = require('fs');
@@ -11,10 +11,10 @@ const { Op } = require('sequelize');
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'localhost',
-  port: process.env.SMTP_PORT || 1025,  // Default port for MailCatcher is 1025
+  port: process.env.SMTP_PORT || 1025, // Default port for MailCatcher is 1025
   secure: false, // MailCatcher does not use SSL/TLS by default
   auth: {
-    user: process.env.SMTP_USER || 'docker',  // MailCatcher does not require authentication
+    user: process.env.SMTP_USER || 'docker', // MailCatcher does not require authentication
     pass: process.env.SMTP_PASS || 'docker',
   },
   tls: {
@@ -57,13 +57,11 @@ const register = async (req, res) => {
 
     // Respond with success message
     return res.status(201).json({ message: 'Please check your email to confirm your account' });
-
   } catch (err) {
     console.error('Error during user registration:', err);
     return res.status(500).json({ errors: ['Internal server error'] });
   }
 };
-
 
 // Confirm user email
 const confirmUser = async (req, res) => {
@@ -106,7 +104,9 @@ const login = async (req, res) => {
     const isPasswordValid = await bcrypt.compare(password, user.hash_passwd);
 
     if (isPasswordValid) {
-      const token = jwt.sign({ id: user.id, email: user.email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+      const token = jwt.sign({ id: user.id, email: user.email }, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: '1h',
+      });
       return res.status(200).json({ token });
     } else {
       return res.status(400).json({ error: 'Incorrect Password' });
@@ -129,7 +129,6 @@ const show = async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
-
 
 // Resend confirmation email
 const resendEmail = async (req, res) => {
@@ -158,7 +157,9 @@ const resendEmail = async (req, res) => {
     if (info && info.accepted.length > 0) {
       return res.status(200).json({ message: 'Please check your email to confirm your account' });
     } else {
-      return res.status(500).json({ message: 'Failed to send confirmation email. Please try again.' });
+      return res
+        .status(500)
+        .json({ message: 'Failed to send confirmation email. Please try again.' });
     }
   } catch (e) {
     console.error(e);
@@ -182,7 +183,6 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage }).single('profilePicture');
 
 const getProfilePicture = async (req, res) => {
-
   const { email } = req.params;
 
   try {
@@ -198,12 +198,14 @@ const getProfilePicture = async (req, res) => {
     return res.status(200).json({ ...user, profilePicture: profilePictureUrl });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ message: 'An error occurred while fetching the profile picture.' });
+    return res
+      .status(500)
+      .json({ message: 'An error occurred while fetching the profile picture.' });
   }
 };
 
 const setProfilePicture = async (req, res) => {
-  const { email } = req.body
+  const { email } = req.body;
 
   try {
     const user = await User.findOne({ where: { email } });
@@ -220,7 +222,10 @@ const setProfilePicture = async (req, res) => {
     const hash = crypto.createHash('md5').update(email).digest('hex');
 
     // Create a new file name for the resized image
-    const resizedImagePath = path.join(__dirname, `../Uploads/ProfilePictures/${hash}_${Date.now()}${fileExtension}`);
+    const resizedImagePath = path.join(
+      __dirname,
+      `../Uploads/ProfilePictures/${hash}_${Date.now()}${fileExtension}`,
+    );
 
     // Resize the image
     await sharp(fileBuffer)
@@ -243,19 +248,18 @@ const setProfilePicture = async (req, res) => {
     }
 
     await User.update({ profilePicture: resizedImagePath }, { where: { email } });
-    
+
     return res.status(200).json({ message: 'Profile picture updated successfully.' });
-    
   } catch (e) {
     console.error(e);
     return res.status(500).json({ message: 'An error occurred while fetching users.' });
   }
-}
+};
 
 const getHashPart = (path) => {
   const underscoreIndex = path.indexOf('_');
-  return storedPath = underscoreIndex !== -1 ? path.substring(0, underscoreIndex) : path;
-}
+  return (storedPath = underscoreIndex !== -1 ? path.substring(0, underscoreIndex) : path);
+};
 
 // Get users by email or username
 const getUsersByEmailOrUsername = async (req, res) => {
@@ -268,14 +272,14 @@ const getUsersByEmailOrUsername = async (req, res) => {
           email: Sequelize.where(
             Sequelize.fn('LOWER', Sequelize.col('email')),
             'LIKE',
-            `%${email || ''}%`
+            `%${email || ''}%`,
           ),
         },
         {
           name: Sequelize.where(
             Sequelize.fn('LOWER', Sequelize.col('name')),
             'LIKE',
-            `%${name || ''}%`
+            `%${name || ''}%`,
           ),
         },
       ],
@@ -323,7 +327,7 @@ const getBlockedUser = async (req, res) => {
       where: {
         email,
         blocked_at: {
-          [Op.ne]: null
+          [Op.ne]: null,
         },
       },
     });
@@ -339,7 +343,6 @@ const getBlockedUser = async (req, res) => {
     return res.status(500).json({ message: 'An error occurred while fetching blocked users.' });
   }
 };
-
 
 // Get only blocked users
 const getOnlyBlockedUsers = async (req, res) => {
@@ -396,7 +399,6 @@ const changePassword = async (req, res) => {
     await User.update({ hash_passwd: hashedPassword }, { where: { email } });
 
     return res.status(200).json({ message: 'Password changed successfully.' });
-
   } catch (error) {
     console.error('Error changing password:', error);
     return res.status(500).json({ message: 'An error occurred while changing the password.' });
@@ -454,7 +456,9 @@ const resetPassword = async (req, res) => {
           return res.status(201).json({ message: 'Please check your email to reset the password' });
         } catch (error) {
           console.error(error);
-          return res.status(500).json({ message: 'Failed to send reset password email. Please try again.' });
+          return res
+            .status(500)
+            .json({ message: 'Failed to send reset password email. Please try again.' });
         }
       } else {
         return res.status(400).json({ message: 'Please confirm your email first' });

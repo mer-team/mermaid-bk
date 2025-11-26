@@ -9,15 +9,18 @@ class Log extends Model {
 }
 
 const defineLogModel = (sequelize) => {
-  Log.init({
-    message: DataTypes.STRING,
-    service: DataTypes.STRING,
-    song_id: DataTypes.INTEGER,
-    type: DataTypes.ENUM("info", "warning", "error"),
-  }, {
-    sequelize,
-    modelName: 'Log',
-  });
+  Log.init(
+    {
+      message: DataTypes.STRING,
+      service: DataTypes.STRING,
+      song_id: DataTypes.INTEGER,
+      type: DataTypes.ENUM('info', 'warning', 'error'),
+    },
+    {
+      sequelize,
+      modelName: 'Log',
+    },
+  );
 
   return Log;
 };

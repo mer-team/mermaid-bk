@@ -10,14 +10,17 @@ class Song_Classification extends Model {
 }
 
 const defineSongClassificationModel = (sequelize) => {
-  Song_Classification.init({
-    song_id: DataTypes.INTEGER,
-    source_id: DataTypes.INTEGER,
-    emotion: DataTypes.STRING,
-  }, {
-    sequelize,
-    modelName: 'Song_Classification',
-  });
+  Song_Classification.init(
+    {
+      song_id: DataTypes.INTEGER,
+      source_id: DataTypes.INTEGER,
+      emotion: DataTypes.STRING,
+    },
+    {
+      sequelize,
+      modelName: 'Song_Classification',
+    },
+  );
 
   return Song_Classification;
 };

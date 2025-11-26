@@ -42,7 +42,7 @@ const filterByTitleAndArtist = async (req, res) => {
         title: Sequelize.where(
           Sequelize.fn('LOWER', Sequelize.col('title')),
           'LIKE',
-          `%${title.toLowerCase()}%`
+          `%${title.toLowerCase()}%`,
         ),
         status: 'processed',
       },
@@ -54,7 +54,7 @@ const filterByTitleAndArtist = async (req, res) => {
         artist: Sequelize.where(
           Sequelize.fn('LOWER', Sequelize.col('artist')),
           'LIKE',
-          `%${title.toLowerCase()}%`
+          `%${title.toLowerCase()}%`,
         ),
         status: 'processed',
       },
@@ -62,8 +62,7 @@ const filterByTitleAndArtist = async (req, res) => {
 
     // Step 3: Combine results and remove duplicates
     const allMatches = [...titleMatches, ...artistMatches].filter(
-      (song, index, self) =>
-        index === self.findIndex((s) => s.id === song.id) // Remove duplicates based on the song ID
+      (song, index, self) => index === self.findIndex((s) => s.id === song.id), // Remove duplicates based on the song ID
     );
 
     // Return the combined list of songs
@@ -82,7 +81,7 @@ const filterByEmotion = async (req, res) => {
         general_classification: Sequelize.where(
           Sequelize.fn('LOWER', Sequelize.col('general_classification')),
           'LIKE',
-          `%${emotion.toLowerCase()}%`
+          `%${emotion.toLowerCase()}%`,
         ),
         status: 'processed',
       },
@@ -102,12 +101,12 @@ const filterByAll = async (req, res) => {
         title: Sequelize.where(
           Sequelize.fn('LOWER', Sequelize.col('title')),
           'LIKE',
-          `%${title.toLowerCase()}%`
+          `%${title.toLowerCase()}%`,
         ),
         general_classification: Sequelize.where(
           Sequelize.fn('LOWER', Sequelize.col('general_classification')),
           'LIKE',
-          `%${emotion.toLowerCase()}%`
+          `%${emotion.toLowerCase()}%`,
         ),
         status: 'processed',
       },
@@ -119,15 +118,44 @@ const filterByAll = async (req, res) => {
   }
 };
 
+// Track recent hits to prevent duplicate counting (in-memory cache)
+const recentHits = new Map();
+const HIT_COOLDOWN_MS = 60000; // 1 minute cooldown per user per song
+
 const updateHits = async (req, res) => {
   try {
     const { song_id } = req.params;
+    const userIdentifier = req.clientIp || req.headers['x-forwarded-for'] || 'unknown';
+    const hitKey = `${song_id}-${userIdentifier}`;
+
+    // Check if this user recently hit this song
+    const lastHitTime = recentHits.get(hitKey);
+    const now = Date.now();
+
+    if (lastHitTime && now - lastHitTime < HIT_COOLDOWN_MS) {
+      // Too soon, don't increment
+      return res.status(200).json('Hit already counted recently');
+    }
+
     const [affectedRows] = await Song.update(
       { hits: Sequelize.literal('hits + 1') },
-      { where: { id: song_id } }
+      { where: { id: song_id } },
     );
 
     if (affectedRows === 0) return res.status(404).json({ message: 'Song not found' });
+
+    // Store the hit timestamp
+    recentHits.set(hitKey, now);
+
+    // Clean up old entries periodically (prevent memory leak)
+    if (recentHits.size > 10000) {
+      const cutoffTime = now - HIT_COOLDOWN_MS;
+      for (const [key, time] of recentHits.entries()) {
+        if (time < cutoffTime) {
+          recentHits.delete(key);
+        }
+      }
+    }
 
     return res.status(200).json('Hit updated');
   } catch (error) {
@@ -152,15 +180,35 @@ const getHits = async (req, res) => {
 };
 
 const getQueueSongs = async (req, res) => {
-  const { user_id } = req.params
+  const { user_id } = req.params;
 
   try {
+    // Build where clause to include songs from both user_id and IP
+    const whereClause = {
+      status: { [Op.ne]: 'processed' },
+      [Op.or]: []
+    };
+
+    // Add user_id filter if provided
+    if (user_id && user_id !== 'null' && user_id !== '0' && user_id !== 'undefined') {
+      whereClause[Op.or].push({ added_by_user: user_id });
+    }
+
+    // Also include songs from this IP (for guest songs)
+    if (req.clientIp) {
+      whereClause[Op.or].push({ added_by_ip: req.clientIp });
+    }
+
+    // If no filters, show nothing
+    if (whereClause[Op.or].length === 0) {
+      return res.status(200).json([]);
+    }
+
     const songs = await Song.findAll({
-      where: {
-        added_by_user: user_id,
-        status: { [Op.ne]: 'processed' },
-      },
+      where: whereClause,
+      order: [['createdAt', 'DESC']], // Show newest first
     });
+
     return res.status(200).json(songs);
   } catch (error) {
     console.error(error);
@@ -204,7 +252,7 @@ const getStreamedMinutes = async (req, res) => {
     const songs = await Song.findAll();
 
     // Convert duration from seconds to minutes and sum it
-    songs.forEach(song => {
+    songs.forEach((song) => {
       total += Math.floor(song.duration / 60); // Convert seconds to minutes and round down
     });
 
@@ -214,7 +262,6 @@ const getStreamedMinutes = async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
-
 
 const analysedVideos = async (req, res) => {
   try {

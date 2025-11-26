@@ -16,6 +16,10 @@
     {
       "name": "Feedback",
       "description": "Everything about the feedback of the songs"
+    },
+    {
+      "name": "YouTube",
+      "description": "YouTube integration endpoints"
     }
   ],
   "paths": {
@@ -617,6 +621,113 @@
           },
           "404": {
             "description": "No feedback found for this song"
+          }
+        }
+      }
+    },
+    "/youtube/search": {
+      "get": {
+        "summary": "Search YouTube videos",
+        "description": "Search for music videos on YouTube. API key is protected on the backend.",
+        "tags": [
+          "YouTube"
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Search query string",
+            "schema": {
+              "type": "string",
+              "example": "never gonna give you up"
+            }
+          },
+          {
+            "name": "maxResults",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of results to return",
+            "schema": {
+              "type": "integer",
+              "default": 4,
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful search",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "YouTube video ID",
+                        "example": "dQw4w9WgXcQ"
+                      },
+                      "thumbnail": {
+                        "type": "string",
+                        "description": "URL of video thumbnail",
+                        "example": "https://i.ytimg.com/vi/dQw4w9WgXcQ/default.jpg"
+                      },
+                      "title": {
+                        "type": "string",
+                        "description": "Video title",
+                        "example": "Rick Astley - Never Gonna Give You Up"
+                      },
+                      "channelTitle": {
+                        "type": "string",
+                        "description": "Channel name",
+                        "example": "Rick Astley"
+                      },
+                      "publishedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Video publication date"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing query parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Query parameter is required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "YouTube API error or server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Failed to search YouTube"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }

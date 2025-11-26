@@ -1,0 +1,57 @@
+### Create Admin User
+POST http://localhost:8000/user/signup
+Content-Type: application/json
+
+{
+  "name": "Admin User",
+  "email": "admin@mermaid.com",
+  "password": "AdminPassword123!",
+  "admin": true,
+  "profilePicture": ""
+}
+
+###
+
+### Create Regular User
+POST http://localhost:8000/user/signup
+Content-Type: application/json
+
+{
+  "name": "Jane Doe",
+  "email": "jane.doe@example.com",
+  "password": "UserPassword123!",
+  "admin": false,
+  "profilePicture": ""
+}
+
+###
+
+### Login
+POST http://localhost:8000/user/login
+Content-Type: application/json
+
+{
+  "email": "admin@mermaid.com",
+  "password": "AdminPassword123!"
+}
+
+###
+
+### Get User Info (requires token)
+GET http://localhost:8000/user
+Authorization: Bearer YOUR_TOKEN_HERE
+
+###
+
+### Confirm Email (replace TOKEN with actual token from email)
+GET http://localhost:8000/user/confirm/TOKEN
+
+###
+
+### Delete User (Direct Database Query - Run in PostgreSQL)
+# Connect to your PostgreSQL database and run:
+# DELETE FROM "Users" WHERE email = 'admin@admin.com';
+# or
+# DELETE FROM "Users" WHERE id = 1;
+
+###

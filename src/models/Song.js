@@ -13,28 +13,31 @@ class Song extends Model {
 }
 
 const defineSongModel = (sequelize) => {
-  Song.init({
-    external_id: DataTypes.STRING,
-    link: DataTypes.STRING,
-    title: DataTypes.STRING,
-    artist: DataTypes.STRING,
-    duration: DataTypes.INTEGER,
-    year: DataTypes.INTEGER,
-    date: DataTypes.DATE,
-    genre: DataTypes.STRING,
-    description: DataTypes.TEXT,
-    thumbnailHQ: DataTypes.STRING,
-    thumbnailMQ: DataTypes.STRING,
-    hits: DataTypes.INTEGER,
-    waveform: DataTypes.STRING,
-    status: DataTypes.ENUM("queued", "processing", "processed", "error", "cancelled"),
-    added_by_ip: DataTypes.STRING,
-    added_by_user: DataTypes.STRING,
-    general_classification: DataTypes.STRING,
-  }, {
-    sequelize,
-    modelName: 'Song',
-  });
+  Song.init(
+    {
+      external_id: DataTypes.STRING,
+      link: DataTypes.STRING,
+      title: DataTypes.STRING,
+      artist: DataTypes.STRING,
+      duration: DataTypes.INTEGER,
+      year: DataTypes.INTEGER,
+      date: DataTypes.DATE,
+      genre: DataTypes.STRING,
+      description: DataTypes.TEXT,
+      thumbnailHQ: DataTypes.STRING,
+      thumbnailMQ: DataTypes.STRING,
+      hits: DataTypes.INTEGER,
+      waveform: DataTypes.STRING,
+      status: DataTypes.ENUM('queued', 'processing', 'processed', 'error', 'cancelled'),
+      added_by_ip: DataTypes.STRING,
+      added_by_user: DataTypes.STRING,
+      general_classification: DataTypes.STRING,
+    },
+    {
+      sequelize,
+      modelName: 'Song',
+    },
+  );
 
   return Song;
 };

@@ -17,10 +17,9 @@ function sendMessage(queue, msg) {
         return;
       }
 
-      channel.assertQueue(queue, { durable: false });
+      channel.assertQueue(queue, { durable: true });
       channel.sendToQueue(queue, Buffer.from(msg));
       console.log(' [x] Sent %s', msg);
-
     });
   });
 }
