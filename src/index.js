@@ -35,19 +35,19 @@ io.on('connection', (socket) => {
     // Specific song listener - join room for this song
     connectedSong[song_id] = socket.id;
     socket.join(`song_${song_id}`); // Join song-specific room
-    console.log(`[Socket.io] Client connected for song: ${song_id} (room: song_${song_id})`);
+    //console.log(`[Socket.io] Client connected for song: ${song_id} (room: song_${song_id})`);
   } else {
     // Global listener (e.g., Queue page) - join global room
     socket.join('global');
-    console.log(`[Socket.io] Global client connected (socket: ${socket.id})`);
+    //console.log(`[Socket.io] Global client connected (socket: ${socket.id})`);
   }
 
   socket.on('disconnect', () => {
     if (song_id && connectedSong[song_id] === socket.id) {
       delete connectedSong[song_id];
-      console.log(`[Socket.io] Client disconnected for song: ${song_id}`);
+      //console.log(`[Socket.io] Client disconnected for song: ${song_id}`);
     } else {
-      console.log(`[Socket.io] Global client disconnected (socket: ${socket.id})`);
+      //console.log(`[Socket.io] Global client disconnected (socket: ${socket.id})`);
     }
   });
 });
