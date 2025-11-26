@@ -183,12 +183,32 @@ const getQueueSongs = async (req, res) => {
   const { user_id } = req.params;
 
   try {
+    // Build where clause to include songs from both user_id and IP
+    const whereClause = {
+      status: { [Op.ne]: 'processed' },
+      [Op.or]: []
+    };
+
+    // Add user_id filter if provided
+    if (user_id && user_id !== 'null' && user_id !== '0' && user_id !== 'undefined') {
+      whereClause[Op.or].push({ added_by_user: user_id });
+    }
+
+    // Also include songs from this IP (for guest songs)
+    if (req.clientIp) {
+      whereClause[Op.or].push({ added_by_ip: req.clientIp });
+    }
+
+    // If no filters, show nothing
+    if (whereClause[Op.or].length === 0) {
+      return res.status(200).json([]);
+    }
+
     const songs = await Song.findAll({
-      where: {
-        added_by_user: user_id,
-        status: { [Op.ne]: 'processed' },
-      },
+      where: whereClause,
+      order: [['createdAt', 'DESC']], // Show newest first
     });
+
     return res.status(200).json(songs);
   } catch (error) {
     console.error(error);
