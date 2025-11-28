@@ -26,65 +26,58 @@ const convertIso8601DurationToSeconds = (duration) => {
 };
 
 const saveTheSong = async (songId, userId, ip) => {
-  return new Promise((resolve, reject) => {
-    const opts = {
-      key: API_KEY,
-    };
-
-    // YouTube search function (still callback-based)
-    search(`https://www.youtube.com/watch?v=${songId}`, opts, async (err, results) => {
-      if (err) {
-        console.error(err);
-        return reject(err); // Reject the promise on error
-      }
-
-      try {
-        const videoId = results[0].id;
-
-        // Fetch video details to get duration
-        const videoDetailsResponse = await axios.get(
-          `https://www.googleapis.com/youtube/v3/videos`,
-          {
-            params: {
-              part: 'contentDetails',
-              id: videoId,
-              key: API_KEY,
-            },
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Fetch video details directly using the video ID (not search!)
+      const videoDetailsResponse = await axios.get(
+        `https://www.googleapis.com/youtube/v3/videos`,
+        {
+          params: {
+            part: 'contentDetails,snippet',
+            id: songId,  // Use the exact video ID
+            key: API_KEY,
           },
-        );
+        },
+      );
 
-        const duration = videoDetailsResponse.data.items[0].contentDetails.duration; // ISO 8601 format
-        const durationInSeconds = convertIso8601DurationToSeconds(duration);
-
-        // Save the song to the database
-        await Song.create({
-          external_id: videoId,
-          link: results[0].link,
-          title: results[0].title,
-          artist: results[0].channelTitle,
-          duration: durationInSeconds,
-          year: new Date(results[0].publishedAt).getFullYear(),
-          date: new Date(results[0].publishedAt),
-          genre: '', //'Salsa, Kuduro, Romance', // Default value
-          description: results[0].description,
-          thumbnailHQ: results[0].thumbnails.high.url,
-          thumbnailMQ: results[0].thumbnails.medium.url,
-          hits: 0,
-          waveform: 'dQw4w9WgXcQ.png',
-          status: 'queued',
-          added_by_ip: ip,
-          added_by_user: userId,
-          createdAt: new Date(),
-          general_classification: '',
-        });
-
-        console.log('Song saved with duration:', durationInSeconds);
-        resolve(); // Resolve the promise when the song is successfully saved
-      } catch (e) {
-        console.error('Error saving song:', e);
-        reject(e); // Reject the promise if something goes wrong
+      if (!videoDetailsResponse.data.items || videoDetailsResponse.data.items.length === 0) {
+        console.error('Video not found:', songId);
+        return reject(new Error('Video not found'));
       }
-    });
+
+      const videoData = videoDetailsResponse.data.items[0];
+      const duration = videoData.contentDetails.duration; // ISO 8601 format
+      const durationInSeconds = convertIso8601DurationToSeconds(duration);
+      const snippet = videoData.snippet;
+
+      // Save the song to the database
+      await Song.create({
+        external_id: songId,  // Use the original video ID
+        link: `https://www.youtube.com/watch?v=${songId}`,
+        title: snippet.title,
+        artist: snippet.channelTitle,
+        duration: durationInSeconds,
+        year: new Date(snippet.publishedAt).getFullYear(),
+        date: new Date(snippet.publishedAt),
+        genre: '',
+        description: snippet.description,
+        thumbnailHQ: snippet.thumbnails?.high?.url || '',
+        thumbnailMQ: snippet.thumbnails?.medium?.url || '',
+        hits: 0,
+        waveform: `${songId}.png`,
+        status: 'queued',
+        added_by_ip: ip,
+        added_by_user: userId,
+        createdAt: new Date(),
+        general_classification: '',
+      });
+
+      console.log(`[API] Song saved: ${snippet.title} (${songId})`);
+      resolve();
+    } catch (e) {
+      console.error('Error saving song:', e);
+      reject(e);
+    }
   });
 };
 
@@ -119,6 +112,12 @@ const classificationQueue = async.queue(async (song_externalID) => {
   let songId = await Song.findOne({
     where: { external_id: song_externalID },
   });
+
+  // Check if song exists
+  if (!songId) {
+    console.error(`[API] Song not found for external_id: ${song_externalID}`);
+    return; // Exit early if song not found
+  }
 
   try {
     await updateStateSong('processing', song_externalID);
