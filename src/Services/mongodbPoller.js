@@ -37,10 +37,11 @@ const lastProgress = new Map();
 
 async function pollProcessingSongs(io) {
   try {
-    // Find all songs currently processing
+    // Find all songs currently processing (logging disabled to reduce noise)
     const processingSongs = await Song.findAll({
       where: { status: 'processing' },
       attributes: ['id', 'external_id', 'title'],
+      logging: false,
     });
 
     if (processingSongs.length === 0) {
