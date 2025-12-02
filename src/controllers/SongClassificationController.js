@@ -29,16 +29,13 @@ const saveTheSong = async (songId, userId, ip) => {
   return new Promise(async (resolve, reject) => {
     try {
       // Fetch video details directly using the video ID (not search!)
-      const videoDetailsResponse = await axios.get(
-        `https://www.googleapis.com/youtube/v3/videos`,
-        {
-          params: {
-            part: 'contentDetails,snippet',
-            id: songId,  // Use the exact video ID
-            key: API_KEY,
-          },
+      const videoDetailsResponse = await axios.get(`https://www.googleapis.com/youtube/v3/videos`, {
+        params: {
+          part: 'contentDetails,snippet',
+          id: songId, // Use the exact video ID
+          key: API_KEY,
         },
-      );
+      });
 
       if (!videoDetailsResponse.data.items || videoDetailsResponse.data.items.length === 0) {
         console.error('Video not found:', songId);
@@ -52,7 +49,7 @@ const saveTheSong = async (songId, userId, ip) => {
 
       // Save the song to the database
       await Song.create({
-        external_id: songId,  // Use the original video ID
+        external_id: songId, // Use the original video ID
         link: `https://www.youtube.com/watch?v=${songId}`,
         title: snippet.title,
         artist: snippet.channelTitle,

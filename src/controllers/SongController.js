@@ -186,7 +186,7 @@ const getQueueSongs = async (req, res) => {
     // Build where clause to include songs from both user_id and IP
     const whereClause = {
       status: { [Op.ne]: 'processed' },
-      [Op.or]: []
+      [Op.or]: [],
     };
 
     // Add user_id filter if provided
