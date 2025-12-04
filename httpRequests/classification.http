@@ -1,0 +1,18 @@
+@example_music_id = Nq_282Sm7II
+@example_user_id = null
+### Get Song Classifications
+GET http://localhost:8000/songs/classification
+
+### Classify Song - Emotion has to be one of the valid emotions and upercase
+# list of valid emotions can be found in the validation rules
+# Example: emotion: { isIn: [['Happy', 'Sad', 'Energetic', 'Calm', 'Angry']]]
+POST http://localhost:8000/classification/{{example_music_id}}/user/{{example_user_id}}
+Content-Type: application/json
+
+{
+  "emotion": "Sad"
+}
+
+
+### YouTube Search
+GET http://localhost:8000/youtube/search?q=end+of&maxResults=4

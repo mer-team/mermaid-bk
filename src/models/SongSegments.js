@@ -10,16 +10,19 @@ class Song_Segments extends Model {
 }
 
 const defineSongSegmentsModel = (sequelize) => {
-  Song_Segments.init({
-    song_id: DataTypes.INTEGER,
-    source_id: DataTypes.INTEGER,
-    start: DataTypes.INTEGER,
-    end: DataTypes.INTEGER,
-    emotion: DataTypes.STRING,
-  }, {
-    sequelize,
-    modelName: 'Song_Segments',
-  });
+  Song_Segments.init(
+    {
+      song_id: DataTypes.INTEGER,
+      source_id: DataTypes.INTEGER,
+      start: DataTypes.INTEGER,
+      end: DataTypes.INTEGER,
+      emotion: DataTypes.STRING,
+    },
+    {
+      sequelize,
+      modelName: 'Song_Segments',
+    },
+  );
 
   return Song_Segments;
 };

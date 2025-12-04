@@ -1,5 +1,6 @@
 services:
   api:
+    container_name: api
     build:
       context: .
       dockerfile: Dockerfile.dev
@@ -9,10 +10,16 @@ services:
       - 8000:8000
     volumes:
       - .:/mermaid-api:cached
+      - segments-data:/mermaid-api/src/Uploads/SongSegments:ro
+      - lyrics-data:/mermaid-api/src/Uploads/SongLyrics:ro
+      - separated-data:/mermaid-api/src/Uploads/SongVocals:ro
+      - separated-data:/mermaid-api/src/Uploads/SongInstrumentals:ro
     networks:
       - mermaid-dev-network
+      - mermaid-audio-processing  # external network
 
   db:
+    container_name: api-db
     image: postgres:15
     restart: on-failure:10 # Restart policy to automatically restart the container if it fails, up to 10 times
     env_file:
@@ -25,6 +32,7 @@ services:
       - mermaid-dev-network
 
   mailcatcher:
+    container_name: api-mailcatcher
     image: dockage/mailcatcher:latest
     restart: on-failure:10
     env_file:
@@ -37,7 +45,18 @@ services:
 
 volumes:
   postgres-data:
+  segments-data:
+    external: true
+    name: segments-service-data
+  lyrics-data:
+    external: true
+    name: lyrics-service-data
+  separated-data:
+    external: true
+    name: separated-service-data
 
 networks:
-  mermaid-dev-network:
+  mermaid-dev-network: # internal development network
+  mermaid-audio-processing:
     external: true
+    name: mermaid-audio-processing-network

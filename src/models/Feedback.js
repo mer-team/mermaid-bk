@@ -10,15 +10,18 @@ class Feedback extends Model {
 }
 
 const defineFeedbackModel = (sequelize) => {
-  Feedback.init({
-    song_id: DataTypes.INTEGER,
-    agree: DataTypes.INTEGER,
-    disagree: DataTypes.INTEGER,
-    user_id: DataTypes.INTEGER
-  }, {
-    sequelize,
-    modelName: 'Feedback',
-  });
+  Feedback.init(
+    {
+      song_id: DataTypes.INTEGER,
+      agree: DataTypes.INTEGER,
+      disagree: DataTypes.INTEGER,
+      user_id: DataTypes.INTEGER,
+    },
+    {
+      sequelize,
+      modelName: 'Feedback',
+    },
+  );
 
   return Feedback;
 };
