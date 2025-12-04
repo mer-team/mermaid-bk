@@ -1,2 +1,2 @@
-ARG VARIANT="20-buster"
+ARG VARIANT="20-bookworm"
 FROM mcr.microsoft.com/devcontainers/javascript-node:1-${VARIANT}

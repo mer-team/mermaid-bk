@@ -1,24 +1,63 @@
 services:
-
   api:
+    container_name: api
     build:
       context: .
       dockerfile: Dockerfile.prod
+    env_file:
+      - .env
     ports:
       - 8000:8000
     depends_on:
       - db
-    env_file:
-      - .env
-      
+    volumes:
+      - segments-data:/app/src/Uploads/SongSegments:ro
+      - lyrics-data:/app/src/Uploads/SongLyrics:ro
+      - separated-data:/app/src/Uploads/SongVocals:ro
+      - separated-data:/app/src/Uploads/SongInstrumentals:ro
+    networks:
+      - mermaid-prod-network
+      - mermaid-audio-processing
+
   db:
+    container_name: api-db
     image: postgres:15
+    restart: on-failure:10
     env_file:
       - .env.postgresql
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      
+    networks:
+      - mermaid-prod-network
+
+  mailcatcher:
+    container_name: api-mailcatcher
+    image: dockage/mailcatcher:latest
+    restart: on-failure:10
+    env_file:
+      - .env.mailcatcher
+    ports:
+      - '1080:1080' # web interface
+      - '1025:1025' # SMTP server
+    networks:
+      - mermaid-dev-network
+
 volumes:
   postgres-data:
+  segments-data:
+    external: true
+    name: segments-service-data
+  lyrics-data:
+    external: true
+    name: lyrics-service-data
+  separated-data:
+    external: true
+    name: separated-service-data
+
+networks:
+  mermaid-prod-network:
+  mermaid-audio-processing:
+    external: true
+    name: mermaid-audio-processing-network
