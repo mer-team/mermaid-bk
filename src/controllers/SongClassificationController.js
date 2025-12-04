@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const { Song_Classification, Log, Song, Song_Segments, Source } = require('../models/Index');
+const { Song_Classification, Log, Song, Song_Segments, Source, User } = require('../models/Index');
 const axios = require('axios');
 const async = require('async');
 const search = require('youtube-search');
@@ -186,27 +186,6 @@ const startClassification = async (song, user, ip) => {
 
 const isAlreadyOnTheDatabase = async (song_id) => {
   return await Song.findOne({ where: { external_id: song_id } });
-};
-
-const howManySongsBasedOnUserId = async (id) => {
-  const songs = await Song.findAll({
-    where: {
-      added_by_user: id,
-      status: 'processed',
-    },
-  });
-  return songs.length;
-};
-
-const howManySongsBasedOnUserIp = async (ip) => {
-  const songs = await Song.findAll({
-    where: {
-      added_by_ip: ip,
-      status: 'processed',
-    },
-  });
-
-  return songs.length;
 };
 
 const index = async (req, res) => {
@@ -509,9 +488,11 @@ const canClassify = async (userId, ip) => {
   let song;
 
   if (userId == null) {
+    // For guests: only check songs added by guests (added_by_user is null or 'null')
     song = await Song.findOne({
       where: {
         added_by_ip: ip,
+        [require('sequelize').Op.or]: [{ added_by_user: null }, { added_by_user: 'null' }],
       },
       order: [['createdAt', 'DESC']],
     });
@@ -582,37 +563,45 @@ const classify = async (req, res) => {
       return res.status(400).json('This song is already in the queue for classification.');
     }
 
-    let limit;
+    // Rate limiting rules (must wait 24h after last song):
+    // - Guests: 1 song, then wait 24h
+    // - Logged-in users: 1 song, then wait 24h
+    // - Admins: unlimited
 
-    // If user is logged in (user_id is not 'null'), use user ID for classification limit
+    // If user is logged in (user_id is not 'null')
     if (user_id !== 'null') {
-      limit = await howManySongsBasedOnUserId(user_id); // Get classification count by user ID
-      console.log(`[Classify] User ${user_id} has classified ${limit} songs`);
+      // Check if user is admin
+      const user = await User.findByPk(user_id);
 
-      if (limit % 5 === 0 && limit > 0) {
-        if (!(await canClassify(user_id, null))) {
-          console.log('[Classify] User limit reached');
-          return res.status(400).json('You have reached the limit for song classification.');
+      if (user && user.admin === true) {
+        // Admin users have no limit
+        console.log(`[Classify] Admin user ${user_id} - no rate limit`);
+      } else {
+        // Regular logged-in users: must wait 24h since last classification
+        const canUserClassify = await canClassify(user_id, null);
+        console.log(`[Classify] User ${user_id} can classify: ${canUserClassify}`);
+
+        if (!canUserClassify) {
+          console.log('[Classify] User must wait 24h since last classification');
+          return res
+            .status(400)
+            .json('You must wait 24 hours after your last classification. Please try again later.');
         }
       }
     }
     // If user is a guest (user_id is 'null'), use IP address for classification limit
     else {
-      limit = await howManySongsBasedOnUserIp(ip); // Get classification count by IP
-      console.log(`[Classify] Guest IP ${ip} has classified ${limit} songs`);
+      const canGuestClassify = await canClassify(null, ip);
+      console.log(`[Classify] Guest IP ${ip} can classify: ${canGuestClassify}`);
 
-      // TODO: Re-enable rate limiting in production
-      // Temporarily disabled for testing
-      /*
-      if (limit >= 1) {
-        const canClassifyResult = await canClassify(null, ip);
-        console.log(`[Classify] Can classify result: ${canClassifyResult}`);
-        if (!canClassifyResult) {
-          console.log('[Classify] Guest limit reached - need to wait 24 hours');
-          return res.status(400).json('You have reached the limit for song classification.');
-        }
+      if (!canGuestClassify) {
+        console.log('[Classify] Guest must wait 24h since last classification');
+        return res
+          .status(400)
+          .json(
+            'You must wait 24 hours after your last classification. Please register for an account, or try again later.',
+          );
       }
-      */
     }
 
     // Start the classification process
